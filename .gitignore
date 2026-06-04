@@ -1,0 +1,14 @@
+# .gitignore
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+node_modules/
+dist/
+.cursor/
+.research/
+assets/fallback_demo_log.txt
+.DS_Store
