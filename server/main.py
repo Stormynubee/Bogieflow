@@ -5,3 +5,5 @@ app = FastAPI(title="RailTwin-X Lite")
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# inject REST route added
