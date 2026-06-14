@@ -23,8 +23,11 @@
     <img src="https://img.shields.io/badge/Vitest-65%20passing-3dd6c6?style=flat-square&labelColor=070a0e&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Faraway2026Japan/releases">
-    <img src="https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=3dd6c6&labelColor=070a0e&logo=github&logoColor=ffffff" alt="Latest Release" />
+    <img src="https://img.shields.io/badge/Release-v1.6.0-3dd6c6?style=flat-square&labelColor=070a0e&logo=github&logoColor=ffffff" alt="Latest Release" />
   </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-3dd6c6?style=flat-square&labelColor=070a0e&logo=open-source-initiative&logoColor=ffffff" alt="License MIT" />
   </a>
@@ -35,10 +38,6 @@
     <img src="https://img.shields.io/badge/Node-20.x-3dd6c6?style=flat-square&labelColor=070a0e&logo=node.js&logoColor=ffffff" alt="Node 20" />
   </a>
   <img src="https://img.shields.io/badge/FAR%20AWAY%202026-Railways-ff5545?style=flat-square&labelColor=070a0e" alt="FAR AWAY 2026 Theme" />
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/demo.gif" alt="Bogie Flow Demo" width="100%" />
 </p>
 
 ---
