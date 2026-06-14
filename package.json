@@ -16,6 +16,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "shots": "node scripts/capture-screenshots.mjs",
     "start": "python -m uvicorn server.main:app --host 0.0.0.0 --port 8000"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
     "vite": "^6.0.0",
