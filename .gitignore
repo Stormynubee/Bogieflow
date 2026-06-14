@@ -13,3 +13,8 @@ public/corridor-frames-temp/
 .research/
 temp/
 .DS_Store
+
+# Bogie Flow specific ignores
+bogie_flow.egg-info/
+.superpowers/
+
