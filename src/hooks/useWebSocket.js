@@ -35,6 +35,7 @@ export function useWebSocket() {
   const [logs, setLogs] = useState([])
   const [activeRiskIndex, setActiveRiskIndex] = useState(0)
   const [segmentHistory, setSegmentHistory] = useState(emptyHistory)
+  const [lastTickAt, setLastTickAt] = useState(null)
   const wsRef = useRef(null)
   const retryRef = useRef(null)
   const reconnectAttemptsRef = useRef(0)
@@ -70,6 +71,7 @@ export function useWebSocket() {
     ws.onerror = () => ws.close()
 
     ws.onmessage = (event) => {
+      setLastTickAt(Date.now())
       const msg = JSON.parse(event.data)
       switch (msg.type) {
         case 'state_snapshot': {
@@ -159,5 +161,7 @@ export function useWebSocket() {
     logs,
     activeRiskIndex,
     segmentHistory,
+    lastTickAt,
+    dataReady: segments.length > 0,
   }
 }

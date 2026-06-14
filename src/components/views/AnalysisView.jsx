@@ -4,10 +4,15 @@ import {
   highestRiskSegment,
   segmentCoordinates,
 } from '../../lib/segmentUtils.js'
+import { recommendedAction } from '../../lib/corridorStatus.js'
 import { soilRainCorrelationData } from '../../lib/chartData.js'
 import { apiUrl } from '../../lib/config.js'
+import { UI } from '../../content/uiCopy.js'
 import MetricBar from '../MetricBar'
 import BogieAnalysisPanel from '../BogieAnalysisPanel'
+import PanelHeader from '../PanelHeader'
+import DashboardSkeleton from '../DashboardSkeleton'
+import RiskGaugeDial from '../RiskGaugeDial'
 
 function SoilRainCorrelation({ segments, segmentHistory, focusId }) {
   const { heights, linePoints, peakIndex, labels } = soilRainCorrelationData(
@@ -19,15 +24,25 @@ function SoilRainCorrelation({ segments, segmentHistory, focusId }) {
   const barW = 200 / count
 
   return (
-    <div className="panel correlation-card">
-      <div className="panel-head">
-        <h2>
-          <span className="material-symbols-outlined panel-icon">water_drop</span>
-          SOIL-RAIN CORRELATION
-        </h2>
-      </div>
+    <div className="panel correlation-card panel-stagger-2">
+      <PanelHeader
+        icon="water_drop"
+        title="Soil–rain correlation"
+        explainer="Bars = soil moisture · dashed line = rainfall trend"
+      />
       <div className="correlation-chart">
-        <svg viewBox="0 0 200 80" className="correlation-svg" preserveAspectRatio="none">
+        <p className="chart-legend">
+          <span className="chart-legend-item">
+            <span className="chart-swatch chart-swatch-bar" aria-hidden="true" />
+            {UI.analysis.chartBars}
+          </span>
+          <span className="chart-legend-item">
+            <span className="chart-swatch chart-swatch-line" aria-hidden="true" />
+            {UI.analysis.chartLine}
+          </span>
+        </p>
+        <svg viewBox="0 0 200 90" className="correlation-svg" preserveAspectRatio="none" role="img" aria-label="Soil moisture and rainfall chart">
+          <line x1="0" y1="80" x2="200" y2="80" className="chart-axis" />
           {heights.map((h, i) => (
             <rect
               key={i}
@@ -35,15 +50,13 @@ function SoilRainCorrelation({ segments, segmentHistory, focusId }) {
               y={80 - h * 0.7}
               width={barW - 8}
               height={h * 0.7}
-              fill={i === peakIndex ? '#ff5545' : 'rgba(52,53,57,0.8)'}
+              fill={i === peakIndex ? 'var(--signal-critical)' : 'rgba(61, 154, 128, 0.45)'}
             />
           ))}
           <polyline
-            points={linePoints
-              .map((h, i) => `${i * barW + barW / 2},${80 - h * 0.65}`)
-              .join(' ')}
+            points={linePoints.map((h, i) => `${i * barW + barW / 2},${80 - h * 0.65}`).join(' ')}
             fill="none"
-            stroke="#e7bdb7"
+            stroke="var(--state-warning)"
             strokeWidth="1.5"
             strokeDasharray="4 2"
           />
@@ -53,6 +66,7 @@ function SoilRainCorrelation({ segments, segmentHistory, focusId }) {
             <span key={d}>{d}</span>
           ))}
         </div>
+        <p className="chart-axis-label">{UI.analysis.chartUnit}</p>
       </div>
     </div>
   )
@@ -66,8 +80,18 @@ export default function AnalysisView({
   selectedSegmentId,
   onSelectSegment,
   onNavigateMaintenance,
+  onInjectToast,
+  dataReady,
 }) {
   const [deployState, setDeployState] = useState('idle')
+
+  if (!dataReady) {
+    return (
+      <div className="analysis-layout" data-testid="view-analysis">
+        <DashboardSkeleton />
+      </div>
+    )
+  }
 
   const focus =
     segments.find((s) => s.id === selectedSegmentId) ??
@@ -76,6 +100,7 @@ export default function AnalysisView({
 
   const metrics = computeMetrics(segments, activeRiskIndex, focus)
   const coords = segmentCoordinates(focus.id)
+  const action = recommendedAction(focus)
 
   const historyEntries = logs.slice(-5).map((log, i) => ({
     key: `hist-${log.timestamp}-${i}`,
@@ -96,71 +121,94 @@ export default function AnalysisView({
       })
       if (!res.ok) throw new Error('deploy failed')
       setDeployState('done')
+      onInjectToast?.(UI.simulation.sent, 'success')
       setTimeout(() => {
         setDeployState('idle')
         onNavigateMaintenance?.()
       }, 1200)
     } catch {
       setDeployState('error')
+      onInjectToast?.(UI.simulation.offline, 'error')
       setTimeout(() => setDeployState('idle'), 2000)
     }
   }
 
   const deployLabel =
     deployState === 'loading'
-      ? 'DEPLOYING…'
+      ? UI.analysis.authorizeLoading
       : deployState === 'done'
-        ? 'DEPLOYED'
+        ? UI.analysis.authorizeDone
         : deployState === 'error'
-          ? 'FAILED'
-          : 'AUTHORIZE DEPLOYMENT'
+          ? UI.analysis.authorizeFailed
+          : UI.analysis.authorizeLabel
 
   return (
     <div className="analysis-layout" data-guide="analysis-main" data-testid="view-analysis">
       <div className="analysis-main">
-        <div className="analysis-header">
-          <div>
+        <div className="analysis-header panel-stagger-1">
+          <div className="analysis-header-copy">
             <p className="analysis-breadcrumb">
-              SEGMENT {focus.id} &gt; DEEP DIVE ANALYSIS
+              {UI.analysis.segmentFocus}: {focus.id}
             </p>
-            <h1 className="analysis-title">Vibration Signature</h1>
-            <p className="analysis-sub">
-              LIVE FREQUENCY: {metrics.liveFrequency} Hz &nbsp;|&nbsp; Z-SCORE:{' '}
-              {(focus.vib_z ?? 0).toFixed(2)}
+            <h1 className="analysis-title">Segment deep dive</h1>
+            <div className="analysis-kpi-row">
+              <div className="analysis-kpi">
+                <span className="analysis-kpi-label">vib_z</span>
+                <span className="analysis-kpi-value mono">{(focus.vib_z ?? 0).toFixed(2)}</span>
+              </div>
+              <div className="analysis-kpi">
+                <span className="analysis-kpi-label">risk_index</span>
+                <span className={`analysis-kpi-value mono ${(focus.risk_index ?? 0) >= 0.7 ? 'text-critical' : ''}`}>
+                  {(focus.risk_index ?? 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="analysis-kpi">
+                <span className="analysis-kpi-label">Live frequency</span>
+                <span className="analysis-kpi-value mono">{metrics.liveFrequency} Hz</span>
+              </div>
+            </div>
+            <p className="analysis-action-line">
+              <strong>{UI.analysis.recommended}:</strong> {action}
             </p>
           </div>
-          <button
-            type="button"
-            data-testid="inject-anomaly-authorize"
-            className={`btn-authorize ${deployState === 'done' ? 'btn-authorize-done' : ''}`}
-            onClick={handleAuthorize}
-            disabled={deployState === 'loading' || deployState === 'done'}
-          >
-            <span className="material-symbols-outlined">warning</span>
-            {deployLabel}
-          </button>
+          <div className="analysis-authorize-block">
+            <p className="analysis-authorize-hint">{UI.analysis.authorizeHint}</p>
+            <button
+              type="button"
+              data-testid="inject-anomaly-authorize"
+              className={`btn-authorize ${deployState === 'done' ? 'btn-authorize-done' : ''}`}
+              onClick={handleAuthorize}
+              disabled={deployState === 'loading' || deployState === 'done'}
+              title={UI.analysis.authorizeHint}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">science</span>
+              {deployLabel}
+            </button>
+          </div>
         </div>
 
-        <section className="panel panel-editorial analysis-viewport panel-enter">
+        <section className="panel panel-editorial analysis-viewport panel-stagger-2">
           <BogieAnalysisPanel
             focusId={focus.id}
             vibZ={focus.vib_z ?? 0}
             az={focus.az ?? 0}
             riskIndex={focus.risk_index ?? 0}
+            recommendedAction={action}
           />
-          <div className="gauge-row" data-testid="risk-gauge">
+          <div className="analysis-gauge-row" data-testid="risk-gauge">
+            <RiskGaugeDial activeRiskIndex={focus.risk_index ?? activeRiskIndex} />
             <MetricBar
               segments={segments}
               activeRiskIndex={activeRiskIndex}
               focusSegment={focus}
             />
           </div>
-          <p className="coords-readout">
-            {focus.id}_X: {coords.lat}° N &nbsp; {focus.id}_Y: {coords.lon}° E
+          <p className="coords-readout mono">
+            {focus.id} · {coords.lat}° N · {coords.lon}° E
           </p>
         </section>
 
-        <div className="segment-picker">
+        <div className="segment-picker panel-stagger-3">
           {['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].map((id) => (
             <button
               key={id}
@@ -181,13 +229,8 @@ export default function AnalysisView({
           focusId={focus.id}
         />
 
-        <div className="panel historical-card">
-          <div className="panel-head">
-            <h2>
-              <span className="material-symbols-outlined panel-icon">history</span>
-              HISTORICAL CONTEXT
-            </h2>
-          </div>
+        <div className="panel historical-card panel-stagger-3">
+          <PanelHeader icon="history" title="Historical context" explainer="Recent agent decisions for this corridor" />
           <ul className="historical-list">
             {historyEntries.length === 0 && (
               <li className="stream-item stream-muted">No historical logs yet</li>

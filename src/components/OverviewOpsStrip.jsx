@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import PanelHeader from './PanelHeader'
 import { injectAnomaly, injectMonsoon } from '../lib/api.js'
 import { UI } from '../content/uiCopy.js'
 
-/** Live injection controls only — navigation lives in Corridor brief. */
-export default function OverviewOpsStrip({ train, connected, onNavigate }) {
+/** Live injection controls — clearly labeled as simulation / demo. */
+export default function OverviewOpsStrip({ train, connected, onNavigate, onInjectToast }) {
   const [busy, setBusy] = useState(null)
   const [toast, setToast] = useState('')
 
@@ -15,9 +16,11 @@ export default function OverviewOpsStrip({ train, connected, onNavigate }) {
     try {
       await fn()
       setToast(UI.simulation.sent)
+      onInjectToast?.(UI.simulation.sent, 'success')
       setTimeout(() => setToast(''), 2000)
     } catch {
       setToast(UI.simulation.offline)
+      onInjectToast?.(UI.simulation.offline, 'error')
     } finally {
       setBusy(null)
     }
@@ -25,19 +28,23 @@ export default function OverviewOpsStrip({ train, connected, onNavigate }) {
 
   return (
     <section
-      className="panel panel-calm overview-ops-strip"
+      className="panel panel-calm overview-ops-strip simulation-demo-panel"
       id="controls-panel"
       data-guide="simulation-inject"
+      data-testid="simulation-demo-panel"
     >
-      <div className="panel-head panel-head-calm panel-head-compact">
-        <div>
-          <h2 className="panel-title-calm">{UI.simulation.title}</h2>
-          <p className="panel-sub-calm">{UI.simulation.sub}</p>
-        </div>
-        <span className={`ops-link-pill ${connected ? 'ops-link-ok' : 'ops-link-off'}`}>
-          {connected ? UI.simulation.apiReady : UI.simulation.apiOffline}
-        </span>
-      </div>
+      <p className="simulation-section-label">{UI.simulation.sectionLabel}</p>
+      <PanelHeader
+        icon="science"
+        title={UI.simulation.title}
+        explainer={UI.simulation.sub}
+        className="panel-head-compact"
+        aside={
+          <span className={`ops-link-pill ${connected ? 'ops-link-ok' : 'ops-link-off'}`}>
+            {connected ? UI.simulation.apiReady : UI.simulation.apiOffline}
+          </span>
+        }
+      />
 
       <div className="overview-ops-body">
         <div className="overview-inject-row">

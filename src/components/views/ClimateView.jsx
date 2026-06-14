@@ -1,11 +1,22 @@
 import { highestRiskSegment } from '../../lib/segmentUtils.js'
+import PanelHeader from '../PanelHeader'
+import DashboardSkeleton from '../DashboardSkeleton'
+import { UI } from '../../content/uiCopy.js'
 
 function avg(segments, key) {
   if (!segments.length) return 0
   return segments.reduce((a, s) => a + (s[key] ?? 0), 0) / segments.length
 }
 
-export default function ClimateView({ segments }) {
+export default function ClimateView({ segments, dataReady }) {
+  if (!dataReady) {
+    return (
+      <div className="climate-layout" data-testid="view-climate">
+        <DashboardSkeleton />
+      </div>
+    )
+  }
+
   const risk = highestRiskSegment(segments)?.risk_index ?? 0.3
   const moisture = avg(segments, 'soil_moisture') * 100
 
@@ -31,95 +42,91 @@ export default function ClimateView({ segments }) {
 
   return (
     <div className="climate-layout" data-guide="climate-main" data-testid="view-climate">
-      <header className="climate-page-header">
-        <p className="analysis-breadcrumb">CORRIDOR &gt; ENVIRONMENTAL STRESS</p>
-        <h1 className="climate-page-title">Climate Impact Strategy</h1>
-        <p className="analysis-sub">REAL-TIME ENVIRONMENTAL STRESS MONITORING</p>
+      <header className="climate-page-header panel-stagger-1">
+        <p className="analysis-breadcrumb">CORRIDOR · ENVIRONMENTAL STRESS</p>
+        <h1 className="climate-page-title">Climate impact</h1>
+        <p className="analysis-sub">Live precipitation and model-derived wear projections</p>
       </header>
 
       <div className="climate-grid-main">
-        <section className="panel panel-editorial heatmap-card">
-          <div className="panel-head">
-            <h2>
-              <span className="material-symbols-outlined panel-icon">map</span>
-              REGIONAL PRECIPITATION HEATMAP
-            </h2>
+        <section className="panel panel-editorial heatmap-card panel-stagger-2 climate-measured">
+          <PanelHeader
+            icon="map"
+            title="Regional precipitation"
+            explainer={UI.climate.heatmapLegend}
+            aside={<span className="data-kind-pill data-kind-measured">{UI.climate.measuredLabel}</span>}
+          />
+          <div className="heatmap-legend" aria-hidden="true">
+            <span>Low</span>
+            <span className="heatmap-legend-bar" />
+            <span>High</span>
           </div>
           <div className="heatmap-grid">
-            {segments.slice(0, 6).map((s, i) => (
+            {segments.slice(0, 6).map((s) => (
               <div
                 key={s.id}
                 className="heatmap-cell"
                 style={{
-                  opacity: 0.4 + (s.rainfall ?? 0) * 0.6,
+                  opacity: 0.45 + (s.rainfall ?? 0) * 0.55,
                   boxShadow:
                     (s.risk_index ?? 0) > 0.5
-                      ? '0 0 8px rgba(255,85,69,0.15)'
+                      ? '0 0 10px rgba(255, 85, 69, 0.2)'
                       : 'none',
                 }}
               >
                 <span className="heatmap-label">{s.id}</span>
-                <span className="heatmap-value">
-                  +{Math.round((s.rainfall ?? 0) * 60)}% PRECIP
+                <span className="heatmap-value mono">
+                  +{Math.round((s.rainfall ?? 0) * 60)}% precip
                 </span>
               </div>
             ))}
-            {segments.length === 0 &&
-              ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].map((id) => (
-                <div key={id} className="heatmap-cell">
-                  <span className="heatmap-label">{id}</span>
-                </div>
-              ))}
           </div>
-          <p className="heatmap-note">
-            Avg soil moisture: {moisture.toFixed(1)}% — Q3 projection active
+          <p className="heatmap-note mono">
+            Avg soil moisture: {moisture.toFixed(1)}% (measured)
           </p>
         </section>
 
-        <section className="panel panel-editorial longevity-card">
-          <div className="panel-head">
-            <h2>
-              <span className="material-symbols-outlined panel-icon">schedule</span>
-              ASSET LONGEVITY <span className="climate-estimated">(estimated)</span>
-            </h2>
-          </div>
+        <section className="panel panel-editorial longevity-card panel-stagger-3 climate-estimated-block">
+          <PanelHeader
+            icon="schedule"
+            title="Asset longevity"
+            explainer="Wear projection from corridor risk — not field measured"
+            aside={<span className="data-kind-pill data-kind-estimated">{UI.climate.estimatedLabel}</span>}
+          />
           <ul className="longevity-list">
             {assets.map((a) => (
               <li key={a.name} className="longevity-item">
                 <div className="longevity-head">
                   <span>{a.name}</span>
-                  <span className="mono">Est. {a.months} Mos (estimated wear)</span>
+                  <span className="mono">Est. {a.months} mos</span>
                 </div>
                 <div className="longevity-track">
-                  <div
-                    className="longevity-fill"
-                    style={{ width: `${a.wear}%` }}
-                  />
+                  <div className="longevity-fill" style={{ width: `${a.wear}%` }} />
                 </div>
               </li>
             ))}
           </ul>
           {risk >= 0.6 && (
-            <p className="longevity-warn">CRITICAL WEAR — schedule inspection</p>
+            <p className="longevity-warn">Critical wear — schedule inspection</p>
           )}
         </section>
       </div>
 
-      <section className="panel panel-editorial vibration-table-card">
-        <div className="panel-head">
-          <h2>
-            <span className="material-symbols-outlined panel-icon">vibration</span>
-            VIBRATION SHIFT VS BASELINE <span className="climate-estimated">(estimated Hz)</span>
-          </h2>
-        </div>
+      <section className="panel panel-editorial vibration-table-card panel-stagger-4 climate-estimated-block">
+        <PanelHeader
+          icon="vibration"
+          title="Vibration shift vs baseline"
+          explainer="Model-derived Hz shift from segment risk — estimated, not sensor baseline"
+          aside={<span className="data-kind-pill data-kind-estimated">{UI.climate.estimatedLabel}</span>}
+        />
         <table className="maintenance-table">
           <thead>
             <tr>
-              <th>ASSET_ID</th>
-              <th>BASELINE (Hz, est.)</th>
-              <th>CURRENT (Hz, est.)</th>
-              <th>SHIFT Δ (est.)</th>
-              <th>STATUS</th>
+              <th>Segment</th>
+              <th>Baseline (Hz, est.)</th>
+              <th>Current (Hz, est.)</th>
+              <th>Shift Δ (est.)</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>

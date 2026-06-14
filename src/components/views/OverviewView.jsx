@@ -1,9 +1,14 @@
 import { useRef } from 'react'
-import CorridorCommandDock from '../CorridorCommandDock'
 import ClimatePanel from '../ClimatePanel'
 import AnomalyStream from '../AnomalyStream'
 import CorridorBriefing from '../CorridorBriefing'
 import OverviewOpsStrip from '../OverviewOpsStrip'
+import HeroStatusLine from '../HeroStatusLine'
+import RiskGaugeDial from '../RiskGaugeDial'
+import MetricBar from '../MetricBar'
+import CorridorCommandDock from '../CorridorCommandDock'
+import DashboardSkeleton from '../DashboardSkeleton'
+import PanelHeader from '../PanelHeader'
 
 export default function OverviewView({
   segments,
@@ -14,21 +19,51 @@ export default function OverviewView({
   openTicketCount,
   activeRiskIndex,
   segmentHistory,
+  lastTickAt,
+  dataReady,
   onSegmentClick,
   onOpenStationMap,
   onNavigate,
   onGoMaintenance,
+  onInjectToast,
 }) {
   const overviewShellRef = useRef(null)
 
+  if (!dataReady) {
+    return (
+      <div className="overview-page" data-testid="view-overview">
+        <DashboardSkeleton />
+      </div>
+    )
+  }
+
   return (
     <div className="overview-page" ref={overviewShellRef} data-testid="view-overview">
+      <HeroStatusLine segments={segments} />
+
+      <section className="panel panel-hero-gauge panel-stagger-1" data-testid="risk-gauge">
+        <PanelHeader
+          icon="speed"
+          title="Corridor risk gauge"
+          explainer="Highest active track-bed risk across segments S1–S6"
+        />
+        <div className="hero-gauge-row">
+          <RiskGaugeDial activeRiskIndex={activeRiskIndex} />
+          <MetricBar
+            segments={segments}
+            activeRiskIndex={activeRiskIndex}
+            variant="strip"
+            animate
+          />
+        </div>
+      </section>
+
       <div className="overview-grid">
         <CorridorCommandDock
           segments={segments}
-          activeRiskIndex={activeRiskIndex}
           onSegmentClick={onSegmentClick}
           driveShellRef={overviewShellRef}
+          lastTickAt={lastTickAt}
         />
 
         <div className="overview-side-stack">
@@ -46,11 +81,12 @@ export default function OverviewView({
             train={train}
             connected={connected}
             onNavigate={onNavigate}
+            onInjectToast={onInjectToast}
           />
         </div>
       </div>
 
-      <aside className="overview-aside">
+      <aside className="overview-aside panel-stagger-4">
         <AnomalyStream tickets={tickets} logs={logs} maxEntries={8} />
       </aside>
     </div>

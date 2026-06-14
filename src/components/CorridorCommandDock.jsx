@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import CorridorScrubViewer from './CorridorScrubViewer'
 import CorridorScrubRail from './CorridorScrubRail'
 import SegmentHudGrid from './SegmentHudGrid'
-import MetricBar from './MetricBar'
+import PanelHeader from './PanelHeader'
 import { useCorridorScrub } from '../hooks/useCorridorScrub.js'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js'
 import { CORRIDOR_FRAME_COUNT } from '../data/corridorFrames.js'
@@ -14,9 +14,9 @@ const HINT_KEY = 'corridor-scrub-hint-dismissed'
 
 export default function CorridorCommandDock({
   segments,
-  activeRiskIndex,
   onSegmentClick,
   driveShellRef,
+  lastTickAt,
 }) {
   const viewportRef = useRef(null)
   const dockRef = useRef(null)
@@ -48,9 +48,9 @@ export default function CorridorCommandDock({
   const dockMotion = reduced
     ? {}
     : {
-        initial: { opacity: 0, y: 12 },
+        initial: { opacity: 0, y: 16 },
         animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] },
       }
 
   const canvasMotion = reduced
@@ -58,7 +58,7 @@ export default function CorridorCommandDock({
     : {
         initial: { opacity: 0 },
         animate: { opacity: 1 },
-        transition: { delay: 0.08, duration: 0.35 },
+        transition: { delay: 0.18, duration: 0.4 },
       }
 
   const railMotion = reduced
@@ -66,22 +66,21 @@ export default function CorridorCommandDock({
     : {
         initial: { opacity: 0, y: 8 },
         animate: { opacity: 1, y: 0 },
-        transition: { delay: 0.12, duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+        transition: { delay: 0.22, duration: 0.35, ease: [0.22, 1, 0.36, 1] },
       }
 
   return (
     <motion.section
       ref={dockRef}
-      className="panel corridor-command-dock"
+      className="panel corridor-command-dock panel-stagger-2"
       data-guide="corridor-feed"
       {...dockMotion}
     >
-      <div className="panel-head panel-head-calm">
-        <div>
-          <h2 className="panel-title-calm">{UI.corridor.feedTitle}</h2>
-          {showHint && <p className="panel-sub-calm">{UI.corridor.scrubHint}</p>}
-        </div>
-      </div>
+      <PanelHeader
+        icon="videocam"
+        title={UI.corridor.feedTitle}
+        explainer={showHint ? UI.corridor.scrubHint : UI.corridor.feedSub}
+      />
 
       <motion.div {...canvasMotion}>
         <CorridorScrubViewer
@@ -101,22 +100,14 @@ export default function CorridorCommandDock({
           displayProgressRef={scrub.displayProgressRef}
           showHint={showHint}
           onRailPointerDown={onRailPointerDown}
+          lastTickAt={lastTickAt}
         />
       </motion.div>
 
-      <div data-guide="segment-strip">
+      <div data-guide="segment-strip" className="corridor-segment-strip panel-stagger-3">
         <SegmentHudGrid
           segments={segments}
           onSegmentClick={onSegmentClick}
-          variant="strip"
-          animate={!reduced}
-        />
-      </div>
-
-      <div data-guide="metrics" data-testid="risk-gauge">
-        <MetricBar
-          segments={segments}
-          activeRiskIndex={activeRiskIndex}
           variant="strip"
           animate={!reduced}
         />

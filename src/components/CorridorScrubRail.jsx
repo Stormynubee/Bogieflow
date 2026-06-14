@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { progressToPercent, formatFrameReadout } from '../lib/scrubRail.js'
+
+const TICK_FRESH_MS = 1200
 
 export default function CorridorScrubRail({
   readoutFrame,
@@ -7,9 +9,18 @@ export default function CorridorScrubRail({
   displayProgressRef,
   showHint = false,
   onRailPointerDown,
+  lastTickAt,
 }) {
   const fillRef = useRef(null)
   const handleRef = useRef(null)
+  const [livePulse, setLivePulse] = useState(false)
+
+  useEffect(() => {
+    if (!lastTickAt) return
+    setLivePulse(true)
+    const timer = setTimeout(() => setLivePulse(false), TICK_FRESH_MS)
+    return () => clearTimeout(timer)
+  }, [lastTickAt])
 
   useEffect(() => {
     let raf = 0
@@ -27,7 +38,11 @@ export default function CorridorScrubRail({
   return (
     <div className="corridor-scrub-rail" aria-label="Corridor scrub progress">
       <span className="scrub-live-pill">
-        <span className="scrub-live-dot" aria-hidden="true" /> Live
+        <span
+          className={`scrub-live-dot ${livePulse ? 'scrub-live-dot-pulse' : ''}`}
+          aria-hidden="true"
+        />
+        Live
       </span>
       {showHint && (
         <span className="scrub-hint">Scroll page · Shift+wheel · drag</span>

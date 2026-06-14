@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useWebSocket } from './hooks/useWebSocket'
+import { useToast } from './hooks/useToast'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import StationMapModal from './components/StationMapModal'
@@ -9,9 +11,12 @@ import AnalysisView from './components/views/AnalysisView'
 import MaintenanceView from './components/views/MaintenanceView'
 import ClimateView from './components/views/ClimateView'
 import BootLoader from './components/BootLoader'
+import ReconnectBanner from './components/ReconnectBanner'
+import ToastStack from './components/ToastStack'
 import { highestRiskSegment } from './lib/segmentUtils.js'
 import { injectMonsoon } from './lib/api.js'
 import { UI } from './content/uiCopy.js'
+import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js'
 
 function formatUptime(seconds) {
   const h = Math.floor(seconds / 3600)
@@ -32,7 +37,13 @@ export default function App() {
     logs,
     activeRiskIndex,
     segmentHistory,
+    lastTickAt,
+    dataReady,
   } = useWebSocket()
+
+  const { toasts, push: pushToast } = useToast()
+  const prevTicketsRef = useRef([])
+  const reduced = usePrefersReducedMotion()
 
   const [booted, setBooted] = useState(false)
   const [view, setView] = useState('overview')
@@ -49,17 +60,26 @@ export default function App() {
     return () => clearInterval(id)
   }, [connected, sessionStart])
 
-  const [scanToast, setScanToast] = useState('')
+  useEffect(() => {
+    const prev = prevTicketsRef.current
+    for (const t of tickets) {
+      const old = prev.find((p) => p.id === t.id)
+      if (!old && t.status !== 'closed') {
+        pushToast(`New ${t.priority} ticket on ${t.segment}`, 'warn')
+      }
+      if (old && old.status === 'open' && t.status === 'closed') {
+        pushToast(`Ticket ${t.id} closed — segment recovered`, 'success')
+      }
+    }
+    prevTicketsRef.current = tickets
+  }, [tickets, pushToast])
 
   const handleScan = async () => {
-    setScanToast('')
     try {
       await injectMonsoon('S4', 0.9, 0.85)
-      setScanToast(UI.simulation.sent)
-      setTimeout(() => setScanToast(''), 2000)
+      pushToast(UI.simulation.sent, 'success')
     } catch {
-      setScanToast(UI.simulation.offline)
-      setTimeout(() => setScanToast(''), 2000)
+      pushToast(UI.simulation.offline, 'error')
     }
   }
 
@@ -83,6 +103,15 @@ export default function App() {
 
   const handleBootComplete = useCallback(() => setBooted(true), [])
 
+  const viewMotion = reduced
+    ? { initial: false, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -6 },
+        transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+      }
+
   if (!booted) {
     return <BootLoader onComplete={handleBootComplete} />
   }
@@ -105,40 +134,59 @@ export default function App() {
           onNavigateMaintenance={goMaintenance}
         />
 
+        {!connected && <ReconnectBanner reconnectAttempts={reconnectAttempts} />}
+
         <main
           className={`main-grid ${view === 'overview' ? 'main-grid-overview' : ''} ${view !== 'overview' ? 'main-grid-single' : ''}`}
         >
-          {view === 'overview' && (
-            <OverviewView
-              segments={segments}
-              tickets={tickets}
-              logs={logs}
-              train={train}
-              connected={connected}
-              openTicketCount={openTickets}
-              activeRiskIndex={activeRiskIndex}
-              segmentHistory={segmentHistory}
-              onSegmentClick={handleSegmentClick}
-              onOpenStationMap={() => setStationMapOpen(true)}
-              onNavigate={setView}
-              onGoMaintenance={goMaintenance}
-            />
-          )}
-          {view === 'analysis' && (
-            <AnalysisView
-              segments={segments}
-              activeRiskIndex={activeRiskIndex}
-              logs={logs}
-              segmentHistory={segmentHistory}
-              selectedSegmentId={selectedSegmentId}
-              onSelectSegment={setSelectedSegmentId}
-              onNavigateMaintenance={goMaintenance}
-            />
-          )}
-          {view === 'maintenance' && (
-            <MaintenanceView tickets={tickets} logs={logs} />
-          )}
-          {view === 'climate' && <ClimateView segments={segments} />}
+          <AnimatePresence mode="wait">
+            {view === 'overview' && (
+              <motion.div key="overview" className="view-shell" {...viewMotion}>
+                <OverviewView
+                  segments={segments}
+                  tickets={tickets}
+                  logs={logs}
+                  train={train}
+                  connected={connected}
+                  openTicketCount={openTickets}
+                  activeRiskIndex={activeRiskIndex}
+                  segmentHistory={segmentHistory}
+                  lastTickAt={lastTickAt}
+                  dataReady={dataReady}
+                  onSegmentClick={handleSegmentClick}
+                  onOpenStationMap={() => setStationMapOpen(true)}
+                  onNavigate={setView}
+                  onGoMaintenance={goMaintenance}
+                  onInjectToast={pushToast}
+                />
+              </motion.div>
+            )}
+            {view === 'analysis' && (
+              <motion.div key="analysis" className="view-shell" {...viewMotion}>
+                <AnalysisView
+                  segments={segments}
+                  activeRiskIndex={activeRiskIndex}
+                  logs={logs}
+                  segmentHistory={segmentHistory}
+                  selectedSegmentId={selectedSegmentId}
+                  onSelectSegment={setSelectedSegmentId}
+                  onNavigateMaintenance={goMaintenance}
+                  onInjectToast={pushToast}
+                  dataReady={dataReady}
+                />
+              </motion.div>
+            )}
+            {view === 'maintenance' && (
+              <motion.div key="maintenance" className="view-shell" {...viewMotion}>
+                <MaintenanceView tickets={tickets} logs={logs} dataReady={dataReady} />
+              </motion.div>
+            )}
+            {view === 'climate' && (
+              <motion.div key="climate" className="view-shell" {...viewMotion}>
+                <ClimateView segments={segments} dataReady={dataReady} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
 
         <footer className="app-footer" data-guide="app-footer">
@@ -166,8 +214,9 @@ export default function App() {
             </a>
           </span>
         </footer>
-        {scanToast && <p className="overview-ops-toast app-scan-toast">{scanToast}</p>}
       </div>
+
+      <ToastStack toasts={toasts} />
 
       <GuideCoach
         view={view}

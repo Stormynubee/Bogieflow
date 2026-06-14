@@ -1,12 +1,4 @@
-/**
- * @typedef {Readonly<{
- *   focusId?: string
- *   vibZ?: number
- *   az?: number
- *   riskIndex?: number
- * }>} BogieAnalysisPanelProps
- */
-
+import { recommendedAction } from '../lib/corridorStatus.js'
 import { CORRIDOR_FRAME_COUNT, corridorFrameUrl } from '../data/corridorFrames.js'
 
 export default function BogieAnalysisPanel({
@@ -14,7 +6,10 @@ export default function BogieAnalysisPanel({
   vibZ = 0,
   az = 0,
   riskIndex = 0,
+  recommendedAction: actionProp,
 }) {
+  const action = actionProp ?? recommendedAction({ id: focusId, risk_index: riskIndex, vib_z: vibZ })
+
   return (
     <div className="bogie-analysis-panel">
       <div className="bogie-analysis-visual">
@@ -25,25 +20,26 @@ export default function BogieAnalysisPanel({
         />
       </div>
       <dl className="bogie-analysis-metrics">
-        <div>
+        <div className="bogie-metric-highlight">
           <dt>Segment</dt>
-          <dd>{focusId}</dd>
+          <dd className="mono">{focusId}</dd>
         </div>
         <div>
           <dt>vib_z</dt>
-          <dd>{vibZ.toFixed(2)}</dd>
+          <dd className="mono">{vibZ.toFixed(2)}</dd>
         </div>
         <div>
-          <dt>az</dt>
-          <dd>{az.toFixed(2)}</dd>
+          <dt>az (m/s²)</dt>
+          <dd className="mono">{az.toFixed(2)}</dd>
         </div>
         <div>
           <dt>risk_index</dt>
-          <dd className={riskIndex >= 0.7 ? 'metric-critical' : ''}>
+          <dd className={`mono ${riskIndex >= 0.7 ? 'metric-critical' : ''}`}>
             {riskIndex.toFixed(2)}
           </dd>
         </div>
       </dl>
+      <p className="bogie-recommended-action">{action}</p>
     </div>
   )
 }
