@@ -83,6 +83,8 @@ export default function AnalysisView({
   onNavigateMaintenance,
   onInjectToast,
   dataReady,
+  realConnected,
+  localInjectAnomaly,
 }) {
   const [deployState, setDeployState] = useState('idle')
 
@@ -115,12 +117,16 @@ export default function AnalysisView({
   const handleAuthorize = async () => {
     setDeployState('loading')
     try {
-      const res = await fetch(apiUrl('/api/inject/anomaly'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ segment_id: focus.id }),
-      })
-      if (!res.ok) throw new Error('deploy failed')
+      if (realConnected) {
+        const res = await fetch(apiUrl('/api/inject/anomaly'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ segment_id: focus.id }),
+        })
+        if (!res.ok) throw new Error('deploy failed')
+      } else {
+        localInjectAnomaly(focus.id)
+      }
       setDeployState('done')
       onInjectToast?.(UI.simulation.sent, 'success')
       setTimeout(() => {

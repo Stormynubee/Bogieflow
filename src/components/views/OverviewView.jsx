@@ -22,6 +22,7 @@ export default function OverviewView({
   logs,
   train,
   connected,
+  realConnected,
   openTicketCount,
   activeRiskIndex,
   segmentHistory,
@@ -34,6 +35,9 @@ export default function OverviewView({
   onNavigate,
   onGoMaintenance,
   onInjectToast,
+  localInjectMonsoon,
+  localInjectAnomaly,
+  localReset,
 }) {
   const scrollRef = useRef(null)
   const shellRef = useRef(null)
@@ -86,10 +90,20 @@ export default function OverviewView({
                 <OverviewOpsStrip
                   train={train}
                   connected={connected}
+                  realConnected={realConnected}
                   onNavigate={onNavigate}
                   onInjectToast={onInjectToast}
+                  localInjectMonsoon={localInjectMonsoon}
+                  localInjectAnomaly={localInjectAnomaly}
                 />
-                <ScenarioMenu connected={connected} onInjectToast={onInjectToast} />
+                <ScenarioMenu
+                  connected={connected}
+                  realConnected={realConnected}
+                  onInjectToast={onInjectToast}
+                  localInjectMonsoon={localInjectMonsoon}
+                  localInjectAnomaly={localInjectAnomaly}
+                  localReset={localReset}
+                />
               </div>
             </aside>
 

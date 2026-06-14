@@ -1399,10 +1399,14 @@ body {
 }
 
 .overview-inject-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 6px;
   margin-bottom: 10px;
+}
+
+.overview-inject-row > :last-child:nth-child(odd) {
+  grid-column: span 2;
 }
 
 .overview-inject-btn {
@@ -4171,9 +4175,13 @@ a:focus-visible,
 }
 
 .scenario-menu-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.scenario-menu-actions > :last-child:nth-child(odd) {
+  grid-column: span 2;
 }
 
 .weather-toggle {

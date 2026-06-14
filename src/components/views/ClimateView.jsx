@@ -10,7 +10,14 @@ function avg(segments, key) {
   return segments.reduce((a, s) => a + (s[key] ?? 0), 0) / segments.length
 }
 
-export default function ClimateView({ segments, dataReady, weatherStatus, connected }) {
+export default function ClimateView({
+  segments,
+  dataReady,
+  weatherStatus,
+  connected,
+  realConnected,
+  localSetWeatherMode,
+}) {
   if (!dataReady) {
     return (
       <div className="climate-layout" data-testid="view-climate">
@@ -56,6 +63,8 @@ export default function ClimateView({ segments, dataReady, weatherStatus, connec
           liveWeather={weatherStatus?.live_weather}
           weatherNote={weatherStatus?.note}
           connected={connected}
+          realConnected={realConnected}
+          localSetWeatherMode={localSetWeatherMode}
         />
       </div>
 

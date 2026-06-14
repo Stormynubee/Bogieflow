@@ -4,7 +4,15 @@ import { injectAnomaly, injectMonsoon } from '../lib/api.js'
 import { UI } from '../content/uiCopy.js'
 
 /** Live injection controls — clearly labeled as simulation / demo. */
-export default function OverviewOpsStrip({ train, connected, onNavigate, onInjectToast }) {
+export default function OverviewOpsStrip({
+  train,
+  connected,
+  realConnected,
+  onNavigate,
+  onInjectToast,
+  localInjectMonsoon,
+  localInjectAnomaly,
+}) {
   const [busy, setBusy] = useState(null)
   const [toast, setToast] = useState('')
 
@@ -52,9 +60,9 @@ export default function OverviewOpsStrip({ train, connected, onNavigate, onInjec
             type="button"
             data-testid="inject-monsoon-s4"
             className="overview-inject-btn"
-            disabled={!connected || busy === 'monsoon'}
+            disabled={busy === 'monsoon'}
             title={UI.simulation.monsoonHint}
-            onClick={() => run('monsoon', () => injectMonsoon('S4', 0.9, 0.85))}
+            onClick={() => run('monsoon', () => realConnected ? injectMonsoon('S4', 0.9, 0.85) : localInjectMonsoon('S4', 0.9, 0.85))}
           >
             {UI.simulation.monsoon}
           </button>
@@ -62,9 +70,9 @@ export default function OverviewOpsStrip({ train, connected, onNavigate, onInjec
             type="button"
             data-testid="inject-anomaly-s4"
             className="overview-inject-btn overview-inject-secondary"
-            disabled={!connected || busy === 'anomaly'}
+            disabled={busy === 'anomaly'}
             title={UI.simulation.anomalyHint}
-            onClick={() => run('anomaly', () => injectAnomaly('S4'))}
+            onClick={() => run('anomaly', () => realConnected ? injectAnomaly('S4') : localInjectAnomaly('S4'))}
           >
             {UI.simulation.anomaly}
           </button>
@@ -73,22 +81,21 @@ export default function OverviewOpsStrip({ train, connected, onNavigate, onInjec
               type="button"
               data-testid="inject-monsoon-train"
               className="overview-inject-btn overview-inject-secondary"
-              disabled={!connected || busy === 'train'}
+              disabled={busy === 'train'}
               title={UI.simulation.stressHint}
-              onClick={() => run('train', () => injectMonsoon(trainSeg))}
+              onClick={() => run('train', () => realConnected ? injectMonsoon(trainSeg) : localInjectMonsoon(trainSeg))}
             >
               {UI.simulation.stress(trainSeg)}
             </button>
           )}
+          <button
+            type="button"
+            className="overview-inject-btn overview-inject-secondary"
+            onClick={() => onNavigate?.('climate')}
+          >
+            {UI.simulation.climateLink}
+          </button>
         </div>
-
-        <button
-          type="button"
-          className="briefing-action briefing-action-inline"
-          onClick={() => onNavigate?.('climate')}
-        >
-          {UI.simulation.climateLink}
-        </button>
 
         {toast && <p className="overview-ops-toast">{toast}</p>}
       </div>

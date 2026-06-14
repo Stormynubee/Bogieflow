@@ -33,6 +33,7 @@ function formatUptime(seconds) {
 export default function App() {
   const {
     connected,
+    realConnected,
     reconnectAttempts,
     segments,
     train,
@@ -45,6 +46,10 @@ export default function App() {
     impact,
     weatherStatus,
     dataReady,
+    localInjectMonsoon,
+    localInjectAnomaly,
+    localReset,
+    localSetWeatherMode,
   } = useWebSocket()
 
   const { toasts, push: pushToast } = useToast()
@@ -83,7 +88,11 @@ export default function App() {
 
   const handleScan = async () => {
     try {
-      await injectMonsoon('S4', 0.9, 0.85)
+      if (realConnected) {
+        await injectMonsoon('S4', 0.9, 0.85)
+      } else {
+        localInjectMonsoon('S4', 0.9, 0.85)
+      }
       pushToast(UI.simulation.sent, 'success')
     } catch {
       pushToast(UI.simulation.offline, 'error')
@@ -135,6 +144,7 @@ export default function App() {
       <GrainOverlay />
       <Sidebar
         connected={connected}
+        realConnected={realConnected}
         reconnectAttempts={reconnectAttempts}
         activeView={view}
         onNavigate={setView}
@@ -144,6 +154,7 @@ export default function App() {
       <div className="workspace">
         <TopBar
           connected={connected}
+          realConnected={realConnected}
           reconnectAttempts={reconnectAttempts}
           openTicketCount={openTickets}
           onNavigateMaintenance={goMaintenance}
@@ -165,6 +176,7 @@ export default function App() {
                   logs={logs}
                   train={train}
                   connected={connected}
+                  realConnected={realConnected}
                   openTicketCount={openTickets}
                   activeRiskIndex={activeRiskIndex}
                   segmentHistory={segmentHistory}
@@ -177,6 +189,9 @@ export default function App() {
                   onNavigate={setView}
                   onGoMaintenance={goMaintenance}
                   onInjectToast={pushToast}
+                  localInjectMonsoon={localInjectMonsoon}
+                  localInjectAnomaly={localInjectAnomaly}
+                  localReset={localReset}
                 />
               </motion.div>
             )}
@@ -192,6 +207,8 @@ export default function App() {
                   onNavigateMaintenance={goMaintenance}
                   onInjectToast={pushToast}
                   dataReady={dataReady}
+                  realConnected={realConnected}
+                  localInjectAnomaly={localInjectAnomaly}
                 />
               </motion.div>
             )}
@@ -202,7 +219,14 @@ export default function App() {
             )}
             {view === 'climate' && (
               <motion.div key="climate" className="view-shell" {...viewMotion}>
-                <ClimateView segments={segments} dataReady={dataReady} weatherStatus={weatherStatus} connected={connected} />
+                <ClimateView
+                  segments={segments}
+                  dataReady={dataReady}
+                  weatherStatus={weatherStatus}
+                  connected={connected}
+                  realConnected={realConnected}
+                  localSetWeatherMode={localSetWeatherMode}
+                />
               </motion.div>
             )}
           </AnimatePresence>

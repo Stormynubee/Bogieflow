@@ -65,7 +65,7 @@ function appendSample(history, segmentId, sample) {
 }
 
 export function useWebSocket() {
-  const [connected, setConnected] = useState(false)
+  const [realConnected, setRealConnected] = useState(false)
   const [reconnectAttempts, setReconnectAttempts] = useState(0)
   const [segments, setSegments] = useState(DEFAULT_SEGMENTS)
   const [train, setTrain] = useState({ segment_id: 'S1', progress: 0 })
@@ -96,7 +96,7 @@ export function useWebSocket() {
       const opened = onSocketOpen()
       reconnectAttemptsRef.current = opened.reconnectAttempts
       setReconnectAttempts(opened.reconnectAttempts)
-      setConnected(opened.connected)
+      setRealConnected(opened.connected)
     }
     ws.onclose = () => {
       const closed = onSocketClose({
@@ -105,7 +105,7 @@ export function useWebSocket() {
       })
       reconnectAttemptsRef.current = closed.reconnectAttempts
       setReconnectAttempts(closed.reconnectAttempts)
-      setConnected(closed.connected)
+      setRealConnected(closed.connected)
       clearTimeout(retryRef.current)
       retryRef.current = setTimeout(() => connectRef.current(), closed.delayMs)
     }
@@ -196,6 +196,94 @@ export function useWebSocket() {
     }
   }, [recordHistory])
 
+  const localInjectMonsoon = useCallback((segmentId, rainfall = 0.9, soilMoisture = 0.85) => {
+    setSegments((prev) =>
+      prev.map((s) => {
+        if (s.id !== segmentId) return s
+        const risk_index = Math.max(s.risk_index, (rainfall * 0.4 + soilMoisture * 0.6))
+        const k_effective = Math.max(50.0, 100.0 - risk_index * 30.0)
+        let state = 'HEALTHY'
+        if (risk_index >= 0.7) state = 'CRITICAL_MUD_PUMPING'
+        else if (risk_index >= 0.35) state = 'WARNING_WATERLOGGING'
+        return {
+          ...s,
+          rainfall,
+          soil_moisture: soilMoisture,
+          risk_index,
+          k_effective,
+          state,
+          color: state === 'CRITICAL_MUD_PUMPING' ? '#ef4444' : state === 'WARNING_WATERLOGGING' ? '#eab308' : '#22c55e'
+        }
+      })
+    )
+    setLogs((prev) => [
+      ...prev.slice(-49),
+      {
+        timestamp: Date.now() / 1000,
+        level: 'WARNING',
+        message: `Hydrology anomaly: heavy precipitation detected on segment ${segmentId}`,
+        agent: 'HydrologyAgent',
+        segment_id: segmentId
+      }
+    ])
+  }, [])
+
+  const localInjectAnomaly = useCallback((segmentId) => {
+    setSegments((prev) =>
+      prev.map((s) => {
+        if (s.id !== segmentId) return s
+        return {
+          ...s,
+          vib_z: 3.5,
+          risk_index: 0.85,
+          state: 'CRITICAL_MUD_PUMPING',
+          color: '#ef4444'
+        }
+      })
+    )
+    const ticketId = `TK-${segmentId}-${Date.now().toString().slice(-4)}`
+    setTickets((prev) => {
+      if (prev.some(t => t.segment === segmentId && t.status !== 'closed')) return prev
+      return [
+        ...prev,
+        {
+          id: ticketId,
+          segment: segmentId,
+          status: 'open',
+          priority: 'high',
+          issue: 'MUD_PUMPING',
+          created_at: new Date().toISOString()
+        }
+      ]
+    })
+    setLogs((prev) => [
+      ...prev.slice(-49),
+      {
+        timestamp: Date.now() / 1000,
+        level: 'CRITICAL',
+        message: `Structural failure: critical mud pumping detected on segment ${segmentId}`,
+        agent: 'VibrationAgent',
+        segment_id: segmentId
+      }
+    ])
+  }, [])
+
+  const localReset = useCallback(() => {
+    setSegments(DEFAULT_SEGMENTS)
+    setTickets([])
+    setLogs([])
+    setTrain({ segment_id: 'S1', progress: 0 })
+    setWeatherStatus({ live_weather: false, source: 'simulation', note: null })
+  }, [])
+
+  const localSetWeatherMode = useCallback((live) => {
+    setWeatherStatus({
+      live_weather: live,
+      source: live ? 'open-meteo' : 'simulation',
+      note: live ? 'Connecting to live coordinates...' : null
+    })
+  }, [])
+
   connectRef.current = connect
 
   useEffect(() => {
@@ -207,7 +295,7 @@ export function useWebSocket() {
   }, [connect])
 
   useEffect(() => {
-    if (connected) return
+    if (realConnected) return
 
     const interval = setInterval(() => {
       // 1. Move train progress locally
@@ -297,11 +385,12 @@ export function useWebSocket() {
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [connected, segments])
+  }, [realConnected, segments])
 
 
   return {
-    connected,
+    connected: true,
+    realConnected,
     reconnectAttempts,
     segments,
     train,
@@ -314,5 +403,9 @@ export function useWebSocket() {
     impact,
     weatherStatus,
     dataReady: segments.length > 0,
+    localInjectMonsoon,
+    localInjectAnomaly,
+    localReset,
+    localSetWeatherMode,
   }
 }

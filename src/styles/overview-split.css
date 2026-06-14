@@ -229,8 +229,8 @@
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  max-height: min(32vh, 300px);
-  min-height: 180px;
+  max-height: none;
+  min-height: 0;
   cursor: ew-resize;
   touch-action: pan-y;
 }
@@ -260,8 +260,8 @@
   }
 
   .corridor-feed-split .corridor-viewport {
-    max-height: min(36vh, 280px);
-    min-height: 160px;
+    max-height: none;
+    min-height: 0;
   }
 
   .overview-metrics-pane .overview-deck {

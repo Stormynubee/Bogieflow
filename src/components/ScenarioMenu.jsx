@@ -9,10 +9,19 @@ const SCENARIO_MENU = [
   { id: 'bearing-fault-s3', ...DEMO_SCENARIOS['bearing-fault-s3'] },
 ]
 
-export default function ScenarioMenu({ connected, onInjectToast }) {
+export default function ScenarioMenu({
+  connected,
+  realConnected,
+  onInjectToast,
+  localInjectMonsoon,
+  localInjectAnomaly,
+  localReset,
+}) {
   const [busy, setBusy] = useState(null)
 
-  const api = { injectMonsoon, injectAnomaly }
+  const api = realConnected
+    ? { injectMonsoon, injectAnomaly }
+    : { injectMonsoon: localInjectMonsoon, injectAnomaly: localInjectAnomaly }
 
   const run = async (key, fn) => {
     setBusy(key)
@@ -41,7 +50,7 @@ export default function ScenarioMenu({ connected, onInjectToast }) {
             type="button"
             data-testid={`scenario-${scenario.id}`}
             className="overview-inject-btn overview-inject-secondary"
-            disabled={!connected || busy != null}
+            disabled={busy != null}
             onClick={() => run(scenario.id, () => runScenario(scenario.id, api))}
           >
             {scenario.label}
@@ -51,8 +60,8 @@ export default function ScenarioMenu({ connected, onInjectToast }) {
           type="button"
           data-testid="scenario-reset"
           className="overview-inject-btn"
-          disabled={!connected || busy != null}
-          onClick={() => run('reset', resetCorridor)}
+          disabled={busy != null}
+          onClick={() => run('reset', realConnected ? resetCorridor : localReset)}
         >
           Reset corridor
         </button>

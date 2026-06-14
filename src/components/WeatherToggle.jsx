@@ -1,14 +1,24 @@
 import { useState } from 'react'
 import { setWeatherMode } from '../lib/api.js'
 
-export default function WeatherToggle({ liveWeather, weatherNote, connected }) {
+export default function WeatherToggle({
+  liveWeather,
+  weatherNote,
+  connected,
+  realConnected,
+  localSetWeatherMode,
+}) {
   const [busy, setBusy] = useState(false)
 
   const setMode = async (wantLive) => {
-    if (!connected || busy || wantLive === liveWeather) return
+    if (busy || wantLive === liveWeather) return
     setBusy(true)
     try {
-      await setWeatherMode(wantLive)
+      if (realConnected) {
+        await setWeatherMode(wantLive)
+      } else {
+        localSetWeatherMode(wantLive)
+      }
     } catch {
       /* WS weather_status will reflect fallback */
     } finally {
@@ -22,7 +32,7 @@ export default function WeatherToggle({ liveWeather, weatherNote, connected }) {
         <button
           type="button"
           aria-pressed={!liveWeather}
-          disabled={!connected || busy}
+          disabled={busy}
           onClick={() => setMode(false)}
           data-testid="weather-mode-simulated"
         >
@@ -31,7 +41,7 @@ export default function WeatherToggle({ liveWeather, weatherNote, connected }) {
         <button
           type="button"
           aria-pressed={liveWeather}
-          disabled={!connected || busy}
+          disabled={busy}
           onClick={() => setMode(true)}
           data-testid="weather-mode-live"
         >
