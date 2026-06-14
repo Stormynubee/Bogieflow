@@ -41,6 +41,7 @@ jobs:
 
       - name: Post PR Status Comment
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
             await github.rest.issues.createComment({
