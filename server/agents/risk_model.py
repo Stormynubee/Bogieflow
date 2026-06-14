@@ -29,8 +29,12 @@ def _features_array(rainfall: float, soil_moisture: float, vib_z: float) -> np.n
     return np.array([[rainfall, soil_moisture, vib_z]], dtype=np.float64)
 
 
+LABEL_PROVENANCE = "Labels from fusion rules, not field outcomes."
+CV_DISCLAIMER = "Cross-validated on training frame; not field-validated."
+
+
 def _honesty_label(data_source: str) -> str:
-    return "Validated" if data_source == "real" else "Simulated"
+    return "Real sources" if data_source == "real" else "Simulated"
 
 
 def evaluate_model(
@@ -109,6 +113,8 @@ def train_and_save(
         "n_samples": int(len(y)),
         "features": list(FEATURE_NAMES),
         "honesty_label": _honesty_label(data_source),
+        "label_provenance": LABEL_PROVENANCE,
+        "cv_disclaimer": CV_DISCLAIMER,
         **metrics,
     }
     meta_target.write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -132,6 +138,8 @@ def get_model_card() -> dict[str, Any]:
         train_and_save()
     card = json.loads(META_PATH.read_text(encoding="utf-8"))
     card["honesty_label"] = _honesty_label(card.get("data_source", "synthetic"))
+    card.setdefault("label_provenance", LABEL_PROVENANCE)
+    card.setdefault("cv_disclaimer", CV_DISCLAIMER)
     return card
 
 

@@ -10,9 +10,11 @@ import numpy as np
 
 FEATURE_NAMES = ("rainfall", "soil_moisture", "vib_z")
 CWRU_FILENAME = "cwru_bearing.csv"
+CWRU_FALLBACK_MARKER = "cwru_bearing.fallback"
 MONSOON_FILENAME = "open_meteo_monsoon.csv"
 DEFAULT_DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 MAX_RAIN_MM = 20.0
+MIN_REAL_SAMPLES = 30
 
 
 def _data_dir(explicit: Path | None) -> Path:
@@ -94,6 +96,9 @@ def load_synthetic_frame(n_samples: int = 500) -> tuple[np.ndarray, np.ndarray]:
 def _load_real_arrays(data_dir: Path) -> tuple[np.ndarray, np.ndarray] | None:
     cwru_path = data_dir / CWRU_FILENAME
     monsoon_path = data_dir / MONSOON_FILENAME
+    fallback_marker = data_dir / CWRU_FALLBACK_MARKER
+    if fallback_marker.is_file():
+        return None
     if not cwru_path.is_file() or not monsoon_path.is_file():
         return None
 
@@ -141,7 +146,9 @@ def load_training_frame(
     if use_real:
         real = _load_real_arrays(directory)
         if real is not None:
-            return real[0], real[1], "real"
+            X, y = real
+            if len(y) >= MIN_REAL_SAMPLES:
+                return X, y, "real"
 
     X, y = load_synthetic_frame()
     return X, y, "synthetic"

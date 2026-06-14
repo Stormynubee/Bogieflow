@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-06-13
+
+### Changed
+- Honesty badge **Validated** → **Real sources**; subtitle clarifies labels come from fusion rules, not field outcomes.
+- Training rejects CWRU fetch fallback (&lt;30 samples or `.fallback` marker) as `data_source=real`.
+- Model card UI shows CV disclaimer: cross-validated on training frame, not field-validated.
+- `test_model_card_api` uses `tmp_path` monkeypatch — no longer mutates committed `risk_model.joblib`.
+
+### Fixed
+- CWRU mirror fallback writes `cwru_bearing.fallback` marker; full mirror fetch clears it.
+
 ## [1.7.0] - 2026-06-13
 
 ### Added

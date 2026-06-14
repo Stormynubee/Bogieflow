@@ -62,7 +62,7 @@ Record with backend + frontend running (`npm run dev:all`) or a deployed single-
 | 19 | Point at impact formulas | inline assumptions under each metric |
 | 20 | Wait ~30–60 s (or click **Reset corridor**) | `data-testid="scenario-reset"` in Scenario replay |
 | 21 | Show ticket closed + gauge drops | toast "Ticket closed — segment recovered" |
-| 22 | Scroll to **Risk model card** | `data-testid="model-card-panel"` — badge Simulated or Validated; confusion matrix + macro F1 |
+| 22 | Scroll to **Risk model card** | `data-testid="model-card-panel"` — badge Simulated or Real sources; CV disclaimer + confusion matrix |
 
 ---
 

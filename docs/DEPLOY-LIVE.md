@@ -97,6 +97,21 @@ vercel --prod --yes
 | `GUIDE_AI_MODEL` | No | Optional | Gemini model name |
 | `PORT` | No | Auto | Uvicorn bind port |
 
+## 3. Render backend (required for model card)
+
+After merging to `main`, **trigger a Render deploy** so `/api/model/card` is live:
+
+1. [Render Dashboard](https://dashboard.render.com) → **bogie-flow** → **Manual Deploy** → **Deploy latest commit** (branch `main`).
+2. Or add GitHub secret `RENDER_DEPLOY_HOOK` (Settings → Deploy Hook URL) so `.github/workflows/render-deploy.yml` auto-triggers after CI.
+
+Verify after deploy (~5–10 min):
+
+```powershell
+Invoke-WebRequest https://bogie-flow.onrender.com/api/model/card -UseBasicParsing
+```
+
+Expect HTTP 200 with `honesty_label`, `cv_disclaimer`, and `confusion_matrix`.
+
 ## 4. Expected live UI behavior
 
 When both sides are deployed and wired:
@@ -105,7 +120,7 @@ When both sides are deployed and wired:
 - Field sensors show **Live** (not Simulated)
 - Scenario inject buttons call real `/api/inject/*` endpoints
 - WebSocket streams `state_snapshot`, `segment_update`, etc.
-- Overview **Risk model card** panel loads from `GET /api/model/card` (Simulated or Validated badge).
+- Overview **Risk model card** panel loads from `GET /api/model/card` (Simulated or Real sources badge).
 
 ## 7. Model training on Render
 

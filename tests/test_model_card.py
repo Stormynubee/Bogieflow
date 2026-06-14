@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from server.agents import risk_model
-from server.agents.dataset import load_training_frame
+from server.agents.dataset import MIN_REAL_SAMPLES, load_training_frame
 from server.agents.risk_model import (
     META_PATH,
     MODEL_PATH,
@@ -86,19 +86,53 @@ def test_get_model_card_honesty_real_only_when_source_real(tmp_path, monkeypatch
     train_and_save(use_real=True, path=model_path, data_dir=fixtures_training_dir)
     card = get_model_card()
     assert card["data_source"] == "real"
-    assert card["honesty_label"] == "Validated"
+    assert card["honesty_label"] == "Real sources"
+    assert "fusion rules" in card["label_provenance"].lower()
 
 
-def test_model_card_api(client):
-    train_and_save(use_real=False)
+def test_load_training_frame_rejects_tiny_real_dataset(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    (data_dir / "open_meteo_monsoon.csv").write_text(
+        "hour,rainfall_mm,soil_moisture\n2023-06-01T00:00,1.0,0.3\n",
+        encoding="utf-8",
+    )
+    (data_dir / "cwru_bearing.csv").write_text(
+        "window_id,fault_class,rms\nN001,normal,0.08\n",
+        encoding="utf-8",
+    )
+    _, y, source = load_training_frame(use_real=True, data_dir=data_dir)
+    assert source == "synthetic"
+    assert len(y) >= MIN_REAL_SAMPLES
+
+
+def test_model_card_includes_cv_disclaimer(tmp_path, monkeypatch):
+    meta_path = tmp_path / "risk_model.meta.json"
+    model_path = tmp_path / "risk_model.joblib"
+    monkeypatch.setattr(risk_model, "MODEL_PATH", model_path)
+    monkeypatch.setattr(risk_model, "META_PATH", meta_path)
+
+    train_and_save(use_real=False, path=model_path)
+    card = get_model_card()
+    assert "not field-validated" in card["cv_disclaimer"].lower()
+
+
+def test_model_card_api(client, tmp_path, monkeypatch):
+    model_path = tmp_path / "risk_model.joblib"
+    meta_path = tmp_path / "risk_model.meta.json"
+    monkeypatch.setattr(risk_model, "MODEL_PATH", model_path)
+    monkeypatch.setattr(risk_model, "META_PATH", meta_path)
+
+    train_and_save(use_real=False, path=model_path)
     r = client.get("/api/model/card")
     assert r.status_code == 200
     body = r.json()
     assert body["data_source"] in ("real", "synthetic")
-    assert body["honesty_label"] in ("Validated", "Simulated")
+    assert body["honesty_label"] in ("Real sources", "Simulated")
     assert "confusion_matrix" in body
     assert "macro_f1" in body
     assert "roc_auc" in body
+    assert "cv_disclaimer" in body
 
 
 @pytest.fixture

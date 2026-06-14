@@ -176,3 +176,17 @@
   margin: 0;
 }
 
+.model-card-provenance,
+.model-card-cv-disclaimer {
+  font-size: var(--type-xs);
+  color: var(--paper-muted);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.model-card-cv-disclaimer {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+

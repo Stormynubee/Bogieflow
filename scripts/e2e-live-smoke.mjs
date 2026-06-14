@@ -84,7 +84,7 @@ async function main() {
     const cardError = page.getByTestId('model-card-error')
     if (await badge.count()) {
       const badgeText = (await badge.textContent())?.trim() ?? ''
-      if (badgeText.includes('Simulated') || badgeText.includes('Validated')) {
+      if (badgeText.includes('Simulated') || badgeText.includes('Real sources')) {
         pass(`Model card badge: ${badgeText}`)
       } else {
         fail('model-card', `unexpected badge text: ${badgeText}`)

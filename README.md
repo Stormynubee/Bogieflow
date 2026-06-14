@@ -23,10 +23,10 @@
     <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Bogieflow/ci.yml?branch=main&label=CI&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github-actions&logoColor=ffffff" alt="CI Status" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/blob/main/tests/">
-    <img src="https://img.shields.io/badge/Pytest-77%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
+    <img src="https://img.shields.io/badge/Pytest-79%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/blob/main/src/lib/">
-    <img src="https://img.shields.io/badge/Vitest-132%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
+    <img src="https://img.shields.io/badge/Vitest-133%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/releases">
     <img src="https://img.shields.io/github/v/release/Stormynubee/Bogieflow?label=v1.7.0&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github&logoColor=ffffff" alt="Latest Release" />
@@ -486,13 +486,13 @@ Verify both test suites locally by running the following commands:
 ```bash
 python -m pytest tests/ -v
 ```
-*(Verifies CORS middleware, static single-origin routing, ML model card API, model caching, ticket de-duplication, Open-Meteo cache fallbacks, and forecast projections. 77 tests collected.)*
+*(Verifies CORS middleware, static single-origin routing, ML model card API, model caching, ticket de-duplication, Open-Meteo cache fallbacks, and forecast projections. 79 tests collected.)*
 
 ### Frontend Vitest Suite
 ```bash
 npm run test
 ```
-*(Verifies WebSocket reducer state, model card display helpers, config path derivations, corridor scrub, guide launcher, sensor stack state, Overview split layout calculation, risk gauge geometries, and custom kinetic counters. 132 tests passing.)*
+*(Verifies WebSocket reducer state, model card display helpers, config path derivations, corridor scrub, guide launcher, sensor stack state, Overview split layout calculation, risk gauge geometries, and custom kinetic counters. 133 tests passing.)*
 
 ### Live stack smoke (production)
 ```bash

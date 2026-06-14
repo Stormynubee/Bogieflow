@@ -5,6 +5,8 @@ import {
   confusionMatrixCells,
   featureImportanceRows,
   modelCardBadge,
+  modelCardCvDisclaimer,
+  modelCardLabelProvenance,
   modelCardMetricRows,
 } from '../lib/modelCardDisplay.js'
 
@@ -102,6 +104,8 @@ export default function ModelCardPanel({ className = '' }) {
   }, [])
 
   const badge = card ? modelCardBadge(card.data_source) : null
+  const labelProvenance = card?.label_provenance ?? modelCardLabelProvenance(card?.data_source)
+  const cvDisclaimer = card ? card.cv_disclaimer || modelCardCvDisclaimer() : ''
   const metrics = modelCardMetricRows(card)
 
   return (
@@ -119,7 +123,7 @@ export default function ModelCardPanel({ className = '' }) {
               className={`model-card-badge model-card-badge-${badge.variant}`}
               data-testid="model-card-badge"
             >
-              {badge.text} · {badge.honesty}
+              {badge.text}
             </span>
           ) : (
             <span className="model-card-badge model-card-badge-pending" data-testid="model-card-badge-pending">
@@ -131,12 +135,17 @@ export default function ModelCardPanel({ className = '' }) {
 
       {error && !card && (
         <p className="model-card-error" data-testid="model-card-error">
-          {error} — Simulated fallback at runtime
+          {error} — live inference unchanged
         </p>
       )}
 
       {card && (
         <>
+          {labelProvenance && (
+            <p className="model-card-provenance" data-testid="model-card-label-provenance">
+              {labelProvenance}
+            </p>
+          )}
           <div className="model-card-metrics">
             {metrics.map((row) => (
               <div key={row.id} className="model-card-metric" data-testid={`model-card-${row.id}`}>
@@ -145,6 +154,11 @@ export default function ModelCardPanel({ className = '' }) {
               </div>
             ))}
           </div>
+          {cvDisclaimer && (
+            <p className="model-card-cv-disclaimer" data-testid="model-card-cv-disclaimer">
+              {cvDisclaimer}
+            </p>
+          )}
 
           <div className="model-card-body">
             <ConfusionMatrixSvg matrix={card.confusion_matrix} labels={card.labels} />

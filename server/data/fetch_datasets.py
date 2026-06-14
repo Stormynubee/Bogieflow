@@ -86,6 +86,8 @@ def _write_cwru_fallback(out_path: Path) -> bool:
         writer = csv.writer(fh)
         writer.writerow(["window_id", "fault_class", "rms"])
         writer.writerows(rows)
+    marker = out_path.parent / "cwru_bearing.fallback"
+    marker.write_text("fallback\n", encoding="utf-8")
     print(f"Wrote fallback {out_path} ({len(rows)} windows — re-run when online for full mirror)")
     return True
 
@@ -130,6 +132,9 @@ def fetch_cwru_bearing(out_path: Path = CWRU_OUT) -> bool:
         with urllib.request.urlopen(CWRU_MIRROR_URL, timeout=60) as resp:
             raw = resp.read().decode("utf-8")
         if _normalize_cwru_mirror(raw, out_path):
+            marker = out_path.parent / "cwru_bearing.fallback"
+            if marker.is_file():
+                marker.unlink()
             return True
     except (urllib.error.URLError, TimeoutError) as exc:
         print(f"CWRU mirror fetch failed: {exc}")

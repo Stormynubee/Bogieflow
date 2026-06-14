@@ -68,7 +68,7 @@ def test_live_model_card_returns_metrics():
     assert response.status_code == 200
     data = response.json()
     assert data["data_source"] in ("real", "synthetic")
-    assert data["honesty_label"] in ("Validated", "Simulated")
+    assert data["honesty_label"] in ("Real sources", "Simulated")
     assert "confusion_matrix" in data
     assert "macro_f1" in data
     assert data["n_samples"] >= 100

@@ -1,10 +1,23 @@
 /** Model card metrics — testable without DOM. */
 
+export const MODEL_LABEL_PROVENANCE =
+  'Labels from fusion rules, not field outcomes.'
+export const MODEL_CV_DISCLAIMER =
+  'Cross-validated on training frame; not field-validated.'
+
 export function modelCardBadge(dataSource) {
   if (dataSource === 'real') {
-    return { text: 'Real data', honesty: 'Validated', variant: 'validated' }
+    return { text: 'Real sources', honesty: 'Real sources', variant: 'validated' }
   }
   return { text: 'Synthetic', honesty: 'Simulated', variant: 'simulated' }
+}
+
+export function modelCardLabelProvenance(dataSource) {
+  return MODEL_LABEL_PROVENANCE
+}
+
+export function modelCardCvDisclaimer() {
+  return MODEL_CV_DISCLAIMER
 }
 
 export function formatModelPercent(value) {

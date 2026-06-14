@@ -39,10 +39,12 @@ Outputs:
 
 | `data_source` | UI badge | Meaning |
 |---------------|----------|---------|
-| `real` | **Validated** | Both CSV files present at train time |
+| `real` | **Real sources** | Open-Meteo + CWRU CSVs present with ≥30 aligned samples (CWRU fallback stub excluded) |
 | `synthetic` | **Simulated** | Rule-generated 503-sample frame (fallback) |
 
-The UI never shows “Real data” unless `data_source == "real"` in the live model card API response.
+Labels are always derived from fusion rules (`_priority_label`), not field fault outcomes. The UI shows **Real sources** only when `data_source == "real"` in the live model card API response.
+
+CV metrics include the disclaimer: *Cross-validated on training frame; not field-validated.*
 
 ## API
 

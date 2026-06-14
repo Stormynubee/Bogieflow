@@ -5,6 +5,8 @@ import {
   formatModelPercent,
   formatRocAuc,
   modelCardBadge,
+  modelCardCvDisclaimer,
+  modelCardLabelProvenance,
   modelCardMetricRows,
 } from './modelCardDisplay.js'
 
@@ -24,11 +26,16 @@ describe('modelCardDisplay', () => {
     importances: { rainfall: 0.42, soil_moisture: 0.31, vib_z: 0.27 },
   }
 
-  it('shows Validated badge only for real data source', () => {
-    expect(modelCardBadge('real').honesty).toBe('Validated')
-    expect(modelCardBadge('real').text).toBe('Real data')
+  it('shows Real sources badge only for real data source', () => {
+    expect(modelCardBadge('real').honesty).toBe('Real sources')
+    expect(modelCardBadge('real').text).toBe('Real sources')
     expect(modelCardBadge('synthetic').honesty).toBe('Simulated')
     expect(modelCardBadge('synthetic').text).toBe('Synthetic')
+  })
+
+  it('surfaces label provenance and CV disclaimer copy', () => {
+    expect(modelCardLabelProvenance('real')).toMatch(/fusion rules/i)
+    expect(modelCardCvDisclaimer()).toMatch(/not field-validated/i)
   })
 
   it('formats CV metrics as percentages', () => {
