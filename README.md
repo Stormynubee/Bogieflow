@@ -89,7 +89,7 @@ Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade e
     <td width="50%" align="center">
       <img src="assets/screenshots/overview.png" alt="Overview Dashboard" width="100%" />
       <br />
-      <em>Overview Dashboard - Corridor Status, Gauge, and Impact Panels</em>
+      <em>Overview — status bar, corridor feed scrub, risk gauge, and impact panels</em>
     </td>
     <td width="50%" align="center">
       <img src="assets/screenshots/analysis.png" alt="Analysis View" width="100%" />
@@ -109,7 +109,23 @@ Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade e
       <em>Climate View - Precipitation Heatmap and Longevity Estimates</em>
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/impact.png" alt="Impact panel" width="100%" />
+      <br />
+      <em>Quantified impact — avoided cost, inspection hours, derailment risk reduction</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/explain.png" alt="Explainable ticket" width="100%" />
+      <br />
+      <em>Explainable AI — feature importances and plain-language ticket rationale</em>
+    </td>
+  </tr>
 </table>
+
+<p align="center">
+  <em>Motion demo: see <code>assets/demo.mp4</code> locally, or run a live inject from the Overview scenario menu.</em>
+</p>
 
 ---
 
@@ -139,8 +155,8 @@ flowchart TD
     %% Subgraph 3: Real-Time Display
     subgraph DISPLAY [Real-Time Display]
         WS[WebSocket Hub]
-        WS -->|live track state| Scrub[Corridor scrub viewer]
-        WS -->|system risk index| Gauge[Corridor command dock]
+        WS -->|live track state| Scrub[Corridor feed scrub]
+        WS -->|system risk index| Gauge[Risk gauge + metrics]
         WS -->|work tickets| Maint[Maintenance view]
     end
 
@@ -248,11 +264,15 @@ Deployment configurations are included in:
 ```
 Faraway2026Japan/
 ├── .github/
+│   ├── dependabot.yml
 │   ├── issue_template/
 │   │   ├── bug_report.md
 │   │   └── feature_request.md
 │   ├── workflows/
+│   │   ├── ai-review.yml
 │   │   ├── ci.yml
+│   │   ├── issue-triage.yml
+│   │   ├── publish-package.yml
 │   │   └── stale.yml
 │   ├── CODEOWNERS
 │   └── pull_request_template.md
@@ -263,14 +283,13 @@ Faraway2026Japan/
 │   │   ├── maintenance.png
 │   │   ├── climate.png
 │   │   ├── impact.png
-│   │   ├── explain.png
-│   │   └── demo.gif
+│   │   └── explain.png
 │   ├── bogie_flow_banner.png
+│   ├── social-preview.png
 │   ├── demo.mp4
 │   └── demo_fallback.mp4
 ├── docs/
-│   ├── plans/
-│   ├── specs/
+│   ├── README.md
 │   ├── PROJECT.md
 │   ├── physics.md
 │   ├── ws-schema.md
@@ -330,7 +349,7 @@ Faraway2026Japan/
 │   │   ├── ImpactPanel.jsx
 │   │   ├── LogEntry.jsx
 │   │   ├── MetricBar.jsx
- guide/      ├── OverviewOpsStrip.jsx
+│   │   ├── OverviewOpsStrip.jsx
 │   │   ├── PanelHeader.jsx
 │   │   ├── ReconnectBanner.jsx
 │   │   ├── RiskGaugeDial.jsx
@@ -357,7 +376,11 @@ Faraway2026Japan/
 │   │   ├── chartData.js
 │   │   ├── config.js
 │   │   ├── corridorScrub.js
+│   │   ├── corridorStatus.js
+│   │   ├── demoScenarios.js
 │   │   ├── guideChat.js
+│   │   ├── guideLauncher.js
+│   │   ├── impactDisplay.js
 │   │   ├── scrubRail.js
 │   │   ├── segmentUtils.js
 │   │   ├── wsReconnect.js
@@ -403,7 +426,7 @@ python -m pytest tests/ -v
 ```bash
 npm run test
 ```
-*(Verifies WebSocket reducer state, config path derivations, capped exponential backoff increments, and layout status lines. 60 tests passing).*
+*(Verifies WebSocket reducer state, config path derivations, corridor scrub, guide launcher, and layout status lines. 65 tests passing).*
 
 ---
 

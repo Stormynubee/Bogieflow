@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.0] - 2026-06-14
 
 ### Added
-- Comprehensive visual assets including high-fidelity screenshots, animated demo GIF, and a social preview card.
+- High-fidelity UI screenshots (four views plus impact and explain close-ups) and a social preview card.
 - Standardized community files: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `SUPPORT.md`, and `CITATION.cff`.
 - Weekly Dependabot audits for `pip`, `npm`, and GitHub Actions.
 - New repository issue and PR templates.
@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete overhaul of `README.md` containing centered HTML header, true badges, project banner, features grid, screenshot gallery, architecture diagrams, and a dedicated Honesty Box.
 - Modernized Vitest badge count to match the newly passing 65 tests.
 - Hardened CI pipeline with concurrency cancellation controls and continue-on-error guards.
+
+### Fixed
+- Removed stale `demo.gif` references; gallery now includes impact and explain panels with refreshed screenshots.
+- Corrected README project structure tree and Vitest count in the testing section.
+- Fixed `docs/README.md` links (relative paths instead of local `file:///` URLs).
 
 ## [1.5.5] - 2026-06-12
 

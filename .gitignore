@@ -9,6 +9,7 @@ venv/
 node_modules/
 dist/
 public/corridor-frames-temp/
+assets/screenshots/temp_frames/
 .cursor/
 .research/
 temp/

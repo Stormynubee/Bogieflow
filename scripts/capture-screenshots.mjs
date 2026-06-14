@@ -1,6 +1,9 @@
 /**
  * Capture dashboard views for hackathon visual showcase.
- * Usage: npm run dev:all (port 5173) in one terminal, then node scripts/capture-screenshots.mjs
+ * Usage:
+ *   npm run dev:all   # then APP_URL=http://127.0.0.1:5173 npm run shots
+ *   npm run build && python -m uvicorn server.main:app --port 8765
+ *   APP_URL=http://127.0.0.1:8765 npm run shots
  */
 import { chromium } from 'playwright'
 import { mkdir } from 'node:fs/promises'
