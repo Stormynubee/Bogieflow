@@ -2,10 +2,15 @@ import asyncio
 from contextlib import asynccontextmanager
 from typing import Any
 
+from server.env import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from server.guide import ai_guide_answer
 from server.simulation import SimulationEngine
 
 clients: set[WebSocket] = set()
@@ -67,6 +72,11 @@ class AnomalyInject(BaseModel):
     segment_id: str = Field(examples=["S4"])
 
 
+class GuideChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    history: list[dict[str, str]] = Field(default_factory=list)
+
+
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "bogie-flow"}
@@ -84,6 +94,11 @@ async def inject_anomaly(body: AnomalyInject):
     assert sim is not None
     result = sim.inject_anomaly(body.segment_id)
     return {"ok": True, **result}
+
+
+@app.post("/api/guide/chat")
+async def guide_chat(body: GuideChatRequest):
+    return ai_guide_answer(body.message, body.history)
 
 
 @app.websocket("/ws")
