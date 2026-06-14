@@ -24,9 +24,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Train risk model (sklearn version lock)
+      run: python -m server.agents.train_risk_model
+
     - name: Run Pytest suite
-      run: |
-        python -m pytest tests/ -v
+      run: python -m pytest tests/ -v
 
   frontend-build:
     runs-on: ubuntu-latest

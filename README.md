@@ -4,12 +4,12 @@
 
 Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=Build&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/actions)
-[![Code Coverage](https://img.shields.io/badge/Coverage-98%25-brightgreen?style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-9%20passing-brightgreen?style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
 [![Release Version](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/releases)
 [![License](https://img.shields.io/github/license/Stormynubee/Faraway2026Japan?label=License&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
-[![Python Version](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)](https://pytop.org)
-[![Node Version](https://img.shields.io/badge/Node-20.x-green?style=flat-square)](https://nodejs.org)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)](https://www.python.org/)
+[![Node](https://img.shields.io/badge/Node-20.x-green?style=flat-square)](https://nodejs.org/)
 
 RailTwin-X Lite is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
 
@@ -93,6 +93,7 @@ Faraway2026Japan/
 │   ├── CODEOWNERS
 │   └── pull_request_template.md
 ├── docs/
+│   ├── PROJECT.md
 │   ├── physics.md
 │   ├── ws-schema.md
 │   ├── SUBMISSION.md
@@ -190,6 +191,18 @@ Run the backend pytest suite to verify agent logic:
 ```bash
 python -m pytest tests/ -v
 ```
+
+---
+
+## FAR AWAY 2026 Submission
+
+| Item | Link |
+| :--- | :--- |
+| Theme | Railways |
+| Submission guide | [docs/SUBMISSION.md](docs/SUBMISSION.md) |
+| Demo script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Full reference | [docs/PROJECT.md](docs/PROJECT.md) |
+| Demo video | [assets/demo.mp4](assets/demo.mp4) |
 
 ---
 

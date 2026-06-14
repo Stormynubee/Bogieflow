@@ -1,5 +1,5 @@
 {
-  "name": "@railtwin-x/dashboard",
+  "name": "@stormynubee/railtwin-x-dashboard",
   "version": "1.0.0",
   "description": "Vite-React dashboard UI for RailTwin-X Lite track-bed monitoring system",
   "type": "module",
