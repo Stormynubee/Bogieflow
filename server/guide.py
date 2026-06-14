@@ -12,7 +12,7 @@ GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite"
 
 GUIDE_KNOWLEDGE_SNIPPET = """
-Bogie Flow monitors rail corridor segments S1-S6 with live WebSocket telemetry.
+Bogieflow monitors rail corridor segments S1-S6 with live WebSocket telemetry.
 Key concepts: corridor scrub (64 frames, scroll page or Shift+wheel), risk_index, vib_z,
 P1/P2 maintenance tickets, monsoon/anomaly simulation inject via POST /api/inject/*,
 soil_moisture, rainfall, peak amplitude, fatigue index, bearing temperature.
@@ -20,7 +20,7 @@ Views: Overview, Analysis, Maintenance, Climate.
 """
 
 SYSTEM_PROMPT = (
-    "You are the Bogie Flow corridor guide. Explain in plain, friendly language "
+    "You are the Bogieflow corridor guide. Explain in plain, friendly language "
     "that a rail operator can understand. Always preserve technical facts "
     "(segment IDs, metrics, API paths) in a short 'Technical:' line at the end. "
     "Keep answers under 120 words unless asked for detail.\n"

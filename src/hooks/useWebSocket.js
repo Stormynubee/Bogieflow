@@ -7,9 +7,47 @@ import { onSocketClose, onSocketOpen } from '../lib/wsReconnect.js'
 const HISTORY_LIMIT = 24
 const SEGMENT_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
 
+const DEFAULT_SEGMENTS = [
+  { id: 'S1', risk_index: 0.05, k_effective: 99.2, state: 'HEALTHY', color: '#22c55e', rainfall: 0.05, soil_moisture: 0.20, vib_z: 0.02, az: 0.005 },
+  { id: 'S2', risk_index: 0.08, k_effective: 98.5, state: 'HEALTHY', color: '#22c55e', rainfall: 0.08, soil_moisture: 0.22, vib_z: 0.04, az: 0.010 },
+  { id: 'S3', risk_index: 0.12, k_effective: 97.0, state: 'HEALTHY', color: '#22c55e', rainfall: 0.12, soil_moisture: 0.25, vib_z: 0.06, az: 0.015 },
+  { id: 'S4', risk_index: 0.15, k_effective: 95.5, state: 'HEALTHY', color: '#22c55e', rainfall: 0.15, soil_moisture: 0.28, vib_z: 0.08, az: 0.020 },
+  { id: 'S5', risk_index: 0.09, k_effective: 98.1, state: 'HEALTHY', color: '#22c55e', rainfall: 0.09, soil_moisture: 0.21, vib_z: 0.05, az: 0.012 },
+  { id: 'S6', risk_index: 0.06, k_effective: 99.0, state: 'HEALTHY', color: '#22c55e', rainfall: 0.06, soil_moisture: 0.19, vib_z: 0.03, az: 0.008 },
+];
+
+const DEFAULT_FORECAST = {
+  horizon_minutes: 30,
+  inspect_next: [],
+  segments: [
+    { id: 'S1', projected_risk: 0.05, status: 'stable', time_to_critical_min: null, sparkline: [0.05, 0.05, 0.05, 0.05, 0.05] },
+    { id: 'S2', projected_risk: 0.08, status: 'stable', time_to_critical_min: null, sparkline: [0.08, 0.08, 0.08, 0.08, 0.08] },
+    { id: 'S3', projected_risk: 0.12, status: 'stable', time_to_critical_min: null, sparkline: [0.12, 0.12, 0.12, 0.12, 0.12] },
+    { id: 'S4', projected_risk: 0.15, status: 'stable', time_to_critical_min: null, sparkline: [0.15, 0.15, 0.15, 0.15, 0.15] },
+    { id: 'S5', projected_risk: 0.09, status: 'stable', time_to_critical_min: null, sparkline: [0.09, 0.09, 0.09, 0.09, 0.09] },
+    { id: 'S6', projected_risk: 0.06, status: 'stable', time_to_critical_min: null, sparkline: [0.06, 0.06, 0.06, 0.06, 0.06] },
+  ]
+};
+
+const DEFAULT_IMPACT = {
+  prevented_cost_usd: 12500,
+  inspection_hours_saved: 18,
+  derailment_reduction_pct: 35,
+  assumptions: {
+    label: 'estimates',
+    formula_cost: 'prevented = $50k×P1 + $15k×P2',
+    formula_hours: 'baseline = 24h - risk×segments',
+  }
+};
+
 function emptyHistory() {
   return Object.fromEntries(
-    SEGMENT_IDS.map((id) => [id, { moisture: [], rainfall: [], vib_z: [] }]),
+    SEGMENT_IDS.map((id, index) => {
+      const moisture = Array.from({ length: HISTORY_LIMIT }, (_, i) => 0.2 + 0.01 * Math.sin((i + index) * 0.5))
+      const rainfall = Array.from({ length: HISTORY_LIMIT }, (_, i) => 0.05 + 0.01 * Math.cos((i + index) * 0.5))
+      const vib_z = Array.from({ length: HISTORY_LIMIT }, (_, i) => 0.02 + 0.01 * Math.sin((i + index) * 0.3))
+      return [id, { moisture, rainfall, vib_z }]
+    }),
   )
 }
 
@@ -29,15 +67,15 @@ function appendSample(history, segmentId, sample) {
 export function useWebSocket() {
   const [connected, setConnected] = useState(false)
   const [reconnectAttempts, setReconnectAttempts] = useState(0)
-  const [segments, setSegments] = useState([])
+  const [segments, setSegments] = useState(DEFAULT_SEGMENTS)
   const [train, setTrain] = useState({ segment_id: 'S1', progress: 0 })
   const [tickets, setTickets] = useState([])
   const [logs, setLogs] = useState([])
-  const [activeRiskIndex, setActiveRiskIndex] = useState(0)
+  const [activeRiskIndex, setActiveRiskIndex] = useState(0.15)
   const [segmentHistory, setSegmentHistory] = useState(emptyHistory)
-  const [lastTickAt, setLastTickAt] = useState(null)
-  const [forecast, setForecast] = useState(null)
-  const [impact, setImpact] = useState(null)
+  const [lastTickAt, setLastTickAt] = useState(() => Date.now())
+  const [forecast, setForecast] = useState(DEFAULT_FORECAST)
+  const [impact, setImpact] = useState(DEFAULT_IMPACT)
   const [weatherStatus, setWeatherStatus] = useState({ live_weather: false, source: 'simulation', note: null })
   const wsRef = useRef(null)
   const retryRef = useRef(null)
@@ -167,6 +205,100 @@ export function useWebSocket() {
       wsRef.current?.close()
     }
   }, [connect])
+
+  useEffect(() => {
+    if (connected) return
+
+    const interval = setInterval(() => {
+      // 1. Move train progress locally
+      setTrain((prev) => {
+        let progress = prev.progress + 4
+        let segment_id = prev.segment_id
+        if (progress >= 100) {
+          progress = 0
+          const currentIdx = SEGMENT_IDS.indexOf(segment_id)
+          segment_id = SEGMENT_IDS[(currentIdx + 1) % SEGMENT_IDS.length]
+        }
+        return { segment_id, progress }
+      })
+
+      // 2. Fluctuate segments slightly
+      setSegments((prev) => {
+        const next = prev.map((s) => {
+          const rainfall = Math.max(0.01, Math.min(1.0, s.rainfall + (Math.random() - 0.5) * 0.01))
+          const soil_moisture = Math.max(0.1, Math.min(1.0, s.soil_moisture + (Math.random() - 0.5) * 0.01))
+          const vib_z = Math.max(0.01, Math.min(4.0, s.vib_z + (Math.random() - 0.5) * 0.04))
+          const risk_index = Math.max(0.01, Math.min(1.0, (rainfall * 0.4 + soil_moisture * 0.6) * (1 + (vib_z > 3.0 ? 0.3 : 0))))
+          const k_effective = Math.max(50.0, Math.min(100.0, 100.0 - risk_index * 30.0))
+          
+          let state = 'HEALTHY'
+          if (risk_index >= 0.7) state = 'CRITICAL_MUD_PUMPING'
+          else if (risk_index >= 0.35) state = 'WARNING_WATERLOGGING'
+
+          return {
+            ...s,
+            rainfall,
+            soil_moisture,
+            vib_z,
+            risk_index,
+            k_effective,
+            state,
+            color: state === 'CRITICAL_MUD_PUMPING' ? '#ef4444' : state === 'WARNING_WATERLOGGING' ? '#eab308' : '#22c55e'
+          }
+        })
+        
+        // compute active risk index
+        const maxRisk = Math.max(...next.map(s => s.risk_index), 0)
+        setActiveRiskIndex(maxRisk)
+        return next
+      })
+
+      // 3. Jitter history for segments
+      setSegmentHistory((prevHistory) => {
+        const nextHistory = { ...prevHistory }
+        SEGMENT_IDS.forEach((id) => {
+          const bucket = nextHistory[id] ?? { moisture: [], rainfall: [], vib_z: [] }
+          const nextMoisture = [...bucket.moisture.slice(1), 0.2 + 0.05 * Math.sin(Date.now() * 0.0001)]
+          const nextRainfall = [...bucket.rainfall.slice(1), 0.1 + 0.03 * Math.cos(Date.now() * 0.0001)]
+          const nextVib = [...bucket.vib_z.slice(1), 0.02 + 0.02 * Math.sin(Date.now() * 0.0002)]
+          nextHistory[id] = { moisture: nextMoisture, rainfall: nextRainfall, vib_z: nextVib }
+        })
+        return nextHistory
+      })
+
+      // 4. Update impact Cost
+      setImpact((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          prevented_cost_usd: prev.prevented_cost_usd + Math.round(Math.random() * 5),
+        }
+      })
+
+      // 5. Update forecast sparklines
+      setForecast((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          segments: prev.segments.map((seg) => {
+            const currentSpark = seg.sparkline || []
+            const currentRisk = segments.find(s => s.id === seg.id)?.risk_index ?? seg.projected_risk
+            const nextSpark = [...currentSpark.slice(1), currentRisk]
+            return {
+              ...seg,
+              projected_risk: currentRisk,
+              sparkline: nextSpark
+            }
+          })
+        }
+      })
+
+      setLastTickAt(Date.now())
+    }, 2000)
+
+    return () => clearInterval(interval)
+  }, [connected, segments])
+
 
   return {
     connected,

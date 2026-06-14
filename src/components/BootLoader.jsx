@@ -70,7 +70,7 @@ export default function BootLoader({ onComplete }) {
       className={`boot-screen ${phase === 'exit' ? 'boot-screen-out' : ''}`}
       role="status"
       aria-live="polite"
-      aria-label="Loading Bogie Flow"
+      aria-label="Loading Bogieflow"
       aria-valuenow={Math.round(progress)}
       aria-valuemin={0}
       aria-valuemax={100}
@@ -79,7 +79,7 @@ export default function BootLoader({ onComplete }) {
         <header className="boot-brand">
           <BootFlowMark phase={phase} progress={progress} />
           <div className="boot-brand-copy">
-            <h1 className="boot-title">Bogie Flow</h1>
+            <h1 className="boot-title">Bogieflow</h1>
             <p className="boot-tagline">
               Others monitor the rail.
               <br />

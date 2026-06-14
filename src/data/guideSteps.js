@@ -5,7 +5,7 @@ export const GUIDE_STEPS = [
     id: 'welcome',
     view: 'overview',
     target: '[data-guide="sidebar"]',
-    title: 'Welcome to Bogie Flow',
+    title: 'Welcome to Bogieflow',
     body: 'This dashboard monitors six track segments (S1–S6) for vibration, soil moisture, and rain. Use the sidebar to switch views.',
     technical: 'Corridor digital twin · WebSocket telemetry · segments S1–S6 · risk_index · vib_z',
   },

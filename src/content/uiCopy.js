@@ -2,7 +2,7 @@
 
 export const UI = {
   brand: {
-    name: 'Bogie Flow',
+    name: 'Bogieflow',
     tagline: 'Track-bed monitoring',
   },
   nav: {

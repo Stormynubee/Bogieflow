@@ -14,7 +14,7 @@ def dist_dir(tmp_path):
     d = tmp_path / "dist"
     d.mkdir()
     (d / "index.html").write_text(
-        "<!DOCTYPE html><html><head><title>Bogie Flow</title></head><body>dashboard</body></html>",
+        "<!DOCTYPE html><html><head><title>Bogieflow</title></head><body>dashboard</body></html>",
         encoding="utf-8",
     )
     (d / "app.js").write_text("console.log('ok')", encoding="utf-8")
@@ -43,7 +43,7 @@ def test_get_root_returns_html(static_app):
         r = client.get("/")
         assert r.status_code == 200
         assert "text/html" in r.headers.get("content-type", "")
-        assert "Bogie Flow" in r.text
+        assert "Bogieflow" in r.text
 
 
 def test_api_health_still_json(static_app):

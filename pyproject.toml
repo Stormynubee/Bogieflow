@@ -8,7 +8,7 @@ version = "1.6.1"
 authors = [
     { name = "Hansraj Tiwari", email = "stormylalala2233@gmail.com" }
 ]
-description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways under Bogie Flow"
+description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways under Bogieflow"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [

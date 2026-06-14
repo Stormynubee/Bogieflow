@@ -90,7 +90,7 @@ const htmlContent = `
   <div class="grid"></div>
   <div class="content">
     <div class="badge">Far Away 2026 — Railways</div>
-    <h1 class="title">Bogie Flow</h1>
+    <h1 class="title">Bogieflow</h1>
     <p class="tagline">Others monitor the rail. We monitor the ballast.</p>
   </div>
   <div class="accent-line"></div>

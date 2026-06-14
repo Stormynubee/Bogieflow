@@ -136,7 +136,7 @@ const htmlContent = `
 <body>
   <div class="brand-panel">
     <div class="badge">Far Away 2026</div>
-    <h1 class="title">Bogie Flow</h1>
+    <h1 class="title">Bogieflow</h1>
     <p class="tagline">Others monitor the rail.<br>We monitor the ballast.</p>
     <p class="desc">Real-time digital twin monitoring and ML-driven predictive maintenance for railway track-beds. Climate wetness and bogie vibration anomaly telemetry fusion.</p>
     <div class="specs">

@@ -1,7 +1,7 @@
-# Bogie Flow
+# Bogieflow
 
 <p align="center">
-  <img src="assets/bogie_flow_banner.png" alt="Bogie Flow Banner" width="100%" />
+  <img src="assets/bogie_flow_banner.png" alt="Bogieflow Banner" width="100%" />
 </p>
 
 <p align="center">
@@ -65,7 +65,7 @@
 
 Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade erosion, and mud pumping under dynamic loads. Left unmonitored, this causes severe track geometry degradation and poses high risks of derailment. Because physical geometry inspection trains are run infrequently, track defects are often detected too late. 
 
-**Bogie Flow** provides a continuous, automated digital-twin evaluation framework that fuses real-time climate hydrology, rolling bogie z-axis acceleration telemetry, and a machine learning classifier to predict, prioritize, and quantify avoided railway failures.
+**Bogieflow** provides a continuous, automated digital-twin evaluation framework that fuses real-time climate hydrology, rolling bogie z-axis acceleration telemetry, and a machine learning classifier to predict, prioritize, and quantify avoided railway failures.
 
 ---
 
@@ -236,7 +236,7 @@ Key variables:
 
 ## One-Click Deployment
 
-Bogie Flow is configured for single-origin serving, compiling the React dashboard into static assets served directly by FastAPI. This allows you to host the entire application (REST API, WebSocket, and UI) on a single port.
+Bogieflow is configured for single-origin serving, compiling the React dashboard into static assets served directly by FastAPI. This allows you to host the entire application (REST API, WebSocket, and UI) on a single port.
 
 ### Docker Deploy
 Build and run the multi-stage Docker container:
@@ -467,7 +467,7 @@ npm run test
 
 ## Judging Criteria Alignment
 
-| Criteria | Evidence / Implementation in Bogie Flow |
+| Criteria | Evidence / Implementation in Bogieflow |
 |:---|:---|
 | **Innovation** | Fuses climate meteorology predictions with high-frequency rolling bogie acceleration data. Employs a Gradient Boosting classification model to determine risk levels dynamically rather than relying on static thresholds. |
 | **Technical Depth** | Implements multi-agent pipelines (Hydrology, Vibration, Planner) on an async FastAPI event loop. Features non-blocking Gemini AI integration, real-time Open-Meteo API caching, and automated ticket explanations. |
