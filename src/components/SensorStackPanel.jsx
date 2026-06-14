@@ -57,10 +57,10 @@ export default function SensorStackPanel({
     </div>
   )
 
-  if (variant === 'strip') {
+  if (variant === 'strip' || variant === 'deck') {
     return (
       <section
-        className={`panel panel-calm sensor-stack-panel sensor-stack-strip ${className}`.trim()}
+        className={`panel panel-calm sensor-stack-panel sensor-stack-${variant} ${className}`.trim()}
         data-testid="field-sensors-panel"
         data-guide="field-sensors"
       >

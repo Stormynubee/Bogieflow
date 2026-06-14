@@ -116,28 +116,51 @@
   min-width: 0;
 }
 
-.overview-sensor-strip {
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-@media (max-width: 1023px) {
-  .overview-sensor-strip {
-    display: none;
-  }
-}
-
 .overview-deck {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.overview-deck-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
 }
 
 @media (min-width: 1100px) {
   .overview-metrics-pane .overview-deck {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: stretch;
   }
+
+  .overview-deck-right {
+    min-height: 100%;
+  }
+
+  .overview-deck-right .sensor-stack-deck {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .overview-deck-right .sensor-stack-grid-deck {
+    flex: 1;
+    align-content: start;
+  }
+
+  .overview-deck .panel-hero-gauge {
+    min-height: 100%;
+  }
+}
+
+.overview-deck .panel-hero-gauge {
+  align-self: start;
 }
 
 /* Alerts full width below split */

@@ -20,7 +20,7 @@ describe('overviewSplitLayout contract', () => {
     expect(OVERVIEW_SPLIT_CLASSES.page).toBe('overview-page-split')
     expect(OVERVIEW_SPLIT_CLASSES.corridorPlacement).toBe('split')
     expect(OVERVIEW_SPLIT_CLASSES.corridorOpsRow).toBe('overview-ops-row')
-    expect(OVERVIEW_SPLIT_CLASSES.fieldSensors).toBe('overview-sensor-strip')
+    expect(OVERVIEW_SPLIT_CLASSES.deckRight).toBe('overview-deck-right')
   })
 
   it('orders header and workspace before alerts in scroll shell', () => {
@@ -113,20 +113,22 @@ describe('overviewSplitLayout contract', () => {
     expect(splitIdx).toBeGreaterThan(indexIdx)
   })
 
-  it('OverviewView includes field sensors panel in corridor and gauge sections', () => {
+  it('OverviewView places field sensors in deck right, not inside risk gauge', () => {
     const src = readFileSync(overviewPath, 'utf8')
     const sensorSrc = readFileSync(sensorPanelPath, 'utf8')
     expect(sensorSrc).toContain('data-testid="field-sensors-panel"')
-    expect(src).toContain('LAYOUT.fieldSensors')
+    expect(src).toContain('LAYOUT.deckRight')
     expect(src).toContain('<SensorStackPanel')
+    expect(src).toContain('variant="deck"')
 
     const corridorStart = src.indexOf('LAYOUT.corridorPane')
     const metricsStart = src.indexOf('LAYOUT.metricsPane')
     const corridorBlock = src.slice(corridorStart, metricsStart)
-    expect(corridorBlock).toContain('variant="strip"')
+    expect(corridorBlock).not.toContain('<SensorStackPanel')
 
     const gaugeIdx = src.indexOf('data-testid="risk-gauge"')
-    const gaugeBlock = src.slice(gaugeIdx, gaugeIdx + 800)
-    expect(gaugeBlock).toContain('variant="compact"')
+    const gaugeBlock = src.slice(gaugeIdx, gaugeIdx + 600)
+    expect(gaugeBlock).not.toContain('<SensorStackPanel')
+    expect(gaugeBlock).toContain('<RiskGaugeDial')
   })
 })

@@ -276,6 +276,16 @@ body {
   padding: 0 18px 16px;
 }
 
+.sensor-stack-grid-deck {
+  grid-template-columns: 1fr;
+  padding: 0 18px 16px;
+  gap: 8px;
+}
+
+.sensor-stack-deck .panel-head-calm {
+  margin-bottom: 12px;
+}
+
 .sensor-stack-card {
   border: 1px solid var(--line);
   background: var(--ink-900);

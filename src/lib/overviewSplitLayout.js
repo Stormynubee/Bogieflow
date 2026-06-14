@@ -8,7 +8,7 @@ export const OVERVIEW_SPLIT_CLASSES = {
   workspace: 'overview-workspace',
   corridorPane: 'overview-corridor-pane',
   corridorOpsRow: 'overview-ops-row',
-  fieldSensors: 'overview-sensor-strip',
+  deckRight: 'overview-deck-right',
   metricsPane: 'overview-metrics-pane',
   alertsStage: 'overview-alerts-stage',
   secondary: 'overview-secondary',

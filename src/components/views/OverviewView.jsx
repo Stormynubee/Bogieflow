@@ -91,14 +91,6 @@ export default function OverviewView({
                 />
                 <ScenarioMenu connected={connected} onInjectToast={onInjectToast} />
               </div>
-              <div className={LAYOUT.fieldSensors}>
-                <SensorStackPanel
-                  segments={segments}
-                  activeRiskIndex={activeRiskIndex}
-                  connected={connected}
-                  variant="strip"
-                />
-              </div>
             </aside>
 
             <div className={LAYOUT.metricsPane}>
@@ -114,12 +106,6 @@ export default function OverviewView({
                     title="Corridor risk gauge"
                     explainer="Highest active track-bed risk across segments S1–S6"
                   />
-                  <SensorStackPanel
-                    segments={segments}
-                    activeRiskIndex={activeRiskIndex}
-                    connected={connected}
-                    variant="compact"
-                  />
                   <div className="hero-gauge-row">
                     <RiskGaugeDial activeRiskIndex={activeRiskIndex} />
                     <MetricBar
@@ -130,7 +116,15 @@ export default function OverviewView({
                     />
                   </div>
                 </section>
-                <ImpactPanel impact={impact} />
+                <div className={LAYOUT.deckRight}>
+                  <ImpactPanel impact={impact} />
+                  <SensorStackPanel
+                    segments={segments}
+                    activeRiskIndex={activeRiskIndex}
+                    connected={connected}
+                    variant="deck"
+                  />
+                </div>
               </div>
             </div>
           </div>
