@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "railtwinx-lite"
+version = "1.0.0"
+authors = [
+    { name = "Hansraj Tiwari", email = "priyanktiwari434@gmail.com" }
+]
+description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.22.0",
+    "websockets>=11.0",
+    "scikit-learn>=1.2.0",
+    "joblib>=1.2.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "httpx>=0.24.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["server*"]

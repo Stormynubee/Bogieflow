@@ -1,0 +1,14 @@
+# Global owners
+* @Stormynubee
+
+# Backend and Agents
+/server/ @Stormynubee
+/tests/ @Stormynubee
+
+# Frontend Dashboard
+/src/ @Stormynubee
+/index.html @Stormynubee
+/vite.config.js @Stormynubee
+
+# CI/CD and Automation workflows
+/.github/ @Stormynubee

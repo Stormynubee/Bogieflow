@@ -1,0 +1,43 @@
+name: Issue Triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Apply labels based on content
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const labels = [];
+
+            if (title.includes('bug') || body.includes('bug') || title.includes('error') || body.includes('error') || title.includes('fail') || body.includes('fail')) {
+              labels.push('bug');
+            }
+            if (title.includes('feature') || body.includes('feature') || title.includes('suggest') || body.includes('suggest') || title.includes('enhance') || body.includes('enhance')) {
+              labels.push('enhancement');
+            }
+            if (title.includes('doc') || body.includes('doc') || title.includes('readme') || body.includes('readme')) {
+              labels.push('documentation');
+            }
+            if (title.includes('question') || body.includes('question') || title.includes('help') || body.includes('help')) {
+              labels.push('question');
+            }
+
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }
