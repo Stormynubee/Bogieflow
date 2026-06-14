@@ -270,7 +270,7 @@ Deployment configurations are included in:
 The Vite React frontend is deployed on Vercel as a static SPA with **client-side demo simulation** when no backend is reachable.
 
 - **Production URL**: [https://bogieflow.vercel.app](https://bogieflow.vercel.app) (alias: [faraway-2026-japan.vercel.app](https://faraway-2026-japan.vercel.app))
-- **Live backend**: [https://bogie-flow.onrender.com](https://bogie-flow.onrender.com) (FastAPI + WebSocket) — see [docs/DEPLOY-LIVE.md](docs/DEPLOY-LIVE.md)
+- **Live backend**: [https://bogie-flow.onrender.com](https://bogie-flow.onrender.com) (FastAPI + WebSocket) — see [docs/DEPLOY-LIVE.md](docs/DEPLOY-LIVE.md). After pushing to `main`, **Manual Deploy** on Render if `/api/model/card` returns 404.
 - **Demo mode**: Without a hosted FastAPI backend, the dashboard runs a local telemetry simulation (header shows **Demo**, field sensors show **Simulated** ingest).
 - **Full stack**: Set `VITE_API_BASE=https://bogie-flow.onrender.com` in [Vercel project settings](https://vercel.com/priyank-tiwaris-projects-91cadde5/faraway-2026-japan/settings/environment-variables), then redeploy.
 

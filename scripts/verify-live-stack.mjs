@@ -149,6 +149,21 @@ async function main() {
     fail('websocket', err.message)
   }
 
+  try {
+    const card = await fetch(`${backend}/api/model/card`, { signal: AbortSignal.timeout(60_000) })
+    if (card.status === 404) {
+      console.log('WARN GET /api/model/card — backend not on v1.7.0 yet; redeploy Render from main')
+    } else if (!card.ok) {
+      fail('model-card', `${card.status} ${card.statusText}`)
+    } else {
+      const body = await card.json()
+      if (!body.confusion_matrix || !body.macro_f1) fail('model-card', 'missing metrics')
+      else pass(`GET /api/model/card (${body.data_source}, honesty=${body.honesty_label})`)
+    }
+  } catch (err) {
+    fail('model-card', err.message)
+  }
+
   if (process.exitCode) process.exit(process.exitCode)
   console.log('\nLive stack verification passed.')
 }

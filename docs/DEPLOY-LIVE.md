@@ -24,6 +24,15 @@ Split architecture: **Vercel** serves the static React SPA; **Render** runs Fast
 
 > **Free tier note:** Render spins down after ~15 minutes idle. The first request after sleep may take 30–60 seconds (cold start).
 
+### Redeploy backend after pushing to `main`
+
+If `GET /api/model/card` returns 404, the Render service is still on an older build:
+
+1. [Render Dashboard](https://dashboard.render.com) → **bogie-flow** → **Manual Deploy** → **Deploy latest commit** (branch `main`, repo `Stormynubee/Bogieflow`).
+2. Optional automation: copy **Settings → Deploy Hook** URL into GitHub repo secret `RENDER_DEPLOY_HOOK` — the `Render Deploy` workflow triggers it after CI passes.
+
+Docker builds run `fetch_datasets` + `train_risk_model` at image build (~5–10 min).
+
 ### Verify backend before wiring Vercel
 
 ```powershell
