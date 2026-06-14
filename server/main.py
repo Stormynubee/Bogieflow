@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
         tick_task.cancel()
 
 
-app = FastAPI(title="RailTwin-X Lite", lifespan=lifespan)
+app = FastAPI(title="Bogie Flow", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -69,7 +69,7 @@ class AnomalyInject(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "railtwin-x-lite"}
+    return {"status": "ok", "service": "bogie-flow"}
 
 
 @app.post("/api/inject/monsoon")
