@@ -37,6 +37,9 @@
   <a href="https://nodejs.org/">
     <img src="https://img.shields.io/badge/Node-20.x-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=node.js&logoColor=ffffff" alt="Node 20" />
   </a>
+  <a href="https://faraway-2026-japan.vercel.app">
+    <img src="https://img.shields.io/badge/Vercel-Deployed-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vercel&logoColor=ffffff" alt="Vercel Deployment" />
+  </a>
   <img src="https://img.shields.io/badge/FAR%20AWAY%202026-Railways-e9482e?style=flat-square&labelColor=0a0a0b" alt="FAR AWAY 2026 Theme" />
 </p>
 
@@ -245,6 +248,12 @@ docker run --rm -p 8000:8000 -e PORT=8000 -e ALLOWED_ORIGINS=https://your-servic
 Deployment configurations are included in:
 - [render.yaml](render.yaml) (Render deployment settings)
 - [railway.toml](railway.toml) (Railway deployment settings)
+- [vercel.json](vercel.json) (Vercel SPA routing settings)
+
+### Vercel Deployment (Frontend UI)
+The Vite React frontend is optimized for deployment on Vercel as a high-performance static site.
+- **Production URL**: [https://faraway-2026-japan.vercel.app](https://faraway-2026-japan.vercel.app)
+- **Environment Variables**: Configure `VITE_API_BASE` and `VITE_WS_BASE` in the Vercel Dashboard to point to your hosted FastAPI backend (e.g. Render/Railway) to enable live telemetry data sync.
 
 ---
 

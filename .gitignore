@@ -19,3 +19,5 @@ temp/
 bogie_flow.egg-info/
 .superpowers/
 
+
+.vercel
