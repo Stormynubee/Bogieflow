@@ -1,65 +1,51 @@
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 /**
- * Shared Three.js pointer controls: drag-orbit, wheel zoom, reset.
+ * Shared Three.js camera controls using standard OrbitControls.
  */
 export function attachOrbitZoom(container, camera, target, opts = {}) {
   const {
     minZoom = 3,
     maxZoom = 14,
-    zoomSpeed = 0.001,
-    rotateSpeed = 0.005,
     onPick,
     pickables = [],
-    initialZoom,
+    initialZoom = 8,
   } = opts
 
-  let targetRotY = 0
-  let targetRotX = 0
-  let targetZoom = initialZoom ?? camera.position.z
-  let dragging = false
-  let lastX = 0
-  let lastY = 0
-  let moved = false
+  // Initialize OrbitControls on the container element
+  const controls = new OrbitControls(camera, container)
+  controls.enableDamping = true
+  controls.dampingFactor = 0.05
+  controls.minDistance = minZoom
+  controls.maxDistance = maxZoom
+  controls.target.copy(target)
+  controls.enablePan = true
+  controls.enableZoom = true
 
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2()
+  let pointerDownTime = 0
+  let pointerDownPos = { x: 0, y: 0 }
 
   const onPointerDown = (e) => {
-    dragging = true
-    moved = false
-    lastX = e.clientX
-    lastY = e.clientY
-  }
-
-  const onPointerUp = () => {
-    dragging = false
-  }
-
-  const onPointerMove = (e) => {
-    if (!dragging) return
-    const dx = e.clientX - lastX
-    const dy = e.clientY - lastY
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true
-    lastX = e.clientX
-    lastY = e.clientY
-    targetRotY += dx * rotateSpeed
-    targetRotX = Math.max(-0.4, Math.min(0.4, targetRotX + dy * rotateSpeed))
-  }
-
-  const onWheel = (e) => {
-    e.preventDefault()
-    targetZoom = Math.min(
-      maxZoom,
-      Math.max(minZoom, targetZoom + e.deltaY * zoomSpeed * 10),
-    )
+    pointerDownTime = Date.now()
+    pointerDownPos = { x: e.clientX, y: e.clientY }
   }
 
   const onClick = (e) => {
-    if (moved || !onPick || !pickables.length) return
+    const clickDuration = Date.now() - pointerDownTime
+    const dx = e.clientX - pointerDownPos.x
+    const dy = e.clientY - pointerDownPos.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    // Only register a pick click if the pointer didn't drag/move significantly
+    if (clickDuration > 250 || distance > 5 || !onPick || !pickables.length) return
+
     const rect = container.getBoundingClientRect()
     pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
     pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+    
     raycaster.setFromCamera(pointer, camera)
     const hits = raycaster.intersectObjects(pickables, false)
     if (hits.length > 0) {
@@ -69,36 +55,35 @@ export function attachOrbitZoom(container, camera, target, opts = {}) {
   }
 
   container.addEventListener('pointerdown', onPointerDown)
-  container.addEventListener('pointerup', onPointerUp)
-  container.addEventListener('pointerleave', onPointerUp)
-  container.addEventListener('pointermove', onPointerMove)
-  container.addEventListener('wheel', onWheel, { passive: false })
   container.addEventListener('click', onClick)
 
-  const update = (group) => {
-    group.rotation.y += (targetRotY - group.rotation.y) * 0.08
-    group.rotation.x += (targetRotX - group.rotation.x) * 0.08
-    camera.position.z += (targetZoom - camera.position.z) * 0.05
-    camera.lookAt(target.x, target.y, target.z)
+  const update = () => {
+    controls.update()
   }
 
   const setZoom = (delta) => {
-    targetZoom = Math.min(maxZoom, Math.max(minZoom, targetZoom + delta))
+    // Zoom in/out factor
+    const zoomFactor = delta > 0 ? 1.1 : 0.9
+    const offset = camera.position.clone().sub(controls.target)
+    offset.multiplyScalar(zoomFactor)
+    
+    const newDist = offset.length()
+    if (newDist >= minZoom && newDist <= maxZoom) {
+      camera.position.copy(controls.target).add(offset)
+    }
   }
 
   const resetView = () => {
-    targetRotY = 0
-    targetRotX = 0
-    targetZoom = initialZoom ?? camera.position.z
+    controls.reset()
+    camera.position.set(0, 3, initialZoom)
+    controls.target.copy(target)
+    controls.update()
   }
 
   const dispose = () => {
     container.removeEventListener('pointerdown', onPointerDown)
-    container.removeEventListener('pointerup', onPointerUp)
-    container.removeEventListener('pointerleave', onPointerUp)
-    container.removeEventListener('pointermove', onPointerMove)
-    container.removeEventListener('wheel', onWheel)
     container.removeEventListener('click', onClick)
+    controls.dispose()
   }
 
   return { update, setZoom, resetView, dispose }

@@ -2,21 +2,21 @@
   --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --bg: #121317;
-  --surface: #121317;
-  --surface-container: #1e1f23;
-  --surface-container-low: #1a1b1f;
-  --surface-container-high: #292a2e;
-  --surface-dim: #121317;
-  --surface-variant: #343539;
+  --bg: #090a0c;
+  --surface: #0f1013;
+  --surface-container: #131518;
+  --surface-container-low: #0f1013;
+  --surface-container-high: #1a1c21;
+  --surface-dim: #090a0c;
+  --surface-variant: #282a30;
 
-  --primary: #ffb4aa;
-  --primary-container: #ff5545;
-  --on-primary: #690003;
-  --on-primary-container: #5c0002;
-  --on-surface: #e3e2e7;
-  --on-surface-variant: #e7bdb7;
-  --outline-variant: #5d3f3b;
+  --primary: #ff5545;
+  --primary-container: #cc3c2e;
+  --on-primary: #ffffff;
+  --on-primary-container: #ffffff;
+  --on-surface: #e2e4e9;
+  --on-surface-variant: #8a909f;
+  --outline-variant: #1e2025;
 
   --color-healthy: #22c55e;
   --color-warning: #eab308;
@@ -24,9 +24,169 @@
   --error-container: #93000a;
   --on-error-container: #ffdad6;
 
-  --radius: 2px;
+  --radius: 4px;
   --gutter: 16px;
 }
+
+/* Boot Loader Splash Screen */
+.boot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #07080a;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+  overflow: hidden;
+}
+
+.boot-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 85, 69, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 85, 69, 0.02) 1px, transparent 1px);
+  pointer-events: none;
+}
+
+.boot-card {
+  width: 100%;
+  max-width: 600px;
+  background: #0f1013;
+  border: 1px solid var(--outline-variant);
+  border-radius: 4px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  animation: boot-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes boot-enter {
+  from { opacity: 0; transform: scale(0.97) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.boot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--outline-variant);
+  padding-bottom: 12px;
+}
+
+.boot-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+}
+
+.boot-ver {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+.boot-terminal {
+  height: 200px;
+  background: #07080a;
+  border: 1px solid var(--outline-variant);
+  border-radius: 2px;
+  padding: 16px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--on-surface);
+}
+
+.boot-log-item {
+  margin-bottom: 6px;
+  list-style: none;
+}
+
+.boot-log-list {
+  padding: 0;
+  margin: 0;
+}
+
+.boot-prefix {
+  color: var(--primary);
+  margin-right: 8px;
+}
+
+.boot-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.boot-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--on-surface-variant);
+}
+
+.boot-progress-track {
+  height: 4px;
+  background: var(--surface-variant);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.boot-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.1s ease-out;
+}
+
+.boot-action-area {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-engage {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+  cursor: not-allowed;
+  transition: all 0.3s;
+}
+
+.btn-engage.engage-ready {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #07080a;
+  cursor: pointer;
+}
+
+.btn-engage.engage-ready:hover {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: 0 0 16px rgba(255, 85, 69, 0.2);
+}
+
 
 * {
   box-sizing: border-box;

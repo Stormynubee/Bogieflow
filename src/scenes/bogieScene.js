@@ -11,49 +11,94 @@ export function createBogieScene(container, { focusSegmentRef }) {
   const height = container.clientHeight
 
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+  const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000)
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   container.appendChild(renderer.domElement)
 
   const group = new THREE.Group()
-  const axleGeom = new THREE.CylinderGeometry(0.2, 0.2, 4, 32)
-  const axleMat = new THREE.MeshPhongMaterial({ color: 0x666670 })
+
+  // Axle (textured heavy metal cylinder)
+  const axleGeom = new THREE.CylinderGeometry(0.18, 0.18, 3.8, 32)
+  const axleMat = new THREE.MeshPhongMaterial({
+    color: 0x50525a,
+    specular: 0x222222,
+    shininess: 30,
+  })
   const axle = new THREE.Mesh(axleGeom, axleMat)
   axle.rotation.z = Math.PI / 2
   group.add(axle)
 
-  const wheelGeom = new THREE.TorusGeometry(1, 0.2, 16, 100)
-  const wheelMat = new THREE.MeshPhongMaterial({
+  // Wheel setup (composed wheels with detailed tire + hub cap + bolts)
+  const wheelGroup1 = new THREE.Group()
+  const wheelGroup2 = new THREE.Group()
+
+  // Tire (thick torus geometry, dark iron color)
+  const tireGeom = new THREE.TorusGeometry(0.9, 0.22, 16, 64)
+  const tireMat = new THREE.MeshPhongMaterial({
     color: 0xff3b30,
-    emissive: 0x551111,
-    emissiveIntensity: 0.4,
+    emissive: 0x441111,
+    emissiveIntensity: 0.3,
+    specular: 0xffffff,
+    shininess: 90,
   })
-  const wheel1 = new THREE.Mesh(wheelGeom, wheelMat)
-  wheel1.position.x = -1.5
-  const wheel2 = new THREE.Mesh(wheelGeom, wheelMat)
-  wheel2.position.x = 1.5
-  group.add(wheel1, wheel2)
+  const tire1 = new THREE.Mesh(tireGeom, tireMat)
+  const tire2 = new THREE.Mesh(tireGeom, tireMat)
+  
+  // Hub caps (flat cylinders inside the tires)
+  const hubGeom = new THREE.CylinderGeometry(0.6, 0.6, 0.15, 32)
+  const hubMat = new THREE.MeshPhongMaterial({
+    color: 0x3a3c42,
+    specular: 0x888888,
+    shininess: 60,
+  })
+  const hub1 = new THREE.Mesh(hubGeom, hubMat)
+  hub1.rotation.x = Math.PI / 2
+  const hub2 = new THREE.Mesh(hubGeom, hubMat)
+  hub2.rotation.x = Math.PI / 2
+
+  wheelGroup1.add(tire1, hub1)
+  wheelGroup2.add(tire2, hub2)
+
+  // Position wheels at axle ends
+  wheelGroup1.position.x = -1.6
+  wheelGroup2.position.x = 1.6
+  
+  group.add(wheelGroup1, wheelGroup2)
+
+  // Suspension springs / dampers on top of axle (visual depth)
+  const springGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.6, 16)
+  const springMat = new THREE.MeshPhongMaterial({ color: 0x2b2d32, shininess: 15 })
+  const spring1 = new THREE.Mesh(springGeom, springMat)
+  spring1.position.set(-1.0, 0.4, 0)
+  const spring2 = new THREE.Mesh(springGeom, springMat)
+  spring2.position.set(1.0, 0.4, 0)
+  group.add(spring1, spring2)
 
   scene.add(group)
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x222233, 0.9))
-  const rim = new THREE.DirectionalLight(0xffb4aa, 0.6)
-  rim.position.set(-3, 5, 2)
+  // Balanced lighting setup
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x111122, 0.9))
+  
+  const rim = new THREE.DirectionalLight(0xffb4aa, 0.8)
+  rim.position.set(-4, 6, -2)
   scene.add(rim)
-  const key = new THREE.DirectionalLight(0xffffff, 1.0)
-  key.position.set(0, 10, 10)
+  
+  const key = new THREE.DirectionalLight(0xffffff, 1.2)
+  key.position.set(2, 8, 8)
   scene.add(key)
-  scene.add(new THREE.AmbientLight(0x404050, 0.4))
+  
+  scene.add(new THREE.AmbientLight(0x303040, 0.4))
 
-  let targetZoom = 5
-  camera.position.z = targetZoom
+  camera.position.set(0, 2, 6.5)
+  camera.lookAt(0, 0, 0)
 
-  const controls = attachOrbitZoom(container, camera, new THREE.Vector3(0, 0, 0), {
+  // Attach OrbitControls wrapper
+  const controls = attachOrbitZoom(container, camera, new THREE.Vector3(0, 0.1, 0), {
     minZoom: 3,
     maxZoom: 10,
-    initialZoom: 5,
+    initialZoom: 6.5,
   })
 
   let frameId = 0
@@ -63,18 +108,32 @@ export function createBogieScene(container, { focusSegmentRef }) {
     if (disposed) return
     frameId = requestAnimationFrame(animate)
 
-    group.rotation.y += 0.004
-    group.rotation.x += 0.002
-    controls.update(group)
+    // Update OrbitControls
+    controls.update()
 
+    // Sync wheel color & spin speed dynamically to active segment risk/telemetry
     const focus = focusSegmentRef?.current
+    let risk = 0.1
+    let speed = 0.02
+
     if (focus) {
-      const risk = focus.risk_index ?? 0
+      risk = focus.risk_index ?? 0
       const color = hexToColor(focus.color)
-      wheelMat.color.setHex(color)
-      wheelMat.emissive.setHex(color >> 3)
-      wheelMat.emissiveIntensity = 0.3 + risk * 0.5
+      tireMat.color.setHex(color)
+      tireMat.emissive.setHex(color >> 3)
+      tireMat.emissiveIntensity = 0.2 + risk * 0.6
+      
+      // Speed increases with vibration z-score
+      const z = focus.vib_z ?? 0
+      speed = 0.01 + Math.min(0.2, (z + 1) * 0.015)
     }
+
+    // Auto rotate the wheel assembly (simulating train movement)
+    wheelGroup1.rotation.y += speed
+    wheelGroup2.rotation.y += speed
+    
+    // Subtle idle spin of the whole group for visual dynamics
+    group.rotation.y += 0.001
 
     renderer.render(scene, camera)
   }

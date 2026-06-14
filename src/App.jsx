@@ -7,6 +7,7 @@ import OverviewView from './components/views/OverviewView'
 import AnalysisView from './components/views/AnalysisView'
 import MaintenanceView from './components/views/MaintenanceView'
 import ClimateView from './components/views/ClimateView'
+import BootLoader from './components/BootLoader'
 import { highestRiskSegment } from './lib/segmentUtils.js'
 
 function formatUptime(seconds) {
@@ -29,6 +30,7 @@ export default function App() {
     segmentHistory,
   } = useWebSocket()
 
+  const [booted, setBooted] = useState(false)
   const [view, setView] = useState('overview')
   const [selectedSegmentId, setSelectedSegmentId] = useState('S3')
   const [stationMapOpen, setStationMapOpen] = useState(false)
@@ -76,6 +78,10 @@ export default function App() {
     train?.segment_id ?? highestRiskSegment(segments)?.id ?? '—'
   const uptimeLabel = connected ? formatUptime(uptimeSec) : '—'
   const agentLabel = connected ? 'NOMINAL' : 'RECONNECTING'
+
+  if (!booted) {
+    return <BootLoader onComplete={() => setBooted(true)} />
+  }
 
   return (
     <div className="shell">
