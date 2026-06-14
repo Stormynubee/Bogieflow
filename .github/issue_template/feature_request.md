@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea or enhancement for RailTwin-X Lite
+about: Suggest an idea or enhancement for Bogie Flow
 title: '[FEATURE] '
 labels: enhancement
 assignees: Stormynubee
