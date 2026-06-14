@@ -1,7 +1,7 @@
 {
-  "name": "@stormynubee/railtwin-x-dashboard",
+  "name": "@stormynubee/bogie-flow-dashboard",
   "version": "1.0.0",
-  "description": "Bogie Flow — climate-aware track-bed monitoring dashboard (Vite + React + Three.js)",
+  "description": "Vite-React dashboard UI for Bogie Flow track-bed monitoring system",
   "type": "module",
   "main": "./dist/index.html",
   "files": [
@@ -13,7 +13,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -22,7 +23,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
   },
   "repository": {
     "type": "git",

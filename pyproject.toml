@@ -3,12 +3,12 @@ requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "railtwinx-lite"
+name = "bogie-flow"
 version = "1.0.0"
 authors = [
     { name = "Hansraj Tiwari", email = "stormylalala2233@gmail.com" }
 ]
-description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways"
+description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways under Bogie Flow"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
