@@ -30,7 +30,7 @@ export default function ClimateView({ segments }) {
   })
 
   return (
-    <div className="climate-layout" data-guide="climate-main">
+    <div className="climate-layout" data-guide="climate-main" data-testid="view-climate">
       <header className="climate-page-header">
         <p className="analysis-breadcrumb">CORRIDOR &gt; ENVIRONMENTAL STRESS</p>
         <h1 className="climate-page-title">Climate Impact Strategy</h1>
@@ -80,7 +80,7 @@ export default function ClimateView({ segments }) {
           <div className="panel-head">
             <h2>
               <span className="material-symbols-outlined panel-icon">schedule</span>
-              ASSET LONGEVITY
+              ASSET LONGEVITY <span className="climate-estimated">(estimated)</span>
             </h2>
           </div>
           <ul className="longevity-list">
@@ -88,7 +88,7 @@ export default function ClimateView({ segments }) {
               <li key={a.name} className="longevity-item">
                 <div className="longevity-head">
                   <span>{a.name}</span>
-                  <span className="mono">Est. {a.months} Mos</span>
+                  <span className="mono">Est. {a.months} Mos (estimated wear)</span>
                 </div>
                 <div className="longevity-track">
                   <div
@@ -109,16 +109,16 @@ export default function ClimateView({ segments }) {
         <div className="panel-head">
           <h2>
             <span className="material-symbols-outlined panel-icon">vibration</span>
-            VIBRATION SHIFT VS BASELINE
+            VIBRATION SHIFT VS BASELINE <span className="climate-estimated">(estimated Hz)</span>
           </h2>
         </div>
         <table className="maintenance-table">
           <thead>
             <tr>
               <th>ASSET_ID</th>
-              <th>BASELINE (Hz)</th>
-              <th>CURRENT (Hz)</th>
-              <th>SHIFT Δ</th>
+              <th>BASELINE (Hz, est.)</th>
+              <th>CURRENT (Hz, est.)</th>
+              <th>SHIFT Δ (est.)</th>
               <th>STATUS</th>
             </tr>
           </thead>

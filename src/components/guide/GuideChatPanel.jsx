@@ -38,6 +38,7 @@ export default function GuideChatPanel({
           className="guide-panel"
           role="dialog"
           aria-label={UI.guide.title}
+          data-testid="guide-panel"
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -140,7 +141,7 @@ export default function GuideChatPanel({
                   disabled={thinking}
                   aria-label="Message to guide"
                 />
-                <button type="submit" className="guide-send" disabled={thinking || !input.trim()} aria-label="Send">
+                <button type="submit" className="guide-send" data-testid="guide-send" disabled={thinking || !input.trim()} aria-label="Send">
                   <span className="material-symbols-outlined">send</span>
                 </button>
               </form>

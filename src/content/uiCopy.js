@@ -13,11 +13,11 @@ export const UI = {
     scan: 'Run corridor scan',
     scanHint: 'Triggers a monsoon stress test on segment S4',
     linkActive: 'Live data connected',
-    linkReconnecting: 'Reconnecting to server…',
+    linkReconnecting: (n) => (n > 0 ? `Reconnecting (${n})…` : 'Reconnecting to server…'),
   },
   topbar: {
     connected: 'Connected',
-    reconnecting: 'Reconnecting',
+    reconnecting: (n) => (n > 0 ? `Reconnecting (${n})…` : 'Reconnecting'),
     tickets: (n) => `${n} open ticket${n !== 1 ? 's' : ''}`,
   },
   footer: {
@@ -66,10 +66,10 @@ export const UI = {
   metrics: {
     peak: 'Peak vibration',
     peakTech: 'Peak amplitude (mm)',
-    fatigue: 'Fatigue load',
-    fatigueTech: 'Fatigue index (%)',
-    bearing: 'Bearing heat',
-    bearingTech: 'Bearing temperature (°C)',
+    fatigue: 'Fatigue load (est.)',
+    fatigueTech: 'Fatigue index (%, estimated)',
+    bearing: 'Bearing heat (est.)',
+    bearingTech: 'Bearing temperature (°C, estimated)',
   },
   climate: {
     moistureTitle: 'Soil moisture (average)',

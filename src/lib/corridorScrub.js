@@ -27,12 +27,7 @@ export function xToProgress(clientX, rectLeft, rectWidth, count) {
   return t * (count - 1)
 }
 
-/** @deprecated use wheelDeltaToProgress */
-export function wheelDeltaToIndex(current, deltaY, count) {
-  const step = deltaY > 0 ? 1 : deltaY < 0 ? -1 : 0
-  return clampFrameIndex(current + step, count)
-}
-
+/** Wheel delta scaled to fractional progress along the corridor. */
 export function wheelDeltaToProgress(deltaY, sensitivity = 0.035) {
   if (!deltaY) return 0
   return deltaY * sensitivity

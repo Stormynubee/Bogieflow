@@ -33,6 +33,7 @@ export default function SegmentHudGrid({
         <CellTag
           key={seg.id}
           type="button"
+          data-testid={`segment-card-${seg.id}`}
           className={`hud-cell ${severityClass(seg)}`}
           onClick={() => onSegmentClick?.(seg.id)}
           {...(animate && isStrip

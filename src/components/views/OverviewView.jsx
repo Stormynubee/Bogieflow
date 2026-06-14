@@ -22,7 +22,7 @@ export default function OverviewView({
   const overviewShellRef = useRef(null)
 
   return (
-    <div className="overview-page" ref={overviewShellRef}>
+    <div className="overview-page" ref={overviewShellRef} data-testid="view-overview">
       <div className="overview-grid">
         <CorridorCommandDock
           segments={segments}

@@ -16,17 +16,18 @@ export default function StationMapModal({ open, onClose, segments, train }) {
   if (!open) return null
 
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="modal-backdrop" role="presentation" onClick={onClose} data-testid="station-map-backdrop">
       <div
         ref={dialogRef}
         className="modal-panel station-map-modal"
         role="dialog"
+        data-testid="station-map-modal"
         aria-labelledby="station-map-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <h2 id="station-map-title">Station Map — Corridor S1–S6</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
+          <button type="button" className="modal-close" onClick={onClose} aria-label="Close" data-testid="station-map-close">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>

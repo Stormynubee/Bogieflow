@@ -116,7 +116,7 @@ export default function AnalysisView({
           : 'AUTHORIZE DEPLOYMENT'
 
   return (
-    <div className="analysis-layout" data-guide="analysis-main">
+    <div className="analysis-layout" data-guide="analysis-main" data-testid="view-analysis">
       <div className="analysis-main">
         <div className="analysis-header">
           <div>
@@ -131,6 +131,7 @@ export default function AnalysisView({
           </div>
           <button
             type="button"
+            data-testid="inject-anomaly-authorize"
             className={`btn-authorize ${deployState === 'done' ? 'btn-authorize-done' : ''}`}
             onClick={handleAuthorize}
             disabled={deployState === 'loading' || deployState === 'done'}
@@ -147,7 +148,7 @@ export default function AnalysisView({
             az={focus.az ?? 0}
             riskIndex={focus.risk_index ?? 0}
           />
-          <div className="gauge-row">
+          <div className="gauge-row" data-testid="risk-gauge">
             <MetricBar
               segments={segments}
               activeRiskIndex={activeRiskIndex}

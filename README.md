@@ -7,8 +7,8 @@
 Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github-actions&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
-[![Pytest](https://img.shields.io/badge/Pytest-9%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
-[![Vitest](https://img.shields.io/badge/Vitest-14%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
+[![Pytest](https://img.shields.io/badge/Pytest-23%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
+[![Vitest](https://img.shields.io/badge/Vitest-47%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
 [![Release](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/releases)
 [![License](https://img.shields.io/badge/License-MIT-ff5545?style=flat-square&labelColor=0c0d12&logo=open-source-initiative&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11-ff5545?style=flat-square&labelColor=0c0d12&logo=python&logoColor=ffffff)](https://www.python.org/)
@@ -26,7 +26,7 @@ The following diagram illustrates the flow of simulated telemetry data through t
 flowchart TD
     %% Subgraph 1: Control & Ingestion
     subgraph INGEST [Control & Ingest]
-        Ctrl[Control Panel] -->|POST /inject| REST[REST Inject API]
+        Scan[Sidebar scan / Ops strip] -->|POST /inject| REST[REST Inject API]
     end
 
     %% Subgraph 2: Processing Pipeline
@@ -44,9 +44,9 @@ flowchart TD
     %% Subgraph 3: Real-Time Display
     subgraph DISPLAY [Real-Time Display]
         WS[WebSocket Hub]
-        WS -->|live track state| Map[TrackMap SVG]
-        WS -->|system risk index| Gauge[RiskGauge CSS]
-        WS -->|work tickets| Queue[Maintenance Queue]
+        WS -->|live track state| Scrub[Corridor scrub viewer]
+        WS -->|system risk index| Gauge[Corridor command dock]
+        WS -->|work tickets| Maint[Maintenance view]
     end
 
     %% Cross-subgraph connections
@@ -60,7 +60,7 @@ flowchart TD
     style PIPELINE fill:#151720,stroke:#ff5545,stroke-width:2px,color:#ffffff
     style DISPLAY fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
 
-    style Ctrl fill:#232630,stroke:#9098a8,color:#ffffff
+    style Scan fill:#232630,stroke:#9098a8,color:#ffffff
     style REST fill:#232630,stroke:#9098a8,color:#ffffff
     style Train fill:#232630,stroke:#9098a8,color:#ffffff
     style Segments fill:#232630,stroke:#9098a8,color:#ffffff
@@ -69,9 +69,9 @@ flowchart TD
     style ML fill:#232630,stroke:#9098a8,color:#ffffff
     style Plan fill:#232630,stroke:#9098a8,color:#ffffff
     style WS fill:#ff5545,stroke:#ffffff,color:#ffffff
-    style Map fill:#232630,stroke:#9098a8,color:#ffffff
+    style Scrub fill:#232630,stroke:#9098a8,color:#ffffff
     style Gauge fill:#232630,stroke:#9098a8,color:#ffffff
-    style Queue fill:#232630,stroke:#9098a8,color:#ffffff
+    style Maint fill:#232630,stroke:#9098a8,color:#ffffff
 ```
 
 ---
@@ -86,13 +86,17 @@ The application is structured into discrete layers of backend agents, machine le
 - **Planner Agent**: Resolves telemetry reports from Hydrology and Vibration agents. Feeds variables to the ML risk classifier to issue maintenance work tickets.
 
 ### Machine Learning Engine
-- **Gradient Boosting Classifier**: Trained using scikit-learn on physics-derived synthetic data (500 samples). Classifies track risk levels into three tiers (OK, P2, P1) based on effective stiffness and vibration anomalies.
+- **Gradient Boosting Classifier** (`scikit-learn==1.8.0`): Trained on physics-derived synthetic data (503 samples). Features are `rainfall`, `soil_moisture`, and `vib_z` as a consistent `numpy` matrix at train and predict time. Classifies track risk into OK, P2, and P1.
+- **Retrain after dependency changes**: `python -m server.agents.train_risk_model` (writes `server/agents/risk_model.joblib`).
 
 ### Frontend Dashboard
-- **Interactive SVG Track Map**: Animates train movement along the S1-S6 corridor, dynamically color-coding segment risks in real time.
-- **Conic Risk Gauge**: Features an animated needle with elastic overshoot transitions representing the maximum active track-bed risk index.
-- **Control Panel**: Allows on-demand injection of severe monsoons or mechanical anomalies on target segments.
-- **Maintenance Queue**: Displays prioritized tickets and logs of the decision path.
+- **Corridor scrub viewer**: 64-frame scroll-driven track visualization with segment HUD (S1–S6).
+- **Corridor command dock**: Risk gauge, live metrics, and segment strip on Overview / Analysis.
+- **Overview ops strip**: One-click monsoon / anomaly inject buttons wired to the REST API.
+- **Maintenance view**: Prioritized ticket table and agent decision logs.
+- **Climate view**: Environmental stress heatmap, estimated asset longevity, and vibration shift table.
+- **Guide coach**: FAB-guided tour and optional Gemini-backed chat (`/api/guide/chat`).
+- **Station map modal**: Corridor station reference overlay.
 
 ---
 
@@ -131,19 +135,72 @@ Faraway2026Japan/
 │   └── models.py
 ├── src/
 │   ├── components/
-│   │   ├── ControlPanel.jsx
-│   │   ├── MaintenanceQueue.jsx
-│   │   ├── RiskGauge.jsx
-│   │   └── TrackMap.jsx
+│   │   ├── AnomalyStream.jsx
+│   │   ├── BogieAnalysisPanel.jsx
+│   │   ├── BootContinueButton.jsx
+│   │   ├── BootFlowMark.jsx
+│   │   ├── BootLoader.jsx
+│   │   ├── BootTerminal.jsx
+│   │   ├── charts/
+│   │   │   ├── MoistureSparkline.jsx
+│   │   │   └── RainfallBars.jsx
+│   │   ├── ClimatePanel.jsx
+│   │   ├── CorridorBriefing.jsx
+│   │   ├── CorridorCommandDock.jsx
+│   │   ├── CorridorScrubRail.jsx
+│   │   ├── CorridorScrubViewer.jsx
+│   │   ├── guide/
+│   │   │   ├── GuideChatPanel.jsx
+│   │   │   ├── GuideCoach.jsx
+│   │   │   └── GuideSpotlight.jsx
+│   │   ├── LogEntry.jsx
+│   │   ├── MetricBar.jsx
+│   │   ├── OverviewOpsStrip.jsx
+│   │   ├── SegmentHudGrid.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── StationMapModal.jsx
+│   │   ├── TopBar.jsx
+│   │   ├── TrackMap.jsx
+│   │   └── views/
+│   │       ├── AnalysisView.jsx
+│   │       ├── ClimateView.jsx
+│   │       ├── MaintenanceView.jsx
+│   │       └── OverviewView.jsx
+│   ├── content/
+│   │   ├── guideKnowledge.js
+│   │   ├── guideSteps.js
+│   │   └── uiCopy.js
+│   ├── data/
+│   │   └── corridorFrames.js
 │   ├── hooks/
+│   │   ├── useGuideCoach.js
 │   │   └── useWebSocket.js
+│   ├── lib/
+│   │   ├── api.js
+│   │   ├── chartData.js
+│   │   ├── config.js
+│   │   ├── corridorScrub.js
+│   │   ├── guideChat.js
+│   │   ├── scrubRail.js
+│   │   ├── segmentUtils.js
+│   │   ├── wsReconnect.js
+│   │   └── wsReducer.js
 │   ├── App.jsx
 │   └── index.css
 ├── tests/
+│   ├── conftest.py
 │   ├── test_api_inject.py
+│   ├── test_cors_health.py
+│   ├── test_guide.py
 │   ├── test_hydrology.py
+│   ├── test_inject_anomaly.py
+│   ├── test_model_cached.py
 │   ├── test_planner.py
+│   ├── test_readme_badges.py
+│   ├── test_recovery.py
 │   ├── test_risk_model.py
+│   ├── test_sim_guard.py
+│   ├── test_ticket_dedup.py
 │   └── test_vibration.py
 ├── package.json
 ├── pyproject.toml
@@ -168,8 +225,9 @@ The WebSocket server broadcasts updates to frontend clients. Messages conform to
 | Type | Description | Key Fields |
 | :--- | :--- | :--- |
 | `state_snapshot` | Current state of all segments, tickets, and logs | `segments`, `train`, `tickets`, `logs` |
-| `segment_update` | Telemetry details for a specific track segment | `id`, `risk_index`, `k_effective`, `color` |
-| `telemetry` | Rolling bogie z-acceleration values | `segment`, `az`, `z_score`, `timestamp` |
+| `segment_update` | Telemetry details for a specific track segment | `id`, `risk_index`, `k_effective`, `state`, `color`, `rainfall`, `soil_moisture`, `vib_z`, `az` |
+| `train_update` | Train position along current segment | `segment_id`, `progress` |
+| `telemetry` | Rolling bogie z-acceleration values (feeds live peak / z-score metrics) | `segment`, `az`, `z_score`, `timestamp` |
 | `ticket` | Prioritized maintenance task | `id`, `priority`, `segment`, `reason`, `model_label` |
 | `agent_log` | Diagnostic log output from rule-based agents | `agent`, `message`, `timestamp` |
 
@@ -186,10 +244,11 @@ The WebSocket server broadcasts updates to frontend clients. Messages conform to
    ```bash
    pip install -r requirements.txt
    ```
-2. Train the Gradient Boosting risk classifier model:
+2. Train the Gradient Boosting risk classifier model (requires `scikit-learn==1.8.0` as pinned in `requirements.txt`):
    ```bash
    python -m server.agents.train_risk_model
    ```
+   Re-run this command after upgrading scikit-learn or changing feature engineering in `risk_model.py`.
 3. Start the FastAPI development server:
    ```bash
    python -m uvicorn server.main:app --reload --port 8000
@@ -207,9 +266,11 @@ The WebSocket server broadcasts updates to frontend clients. Messages conform to
 3. Open `http://localhost:5173` in your web browser.
 
 ### Verification
-Run the backend pytest suite to verify agent logic:
+Run the backend pytest suite and frontend vitest suite:
 ```bash
-python -m pytest tests/ -v
+python -m pytest tests/ -q
+npm run test
+npm run build
 ```
 
 ---

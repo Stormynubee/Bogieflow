@@ -27,6 +27,7 @@ export default function GuideCoach({ view, setView, onOpenStationMap }) {
       <motion.button
         type="button"
         className="guide-fab"
+        data-testid="guide-fab"
         aria-label={UI.guide.fabLabel}
         aria-expanded={coach.open}
         variants={fabVariants}

@@ -4,7 +4,6 @@ import {
   xToProgress,
   clampFrameIndex,
   clampProgress,
-  wheelDeltaToIndex,
   scrollTravel,
   wheelDeltaToProgress,
   progressToBlendParts,
@@ -35,11 +34,6 @@ describe('corridorScrub', () => {
 
   it('xToProgress returns fractional values', () => {
     expect(xToProgress(400, 0, 800, count)).toBeCloseTo((count - 1) / 2, 5)
-  })
-
-  it('clamps wheel overflow', () => {
-    expect(wheelDeltaToIndex(count - 2, 1, count)).toBe(count - 1)
-    expect(wheelDeltaToIndex(0, -1, count)).toBe(0)
   })
 
   it('wheel delta scales smoothly', () => {

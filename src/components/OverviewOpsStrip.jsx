@@ -43,6 +43,7 @@ export default function OverviewOpsStrip({ train, connected, onNavigate }) {
         <div className="overview-inject-row">
           <button
             type="button"
+            data-testid="inject-monsoon-s4"
             className="overview-inject-btn"
             disabled={!connected || busy === 'monsoon'}
             title={UI.simulation.monsoonHint}
@@ -52,6 +53,7 @@ export default function OverviewOpsStrip({ train, connected, onNavigate }) {
           </button>
           <button
             type="button"
+            data-testid="inject-anomaly-s4"
             className="overview-inject-btn overview-inject-secondary"
             disabled={!connected || busy === 'anomaly'}
             title={UI.simulation.anomalyHint}
@@ -62,6 +64,7 @@ export default function OverviewOpsStrip({ train, connected, onNavigate }) {
           {trainSeg && (
             <button
               type="button"
+              data-testid="inject-monsoon-train"
               className="overview-inject-btn overview-inject-secondary"
               disabled={!connected || busy === 'train'}
               title={UI.simulation.stressHint}

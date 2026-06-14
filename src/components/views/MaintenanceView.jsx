@@ -2,7 +2,7 @@ import LogEntry from '../LogEntry'
 
 export default function MaintenanceView({ tickets, logs }) {
   return (
-    <div className="maintenance-layout" data-guide="maintenance-main">
+    <div className="maintenance-layout" data-guide="maintenance-main" data-testid="view-maintenance">
       <section className="panel panel-editorial maintenance-tickets">
         <div className="panel-head">
           <h2>
@@ -31,7 +31,7 @@ export default function MaintenanceView({ tickets, logs }) {
                 </tr>
               )}
               {tickets.map((t) => (
-                <tr key={t.id}>
+                <tr key={t.id} data-testid={`ticket-row-${t.id}`}>
                   <td className="mono">{t.id?.slice(0, 8)}</td>
                   <td>{t.segment}</td>
                   <td>

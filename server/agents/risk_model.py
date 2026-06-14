@@ -8,6 +8,10 @@ MODEL_PATH = Path(__file__).resolve().parent / "risk_model.joblib"
 _model: GradientBoostingClassifier | None = None
 
 
+def _features_array(rainfall: float, soil_moisture: float, vib_z: float) -> np.ndarray:
+    return np.array([[rainfall, soil_moisture, vib_z]], dtype=np.float64)
+
+
 def train_and_save(path: Path | None = None) -> GradientBoostingClassifier:
     target = path or MODEL_PATH
     np.random.seed(42)
@@ -27,7 +31,13 @@ def train_and_save(path: Path | None = None) -> GradientBoostingClassifier:
             labels.append("P2")
         else:
             labels.append("OK")
-    X = np.column_stack([rainfall, soil_moisture, vib_z])
+    X = np.column_stack(
+        (
+            np.asarray(rainfall, dtype=np.float64),
+            np.asarray(soil_moisture, dtype=np.float64),
+            np.asarray(vib_z, dtype=np.float64),
+        )
+    )
     model = GradientBoostingClassifier(n_estimators=50, random_state=42)
     model.fit(X, labels)
     joblib.dump(model, target)
@@ -47,5 +57,6 @@ def load_risk_model() -> GradientBoostingClassifier:
 
 def predict_priority(rainfall: float, soil_moisture: float, z_score: float) -> str:
     model = load_risk_model()
-    label = model.predict([[rainfall, soil_moisture, z_score]])[0]
+    X = _features_array(rainfall, soil_moisture, z_score)
+    label = model.predict(X)[0]
     return str(label)

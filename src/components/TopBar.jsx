@@ -1,6 +1,6 @@
 import { UI } from '../content/uiCopy.js'
 
-export default function TopBar({ connected, openTicketCount, onNavigateMaintenance }) {
+export default function TopBar({ connected, reconnectAttempts = 0, openTicketCount, onNavigateMaintenance }) {
   return (
     <header className="topbar topbar-editorial">
       <div className="topbar-brand">
@@ -18,9 +18,9 @@ export default function TopBar({ connected, openTicketCount, onNavigateMaintenan
             {UI.topbar.tickets(openTicketCount)}
           </button>
         )}
-        <div className={`system-chip ${connected ? 'nominal' : 'warn'}`}>
+        <div className={`system-chip ${connected ? 'nominal' : 'warn'}`} data-testid="topbar-connection-status">
           <span className="chip-dot" />
-          {connected ? UI.topbar.connected : UI.topbar.reconnecting}
+          {connected ? UI.topbar.connected : UI.topbar.reconnecting(reconnectAttempts)}
         </div>
       </div>
     </header>

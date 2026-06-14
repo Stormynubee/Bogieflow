@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { id: 'climate', icon: 'thermostat', label: UI.nav.climate },
 ]
 
-export default function Sidebar({ connected, activeView, onNavigate, onScan }) {
+export default function Sidebar({ connected, reconnectAttempts = 0, activeView, onNavigate, onScan }) {
   return (
     <nav className="sidebar sidebar-editorial" aria-label="Main navigation" data-guide="sidebar">
       <div className="sidebar-header">
@@ -20,6 +20,7 @@ export default function Sidebar({ connected, activeView, onNavigate, onScan }) {
           <button
             key={id}
             type="button"
+            data-testid={`nav-${id}`}
             className={`nav-item ${activeView === id ? 'nav-item-active' : ''}`}
             onClick={() => onNavigate(id)}
           >
@@ -30,12 +31,12 @@ export default function Sidebar({ connected, activeView, onNavigate, onScan }) {
       </div>
 
       <div className="sidebar-footer">
-        <button type="button" className="btn-scan" onClick={onScan} title={UI.nav.scanHint}>
+        <button type="button" className="btn-scan" onClick={onScan} title={UI.nav.scanHint} data-testid="scan-corridor">
           <span className="material-symbols-outlined">radar</span>
           {UI.nav.scan}
         </button>
-        <p className={`sidebar-status ${connected ? 'online' : 'offline'}`}>
-          {connected ? UI.nav.linkActive : UI.nav.linkReconnecting}
+        <p className={`sidebar-status ${connected ? 'online' : 'offline'}`} data-testid="sidebar-connection-status">
+          {connected ? UI.nav.linkActive : UI.nav.linkReconnecting(reconnectAttempts)}
         </p>
       </div>
     </nav>

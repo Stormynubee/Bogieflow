@@ -4,7 +4,7 @@ Single source of truth for backend ↔ frontend. Six segments: **S1–S6**.
 
 ## Connection
 
-- **URL:** `ws://localhost:8000/ws`
+- **URL:** `ws://localhost:8000/ws` (dev proxy: same host as Vite on `/ws`)
 - On connect, server sends `state_snapshot` then streams events on tick (~500ms) and on inject.
 
 ## Message types
@@ -24,7 +24,9 @@ Full sync on connect.
       "state": "HEALTHY",
       "color": "#22c55e",
       "rainfall": 0.1,
-      "soil_moisture": 0.2
+      "soil_moisture": 0.2,
+      "vib_z": 0.0,
+      "az": 0.3
     }
   ],
   "train": { "segment_id": "S2", "progress": 0.45 },
@@ -45,13 +47,17 @@ Emitted when hydrology or planner changes segment risk.
   "risk_index": 0.87,
   "k_effective": 65.2,
   "state": "CRITICAL_MUD_PUMPING",
-  "color": "#ef4444"
+  "color": "#ef4444",
+  "rainfall": 0.9,
+  "soil_moisture": 0.85,
+  "vib_z": 4.0,
+  "az": 2.8
 }
 ```
 
 ### `telemetry`
 
-Bogie vibration sample (no chart UI in v4; still emitted for logs/debug).
+Bogie vibration sample — feeds live metrics (peak amplitude, z-score) on Overview and Analysis.
 
 ```json
 {
@@ -64,6 +70,8 @@ Bogie vibration sample (no chart UI in v4; still emitted for logs/debug).
 ```
 
 ### `train_update`
+
+Train position along the current segment (0–1 progress).
 
 ```json
 {
@@ -87,6 +95,8 @@ Bogie vibration sample (no chart UI in v4; still emitted for logs/debug).
 }
 ```
 
+Status may update to `"closed"` when a segment recovers to HEALTHY.
+
 ### `agent_log`
 
 ```json
@@ -108,5 +118,8 @@ Bogie vibration sample (no chart UI in v4; still emitted for logs/debug).
 
 ## REST inject (demo controls)
 
+- `GET /health`, `GET /api/health` — service status
 - `POST /api/inject/monsoon` — `{ "segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85 }`
 - `POST /api/inject/anomaly` — `{ "segment_id": "S4" }` (diagnostic backup)
+
+Returns **503** when the simulation engine is not ready.

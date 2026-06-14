@@ -75,7 +75,7 @@ export default function CorridorBriefing({
             {UI.briefing.maintenanceLog}
           </button>
         )}
-        <button type="button" className="briefing-action" onClick={() => onOpenStationMap?.()}>
+        <button type="button" className="briefing-action" onClick={() => onOpenStationMap?.()} data-testid="station-map-open">
           {UI.briefing.stationMap}
         </button>
       </div>

@@ -1,3 +1,4 @@
+import logging
 import asyncio
 import os
 from contextlib import asynccontextmanager
@@ -7,6 +8,8 @@ from server.env import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 
 def parse_allowed_origins(value: str | None = None) -> list[str]:
     raw = value if value is not None else os.environ.get(
@@ -15,7 +18,7 @@ def parse_allowed_origins(value: str | None = None) -> list[str]:
     )
     return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -26,6 +29,22 @@ from server.simulation import SimulationEngine
 clients: set[WebSocket] = set()
 sim: SimulationEngine | None = None
 tick_task: asyncio.Task | None = None
+_broadcast_tasks: set[asyncio.Task] = set()
+
+
+def require_sim() -> SimulationEngine:
+    if sim is None:
+        raise HTTPException(status_code=503, detail="Simulation not ready")
+    return sim
+
+
+def _log_broadcast_result(task: asyncio.Task) -> None:
+    _broadcast_tasks.discard(task)
+    if task.cancelled():
+        return
+    exc = task.exception()
+    if exc is not None:
+        logger.exception("WebSocket broadcast failed", exc_info=exc)
 
 
 async def broadcast(message: dict[str, Any]) -> None:
@@ -33,15 +52,19 @@ async def broadcast(message: dict[str, Any]) -> None:
     for ws in clients:
         try:
             await ws.send_json(message)
-        except Exception:
+        except Exception as exc:
+            logger.warning("WebSocket send failed: %s", exc)
             dead.append(ws)
     for ws in dead:
         clients.discard(ws)
 
 
 def on_sim_event(event: dict[str, Any]) -> None:
-    if clients:
-        asyncio.create_task(broadcast(event))
+    if not clients:
+        return
+    task = asyncio.create_task(broadcast(event))
+    _broadcast_tasks.add(task)
+    task.add_done_callback(_log_broadcast_result)
 
 
 async def simulation_loop() -> None:
@@ -59,6 +82,8 @@ async def lifespan(app: FastAPI):
     yield
     if tick_task:
         tick_task.cancel()
+    for task in list(_broadcast_tasks):
+        task.cancel()
 
 
 app = FastAPI(title="Bogie Flow", lifespan=lifespan)
@@ -103,15 +128,15 @@ def api_health():
 
 @app.post("/api/inject/monsoon")
 async def inject_monsoon(body: MonsoonInject):
-    assert sim is not None
-    result = sim.inject_monsoon(body.segment_id, body.rainfall, body.soil_moisture)
+    engine = require_sim()
+    result = engine.inject_monsoon(body.segment_id, body.rainfall, body.soil_moisture)
     return {"ok": True, **result}
 
 
 @app.post("/api/inject/anomaly")
 async def inject_anomaly(body: AnomalyInject):
-    assert sim is not None
-    result = sim.inject_anomaly(body.segment_id)
+    engine = require_sim()
+    result = engine.inject_anomaly(body.segment_id)
     return {"ok": True, **result}
 
 
@@ -125,7 +150,7 @@ async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
     clients.add(ws)
     try:
-        if sim:
+        if sim is not None:
             await ws.send_json(sim.state_snapshot())
         while True:
             await ws.receive_text()

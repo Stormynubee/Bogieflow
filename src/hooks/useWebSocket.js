@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 
 import { wsUrl } from '../lib/config.js'
 import { computeActiveRiskIndex, applySegmentUpdate } from '../lib/wsReducer.js'
+import { onSocketClose, onSocketOpen } from '../lib/wsReconnect.js'
 
 const HISTORY_LIMIT = 24
 const SEGMENT_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
@@ -27,6 +28,7 @@ function appendSample(history, segmentId, sample) {
 
 export function useWebSocket() {
   const [connected, setConnected] = useState(false)
+  const [reconnectAttempts, setReconnectAttempts] = useState(0)
   const [segments, setSegments] = useState([])
   const [train, setTrain] = useState({ segment_id: 'S1', progress: 0 })
   const [tickets, setTickets] = useState([])
@@ -35,6 +37,8 @@ export function useWebSocket() {
   const [segmentHistory, setSegmentHistory] = useState(emptyHistory)
   const wsRef = useRef(null)
   const retryRef = useRef(null)
+  const reconnectAttemptsRef = useRef(0)
+  const connectRef = useRef(() => {})
 
   const recordHistory = useCallback((segmentId, fields) => {
     setSegmentHistory((prev) => appendSample(prev, segmentId, fields))
@@ -46,10 +50,22 @@ export function useWebSocket() {
     const ws = new WebSocket(wsUrl())
     wsRef.current = ws
 
-    ws.onopen = () => setConnected(true)
+    ws.onopen = () => {
+      const opened = onSocketOpen()
+      reconnectAttemptsRef.current = opened.reconnectAttempts
+      setReconnectAttempts(opened.reconnectAttempts)
+      setConnected(opened.connected)
+    }
     ws.onclose = () => {
-      setConnected(false)
-      retryRef.current = setTimeout(connect, 2000)
+      const closed = onSocketClose({
+        reconnectAttempts: reconnectAttemptsRef.current,
+        connected: true,
+      })
+      reconnectAttemptsRef.current = closed.reconnectAttempts
+      setReconnectAttempts(closed.reconnectAttempts)
+      setConnected(closed.connected)
+      clearTimeout(retryRef.current)
+      retryRef.current = setTimeout(() => connectRef.current(), closed.delayMs)
     }
     ws.onerror = () => ws.close()
 
@@ -124,6 +140,8 @@ export function useWebSocket() {
     }
   }, [recordHistory])
 
+  connectRef.current = connect
+
   useEffect(() => {
     connect()
     return () => {
@@ -134,6 +152,7 @@ export function useWebSocket() {
 
   return {
     connected,
+    reconnectAttempts,
     segments,
     train,
     tickets,

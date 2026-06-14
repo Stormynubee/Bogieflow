@@ -113,7 +113,7 @@ export default function CorridorCommandDock({
         />
       </div>
 
-      <div data-guide="metrics">
+      <div data-guide="metrics" data-testid="risk-gauge">
         <MetricBar
           segments={segments}
           activeRiskIndex={activeRiskIndex}

@@ -10,7 +10,7 @@ import MaintenanceView from './components/views/MaintenanceView'
 import ClimateView from './components/views/ClimateView'
 import BootLoader from './components/BootLoader'
 import { highestRiskSegment } from './lib/segmentUtils.js'
-import { apiUrl } from './lib/config.js'
+import { injectMonsoon } from './lib/api.js'
 import { UI } from './content/uiCopy.js'
 
 function formatUptime(seconds) {
@@ -25,6 +25,7 @@ function formatUptime(seconds) {
 export default function App() {
   const {
     connected,
+    reconnectAttempts,
     segments,
     train,
     tickets,
@@ -48,19 +49,17 @@ export default function App() {
     return () => clearInterval(id)
   }, [connected, sessionStart])
 
+  const [scanToast, setScanToast] = useState('')
+
   const handleScan = async () => {
+    setScanToast('')
     try {
-      await fetch(apiUrl('/api/inject/monsoon'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          segment_id: 'S4',
-          rainfall: 0.9,
-          soil_moisture: 0.85,
-        }),
-      })
+      await injectMonsoon('S4', 0.9, 0.85)
+      setScanToast(UI.simulation.sent)
+      setTimeout(() => setScanToast(''), 2000)
     } catch {
-      document.getElementById('controls-panel')?.scrollIntoView({ behavior: 'smooth' })
+      setScanToast(UI.simulation.offline)
+      setTimeout(() => setScanToast(''), 2000)
     }
   }
 
@@ -92,6 +91,7 @@ export default function App() {
     <div className="shell">
       <Sidebar
         connected={connected}
+        reconnectAttempts={reconnectAttempts}
         activeView={view}
         onNavigate={setView}
         onScan={handleScan}
@@ -100,6 +100,7 @@ export default function App() {
       <div className="workspace">
         <TopBar
           connected={connected}
+          reconnectAttempts={reconnectAttempts}
           openTicketCount={openTickets}
           onNavigateMaintenance={goMaintenance}
         />
@@ -147,7 +148,7 @@ export default function App() {
             {UI.footer.segment}: {footerSegment}
           </span>
           <span className="footer-links">
-            <button type="button" className="footer-link" onClick={() => setStationMapOpen(true)}>
+            <button type="button" className="footer-link" onClick={() => setStationMapOpen(true)} data-testid="station-map-open">
               {UI.footer.stationMap}
             </button>
             <span className="footer-sep">|</span>
@@ -165,6 +166,7 @@ export default function App() {
             </a>
           </span>
         </footer>
+        {scanToast && <p className="overview-ops-toast app-scan-toast">{scanToast}</p>}
       </div>
 
       <GuideCoach
