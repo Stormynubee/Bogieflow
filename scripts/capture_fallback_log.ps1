@@ -3,7 +3,7 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 $log = Join-Path $root "assets\fallback_demo_log.txt"
-"RailTwin-X Lite - Fallback Demo Log" | Out-File $log
+"Bogie Flow - Fallback Demo Log" | Out-File $log
 "Generated: $(Get-Date -Format o)" | Add-Content $log
 "" | Add-Content $log
 

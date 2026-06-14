@@ -1,8 +1,8 @@
-# RailTwin-X Lite — Demo Script (2–4 min, OBS 1920×1080 + voiceover)
+# Bogie Flow — Demo Script (2–4 min, OBS 1920×1080 + voiceover)
 
 ## Opening (0:00–0:15)
 
-**Voiceover:** "Others monitor the rail. We monitor the ballast. RailTwin-X Lite fuses monsoon hydrology with bogie vibration to prioritize track-bed maintenance before the inspection train arrives."
+**Voiceover:** "Others monitor the rail. We monitor the ballast. Bogie Flow fuses monsoon hydrology with bogie vibration to prioritize track-bed maintenance before the inspection train arrives."
 
 Show dashboard title + tagline.
 

@@ -1,6 +1,8 @@
-# RailTwin-X Lite
+# Bogie Flow
 
 **Others monitor the rail. We monitor the ballast.**
+
+![Bogie Flow Banner](assets/bogie_flow_banner.png)
 
 Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
 
@@ -11,7 +13,7 @@ Climate-aware track-bed risk evaluation and agent-based telemetry fusion for rai
 [![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/Node-20.x-green?style=flat-square)](https://nodejs.org/)
 
-RailTwin-X Lite is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
+Bogie Flow is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
 
 ---
 

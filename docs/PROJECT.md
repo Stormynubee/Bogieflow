@@ -1,4 +1,4 @@
-# RailTwin-X Lite — Complete Project Reference
+# Bogie Flow — Complete Project Reference
 
 > **Others monitor the rail. We monitor the ballast.**
 
@@ -42,7 +42,7 @@ This document is the single bottom-up reference for everything in this repositor
 
 ## 1. Executive summary
 
-**RailTwin-X Lite** is a FAR AWAY 2026 hackathon submission for the **Railways** theme. It fuses **monsoon hydrology** (rain + soil moisture) with **bogie vibration anomalies** to prioritize **track-bed maintenance** on a simulated 6-segment corridor (S1–S6).
+**Bogie Flow** is a FAR AWAY 2026 hackathon submission for the **Railways** theme. It fuses **monsoon hydrology** (rain + soil moisture) with **bogie vibration anomalies** to prioritize **track-bed maintenance** on a simulated 6-segment corridor (S1–S6).
 
 The system uses:
 
@@ -84,7 +84,7 @@ Track-bed **mud pumping / ballast fouling** during monsoon degrades stiffness \(
 
 ## 4. Product definition
 
-**One sentence:** RailTwin-X Lite fuses climate risk (rain + soil moisture) with bogie vibration anomalies — via physics-informed agents + a tiny sklearn fusion model — to prioritize track-bed maintenance on six corridor segments.
+**One sentence:** Bogie Flow fuses climate risk (rain + soil moisture) with bogie vibration anomalies — via physics-informed agents + a tiny sklearn fusion model — to prioritize track-bed maintenance on six corridor segments.
 
 **Demo segment:** **S4** (middle of corridor) for monsoon inject.
 
@@ -100,7 +100,7 @@ These were considered during planning but **cut from Round 1** to ship on time:
 
 | Rejected | Reason |
 |----------|--------|
-| Full RailTwin-X (DenseNet, live CWT, Langfuse, SQLCipher) | Over-scoped for 18h build window |
+| Full Bogie Flow-X (DenseNet, live CWT, Langfuse, SQLCipher) | Over-scoped for 18h build window |
 | AetherMesh / logistics package barter | Wrong theme; separate product |
 | Leaflet / Mapbox / Delhi GIS | Unnecessary for demo |
 | Open-Meteo live API | Manual inject sufficient for R1 |
@@ -335,7 +335,7 @@ python -m server.agents.train_risk_model
 
 | Method | Path | Body | Response |
 |--------|------|------|----------|
-| GET | `/health` | — | `{ status: "ok", service: "railtwin-x-lite" }` |
+| GET | `/health` | — | `{ status: "ok", service: "bogie-flow" }` |
 | POST | `/api/inject/monsoon` | `{ segment_id, rainfall, soil_moisture }` | `{ ok, segment, hydrology }` |
 | POST | `/api/inject/anomaly` | `{ segment_id }` | `{ ok, segment, vibration }` |
 
@@ -729,4 +729,4 @@ From [docs/SUBMISSION.md](SUBMISSION.md) — mark Pass before Unstop upload:
 
 ---
 
-*Last updated: June 2026 — RailTwin-X Lite v1.0.0 for FAR AWAY 2026 Railways theme.*
+*Last updated: June 2026 — Bogie Flow v1.0.0 for FAR AWAY 2026 Railways theme.*

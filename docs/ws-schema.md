@@ -1,4 +1,4 @@
-# WebSocket Message Schema — RailTwin-X Lite
+# WebSocket Message Schema — Bogie Flow
 
 Single source of truth for backend ↔ frontend. Six segments: **S1–S6**.
 

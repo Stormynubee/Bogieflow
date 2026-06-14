@@ -1,6 +1,6 @@
 # Design Depth Appendix: Mathematical & Physics-Based Foundations
 
-This document details the mathematical models and physics-based formulations underlying the **RailTwin-X** predictive railway infrastructure management system. 
+This document details the mathematical models and physics-based formulations underlying the **Bogie Flow-X** predictive railway infrastructure management system. 
 
 ---
 
@@ -36,7 +36,7 @@ Where:
 * $b$ is the translation parameter (time domain shift).
 * $\psi^*(t)$ is the complex conjugate of the Daubechies 4 ($\text{db4}$) mother wavelet, selected for its correlation with shock signals.
 
-In the RailTwin-X production system (Phase 2), these 2D time-frequency scalograms are fed into an edge convolutional network to isolate track joint defects, spalls, and ballast voids from regular track wear.
+In the Bogie Flow-X production system (Phase 2), these 2D time-frequency scalograms are fed into an edge convolutional network to isolate track joint defects, spalls, and ballast voids from regular track wear.
 
 ---
 

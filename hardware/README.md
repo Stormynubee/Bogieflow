@@ -1,4 +1,4 @@
-# RailTwin-X Sensor Node (Round 2)
+# Bogie Flow-X Sensor Node (Round 2)
 
 Edge node for bogie-mounted vibration sensing — **Round 1 submission uses simulation**; this documents the field path for Delhi.
 

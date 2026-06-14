@@ -4,7 +4,7 @@
 
 **Others monitor the rail. We monitor the ballast.**
 
-RailTwin-X Lite fuses monsoon hydrology with bogie vibration anomalies to prioritize track-bed maintenance on a simulated 6-segment Indian Railways corridor. Three cooperating agents (hydrology, vibration, planner) plus a **sklearn GradientBoosting** fusion model produce P1/P2 maintenance tickets in real time via FastAPI WebSocket.
+Bogie Flow fuses monsoon hydrology with bogie vibration anomalies to prioritize track-bed maintenance on a simulated 6-segment Indian Railways corridor. Three cooperating agents (hydrology, vibration, planner) plus a **sklearn GradientBoosting** fusion model produce P1/P2 maintenance tickets in real time via FastAPI WebSocket.
 
 **GitHub:** https://github.com/Stormynubee/Faraway2026Japan  
 **Theme:** Railways  
