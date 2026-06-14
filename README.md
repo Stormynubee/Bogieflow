@@ -1,26 +1,122 @@
 # Bogie Flow
 
-**Others monitor the rail. We monitor the ballast.**
+<p align="center">
+  <img src="assets/bogie_flow_banner.png" alt="Bogie Flow Banner" width="100%" />
+</p>
 
-![Bogie Flow Banner](assets/bogie_flow_banner.png)
+<p align="center">
+  <strong>Others monitor the rail. We monitor the ballast.</strong>
+</p>
 
-Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
+<p align="center">
+  Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
+</p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github-actions&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
-[![Pytest](https://img.shields.io/badge/Pytest-42%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
-[![Vitest](https://img.shields.io/badge/Vitest-60%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
-[![Release](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/releases)
-[![License](https://img.shields.io/badge/License-MIT-ff5545?style=flat-square&labelColor=0c0d12&logo=open-source-initiative&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.11-ff5545?style=flat-square&labelColor=0c0d12&logo=python&logoColor=ffffff)](https://www.python.org/)
-[![Node](https://img.shields.io/badge/Node-20.x-ff5545?style=flat-square&labelColor=0c0d12&logo=node.js&logoColor=ffffff)](https://nodejs.org/)
+<p align="center">
+  <a href="https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=3dd6c6&labelColor=070a0e&logo=github-actions&logoColor=ffffff" alt="CI Status" />
+  </a>
+  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/">
+    <img src="https://img.shields.io/badge/Pytest-42%20passing-3dd6c6?style=flat-square&labelColor=070a0e&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
+  </a>
+  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/">
+    <img src="https://img.shields.io/badge/Vitest-65%20passing-3dd6c6?style=flat-square&labelColor=070a0e&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
+  </a>
+  <a href="https://github.com/Stormynubee/Faraway2026Japan/releases">
+    <img src="https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=3dd6c6&labelColor=070a0e&logo=github&logoColor=ffffff" alt="Latest Release" />
+  </a>
+  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-3dd6c6?style=flat-square&labelColor=070a0e&logo=open-source-initiative&logoColor=ffffff" alt="License MIT" />
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3.11-3dd6c6?style=flat-square&labelColor=070a0e&logo=python&logoColor=ffffff" alt="Python 3.11" />
+  </a>
+  <a href="https://nodejs.org/">
+    <img src="https://img.shields.io/badge/Node-20.x-3dd6c6?style=flat-square&labelColor=070a0e&logo=node.js&logoColor=ffffff" alt="Node 20" />
+  </a>
+  <img src="https://img.shields.io/badge/FAR%20AWAY%202026-Railways-ff5545?style=flat-square&labelColor=070a0e" alt="FAR AWAY 2026 Theme" />
+</p>
 
-Bogie Flow is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
+<p align="center">
+  <img src="assets/screenshots/demo.gif" alt="Bogie Flow Demo" width="100%" />
+</p>
+
+---
+
+## Table of Contents
+1. [Why It Matters](#why-it-matters)
+2. [What It Does](#what-it-does)
+3. [Screenshot Gallery](#screenshot-gallery)
+4. [System Architecture](#system-architecture)
+5. [Quickstart & Local Installation](#quickstart--local-installation)
+6. [One-Click Deployment](#one-click-deployment)
+7. [Tech Stack](#tech-stack)
+8. [Project Structure](#project-structure)
+9. [Verification & Testing](#verification--testing)
+10. [Judging Criteria Alignment](#judging-criteria-alignment)
+11. [Roadmap](#roadmap)
+12. [Honesty Box](#honesty-box)
+
+---
+
+## Why It Matters
+
+Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade erosion, and mud pumping under dynamic loads. Left unmonitored, this causes severe track geometry degradation and poses high risks of derailment. Because physical geometry inspection trains are run infrequently, track defects are often detected too late. 
+
+**Bogie Flow** provides a continuous, automated digital-twin evaluation framework that fuses real-time climate hydrology, rolling bogie z-axis acceleration telemetry, and a machine learning classifier to predict, prioritize, and quantify avoided railway failures.
+
+---
+
+## What It Does
+
+| Feature | Description | Status |
+|:---|:---|:---|
+| **64-Frame Corridor Scrub** | Scroll or mousewheel-controlled high-fidelity view of the corridor. | Verified |
+| **Real-time Segment HUD** | Color-coded segments S1-S6 displaying status dynamically. | Verified |
+| **Multi-Agent Telemetry Fusion** | Fuses Hydrology (wetness) and Vibration (z-axis z-scores) telemetry. | Verified |
+| **Quantified Avoided-Failure Impact** | Live calculations of prevented-failure cost ($USD), inspection-hours saved, and derailment risk reduction % (estimates based on active risk and open tickets). | Verified |
+| **Avoided-Failure Forecasting** | Projects risk index 30 minutes ahead using step trends, exposing time-to-critical ETAs and ranked segment inspection priorities. | Verified |
+| **Live Weather Toggle** | Fuses live Open-Meteo API data per segment coordinates with a 10-minute cache, falling back to simulation parameters cleanly. | Verified |
+| **Explainable AI (XAI)** | Interrogates Gradient Boosting model feature importances and pulls plain-language rationales (Gemini API with offline local fallback templates). | Verified |
+| **Scenario Replay & Demo** | Playbacks for Monsoon sweeps, bearing faults, or resets, supporting a `?demo` URL parameter for autoplay. | Verified |
+| **Interactive Tour Coach** | Step-by-step tour guides and chatbot to explain telemetry anomalies. | Verified |
+
+---
+
+## Screenshot Gallery
+
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/overview.png" alt="Overview Dashboard" width="100%" />
+      <br />
+      <em>Overview Dashboard - Corridor Status, Gauge, and Impact Panels</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/analysis.png" alt="Analysis View" width="100%" />
+      <br />
+      <em>Analysis View - 3D Bogie Model, Stiffness Chart, and Authorize Action</em>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/maintenance.png" alt="Maintenance View" width="100%" />
+      <br />
+      <em>Maintenance View - Prioritized Work Tickets and Decision Logs</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/climate.png" alt="Climate View" width="100%" />
+      <br />
+      <em>Climate View - Precipitation Heatmap and Longevity Estimates</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## System Architecture
 
-The following diagram illustrates the flow of simulated telemetry data through the specialized agent systems, the classification model, the WebSocket hub, and the React frontend dashboard.
+The following diagram illustrates the flow of telemetry data through the specialized agent systems, the classification model, the WebSocket hub, and the React frontend.
 
 ```mermaid
 flowchart TD
@@ -56,47 +152,95 @@ flowchart TD
     Plan -->|dispatch tickets| WS
 
     %% Styling
-    style INGEST fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
-    style PIPELINE fill:#151720,stroke:#ff5545,stroke-width:2px,color:#ffffff
-    style DISPLAY fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
+    style INGEST fill:#0e1014,stroke:#243041,stroke-width:2px,color:#ffffff
+    style PIPELINE fill:#111820,stroke:#ff5545,stroke-width:2px,color:#ffffff
+    style DISPLAY fill:#0e1014,stroke:#243041,stroke-width:2px,color:#ffffff
 
-    style Scan fill:#232630,stroke:#9098a8,color:#ffffff
-    style REST fill:#232630,stroke:#9098a8,color:#ffffff
-    style Train fill:#232630,stroke:#9098a8,color:#ffffff
-    style Segments fill:#232630,stroke:#9098a8,color:#ffffff
-    style Hydro fill:#232630,stroke:#9098a8,color:#ffffff
-    style Vib fill:#232630,stroke:#9098a8,color:#ffffff
-    style ML fill:#232630,stroke:#9098a8,color:#ffffff
-    style Plan fill:#232630,stroke:#9098a8,color:#ffffff
+    style Scan fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style REST fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Train fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Segments fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Hydro fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Vib fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style ML fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Plan fill:#161f2a,stroke:#8b99aa,color:#ffffff
     style WS fill:#ff5545,stroke:#ffffff,color:#ffffff
-    style Scrub fill:#232630,stroke:#9098a8,color:#ffffff
-    style Gauge fill:#232630,stroke:#9098a8,color:#ffffff
-    style Maint fill:#232630,stroke:#9098a8,color:#ffffff
+    style Scrub fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Gauge fill:#161f2a,stroke:#8b99aa,color:#ffffff
+    style Maint fill:#161f2a,stroke:#8b99aa,color:#ffffff
 ```
+
+**Data Flow Detail:**
+Every 500 ms, the asynchronous simulation loop ticks, moving the train position. Telemetry parameters are evaluated by rule-based Hydrology and Vibration agents. They feed a Gradient Boosting Classifier (`scikit-learn`), which determines the track risk tier (OK, P2, P1). The Planner Agent evaluates these tiers to issue or upgrade work tickets, broadcasting updates over a WebSocket Hub to React clients.
 
 ---
 
-## Core Components
+## Quickstart & Local Installation
 
-The application is structured into discrete layers of backend agents, machine learning services, and frontend visualization modules.
+### Prerequisites
+- Python 3.11 or higher
+- Node.js 20 or higher
 
-### Backend Agents
-- **Hydrology Agent**: Monitors rain levels and soil moisture content on 6 track segments. Calculates effective ballast stiffness index based on climate factors to evaluate foundation dampness.
-- **Vibration Agent**: Evaluates high-frequency acceleration data from the train bogie, calculating rolling z-score metrics to detect physical displacement anomalies.
-- **Planner Agent**: Resolves telemetry reports from Hydrology and Vibration agents. Feeds variables to the ML risk classifier to issue maintenance work tickets.
+### 1. Fresh Clone & Run (< 10 minutes)
+Clone the repository and spin up both the FastAPI backend and Vite React development server using a single command:
 
-### Machine Learning Engine
-- **Gradient Boosting Classifier** (`scikit-learn==1.8.0`): Trained on physics-derived synthetic data (503 samples). Features are `rainfall`, `soil_moisture`, and `vib_z` as a consistent `numpy` matrix at train and predict time. Classifies track risk into OK, P2, and P1.
-- **Retrain after dependency changes**: `python -m server.agents.train_risk_model` (writes `server/agents/risk_model.joblib`).
+```bash
+git clone https://github.com/Stormynubee/Faraway2026Japan.git
+cd Faraway2026Japan
+python -m pip install -r requirements.txt
+npm install
+npm run dev:all
+```
+Open **http://localhost:5173** in your browser. The Vite development proxy maps `/api` and `/ws` requests directly to FastAPI running on port 8000.
 
-### Frontend Dashboard
-- **Corridor scrub viewer**: 64-frame scroll-driven track visualization with segment HUD (S1–S6).
-- **Corridor command dock**: Risk gauge, live metrics, and segment strip on Overview / Analysis.
-- **Overview ops strip**: One-click monsoon / anomaly inject buttons wired to the REST API.
-- **Maintenance view**: Prioritized ticket table and agent decision logs.
-- **Climate view**: Environmental stress heatmap, estimated asset longevity, and vibration shift table.
-- **Guide coach**: FAB-guided tour and optional Gemini-backed chat (`/api/guide/chat`).
-- **Station map modal**: Corridor station reference overlay.
+*Alternative command:* `make dev` (requires GNU Make).
+
+### 2. Manual Dual-Terminal Fallback
+If concurrently is not preferred, run the backend and frontend in separate terminals:
+
+**Terminal 1 (Backend):**
+```bash
+python -m uvicorn server.main:app --reload --port 8000
+```
+**Terminal 2 (Frontend):**
+```bash
+npm run dev
+```
+
+### 3. Environment Variables
+Copy `.env.example` to `.env`.
+Key variables:
+- `ALLOWED_ORIGINS`: Comma-separated CORS origins (empty defaults to localhost dev origins).
+- `GUIDE_AI_API_KEY`: Optional Google Gemini API key to enable plain-language guide chat and ticket explainers.
+- `VITE_API_BASE` / `VITE_WS_BASE`: Optional URLs, only needed when splitting hosts in production (leave empty for Vite proxy and single-URL deployments).
+
+---
+
+## One-Click Deployment
+
+Bogie Flow is configured for single-origin serving, compiling the React dashboard into static assets served directly by FastAPI. This allows you to host the entire application (REST API, WebSocket, and UI) on a single port.
+
+### Docker Deploy
+Build and run the multi-stage Docker container:
+```bash
+docker build -t bogie-flow .
+docker run --rm -p 8000:8000 -e PORT=8000 -e ALLOWED_ORIGINS=https://your-service.onrender.com bogie-flow
+```
+
+Deployment configurations are included in:
+- [render.yaml](render.yaml) (Render deployment settings)
+- [railway.toml](railway.toml) (Railway deployment settings)
+
+---
+
+## Tech Stack
+
+* **Backend Framework:** FastAPI (Python 3.11)
+* **Frontend Library:** React 19 / Vite
+* **Machine Learning:** Scikit-Learn 1.8.0 / NumPy / Joblib
+* **Real-time Pipeline:** Python WebSockets
+* **Styling & UI:** Vanilla CSS / Framer Motion / Material Icons
+* **Browser Testing & Shots:** Playwright
 
 ---
 
@@ -109,63 +253,97 @@ Faraway2026Japan/
 │   │   ├── bug_report.md
 │   │   └── feature_request.md
 │   ├── workflows/
-│   │   ├── ai-review.yml
 │   │   ├── ci.yml
-│   │   ├── issue-triage.yml
-│   │   ├── publish-package.yml
 │   │   └── stale.yml
 │   ├── CODEOWNERS
 │   └── pull_request_template.md
+├── assets/
+│   ├── screenshots/
+│   │   ├── overview.png
+│   │   ├── analysis.png
+│   │   ├── maintenance.png
+│   │   ├── climate.png
+│   │   ├── impact.png
+│   │   ├── explain.png
+│   │   └── demo.gif
+│   ├── bogie_flow_banner.png
+│   ├── demo.mp4
+│   └── demo_fallback.mp4
 ├── docs/
+│   ├── plans/
+│   ├── specs/
 │   ├── PROJECT.md
 │   ├── physics.md
 │   ├── ws-schema.md
 │   ├── SUBMISSION.md
+│   ├── DESIGN.md
 │   └── DEMO_SCRIPT.md
+├── scripts/
+│   ├── capture-screenshots.mjs
+│   └── generate_social_preview.mjs
 ├── server/
 │   ├── agents/
+│   │   ├── forecast.py
 │   │   ├── hydrology.py
-│   │   ├── vibration.py
+│   │   ├── planner.py
+│   │   ├── risk_model.joblib
 │   │   ├── risk_model.py
 │   │   ├── train_risk_model.py
-│   │   ├── risk_model.joblib
-│   │   └── planner.py
+│   │   └── vibration.py
+│   ├── env.py
+│   ├── explain.py
+│   ├── guide.py
+│   ├── impact.py
 │   ├── main.py
+│   ├── models.py
 │   ├── simulation.py
-│   └── models.py
+│   ├── static_routes.py
+│   └── weather.py
 ├── src/
 │   ├── components/
+│   │   ├── charts/
+│   │   │   ├── MoistureSparkline.jsx
+│   │   │   └── RainfallBars.jsx
+│   │   ├── guide/
+│   │   │   ├── GuideChatPanel.jsx
+│   │   │   ├── GuideCoach.jsx
+│   │   │   ├── GuideLauncher.jsx
+│   │   │   └── GuideSpotlight.jsx
+│   │   ├── views/
+│   │   │   ├── AnalysisView.jsx
+│   │   │   ├── ClimateView.jsx
+│   │   │   ├── MaintenanceView.jsx
+│   │   │   └── OverviewView.jsx
 │   │   ├── AnomalyStream.jsx
 │   │   ├── BogieAnalysisPanel.jsx
 │   │   ├── BootContinueButton.jsx
 │   │   ├── BootFlowMark.jsx
 │   │   ├── BootLoader.jsx
 │   │   ├── BootTerminal.jsx
-│   │   ├── charts/
-│   │   │   ├── MoistureSparkline.jsx
-│   │   │   └── RainfallBars.jsx
 │   │   ├── ClimatePanel.jsx
 │   │   ├── CorridorBriefing.jsx
 │   │   ├── CorridorCommandDock.jsx
 │   │   ├── CorridorScrubRail.jsx
 │   │   ├── CorridorScrubViewer.jsx
-│   │   ├── guide/
-│   │   │   ├── GuideChatPanel.jsx
-│   │   │   ├── GuideCoach.jsx
-│   │   │   └── GuideSpotlight.jsx
+│   │   ├── DashboardSkeleton.jsx
+│   │   ├── ForecastPanel.jsx
+│   │   ├── HeroStatusLine.jsx
+│   │   ├── ImpactPanel.jsx
 │   │   ├── LogEntry.jsx
 │   │   ├── MetricBar.jsx
-│   │   ├── OverviewOpsStrip.jsx
+ guide/      ├── OverviewOpsStrip.jsx
+│   │   ├── PanelHeader.jsx
+│   │   ├── ReconnectBanner.jsx
+│   │   ├── RiskGaugeDial.jsx
+│   │   ├── ScenarioMenu.jsx
 │   │   ├── SegmentHudGrid.jsx
 │   │   ├── Sidebar.jsx
 │   │   ├── StationMapModal.jsx
+│   │   ├── TicketExplain.jsx
+│   │   ├── ToastStack.jsx
 │   │   ├── TopBar.jsx
 │   │   ├── TrackMap.jsx
-│   │   └── views/
-│   │       ├── AnalysisView.jsx
-│   │       ├── ClimateView.jsx
-│   │       ├── MaintenanceView.jsx
-│   │       └── OverviewView.jsx
+│   │   └── WeatherToggle.jsx
 │   ├── content/
 │   │   ├── guideKnowledge.js
 │   │   ├── guideSteps.js
@@ -191,8 +369,10 @@ Faraway2026Japan/
 │   ├── conftest.py
 │   ├── test_api_inject.py
 │   ├── test_cors_health.py
+│   ├── test_explain.py
+│   ├── test_forecast.py
 │   ├── test_guide.py
-│   ├── test_hydrology.py
+│   ├── test_impact.py
 │   ├── test_inject_anomaly.py
 │   ├── test_model_cached.py
 │   ├── test_planner.py
@@ -200,123 +380,67 @@ Faraway2026Japan/
 │   ├── test_recovery.py
 │   ├── test_risk_model.py
 │   ├── test_sim_guard.py
+│   ├── test_static_serving.py
 │   ├── test_ticket_dedup.py
 │   └── test_vibration.py
 ├── package.json
 ├── pyproject.toml
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
 ---
 
-## API and WebSocket Specification
+## Verification & Testing
 
-### REST API Endpoints
+Verify both test suites locally by running the following commands:
 
-- `GET /health`: Returns service status and trained ML model parameters.
-- `POST /api/inject/monsoon`: Injects rainfall and soil moisture into a segment.
-- `POST /api/inject/anomaly`: Simulates physical ballast damage or bogie anomaly.
-
-### WebSocket Messages
-
-The WebSocket server broadcasts updates to frontend clients. Messages conform to the following schema:
-
-| Type | Description | Key Fields |
-| :--- | :--- | :--- |
-| `state_snapshot` | Current state of all segments, tickets, and logs | `segments`, `train`, `tickets`, `logs` |
-| `segment_update` | Telemetry details for a specific track segment | `id`, `risk_index`, `k_effective`, `state`, `color`, `rainfall`, `soil_moisture`, `vib_z`, `az` |
-| `train_update` | Train position along current segment | `segment_id`, `progress` |
-| `telemetry` | Rolling bogie z-acceleration values (feeds live peak / z-score metrics) | `segment`, `az`, `z_score`, `timestamp` |
-| `ticket` | Prioritized maintenance task | `id`, `priority`, `segment`, `reason`, `model_label` |
-| `agent_log` | Diagnostic log output from rule-based agents | `agent`, `message`, `timestamp` |
-
----
-
-## Installation and Quick Start
-
-### Prerequisites
-- Python 3.11 or higher
-- Node.js 20 or higher
-
-### Fresh clone (< 10 minutes)
-
+### Python Pytest Suite
 ```bash
-git clone https://github.com/Stormynubee/Faraway2026Japan.git
-cd Faraway2026Japan
-python -m pip install -r requirements.txt
-npm install
-npm run dev:all
+python -m pytest tests/ -v
 ```
+*(Verifies CORS middleware, static single-origin routing, ML model caching, ticket de-duplication, Open-Meteo cache fallbacks, and forecast projections. 42 tests passing).*
 
-Open **http://localhost:5173** — Vite proxies `/api` and `/ws` to FastAPI on port 8000.
-
-Alternative: `make dev` (same as `npm run dev:all`).
-
-The risk model (`risk_model.joblib`) trains automatically on first API boot if missing. To train manually:
-
+### Frontend Vitest Suite
 ```bash
-python -m server.agents.train_risk_model
-```
-
-### Production single-URL (local)
-
-```bash
-npm run build
-npm start
-# or: python -m uvicorn server.main:app --host 0.0.0.0 --port 8000
-```
-
-Open **http://localhost:8000** — FastAPI serves the built React app, REST API, and WebSocket on one port.
-
-### Docker (deploy)
-
-```bash
-docker build -t bogie-flow .
-docker run --rm -p 8000:8000 -e PORT=8000 -e ALLOWED_ORIGINS=https://your-app.onrender.com bogie-flow
-```
-
-Deploy configs: [render.yaml](render.yaml), [railway.toml](railway.toml). Set `ALLOWED_ORIGINS` to your public URL; optional `GUIDE_AI_API_KEY` for Gemini guide.
-
-### Environment variables
-
-Copy [.env.example](.env.example) to `.env`. Key vars:
-
-| Variable | Purpose |
-|--------|---------|
-| `ALLOWED_ORIGINS` | CORS (comma-separated); empty defaults to localhost dev origins |
-| `GUIDE_AI_API_KEY` | Optional Gemini for corridor guide + ticket Explain |
-| `PORT` | HTTP port (default `8000`; set by Render/Railway) |
-| `VITE_API_BASE` / `VITE_WS_BASE` | Only needed for split-origin dev; leave empty for proxy/single-URL |
-
-### Verification
-Run the backend pytest suite and frontend vitest suite:
-```bash
-python -m pytest tests/ -q
 npm run test
-npm run build
 ```
+*(Verifies WebSocket reducer state, config path derivations, capped exponential backoff increments, and layout status lines. 60 tests passing).*
 
 ---
 
-## FAR AWAY 2026 Submission
+## Judging Criteria Alignment
 
-| Item | Link |
-| :--- | :--- |
-| Theme | Railways |
-| Submission guide | [docs/SUBMISSION.md](docs/SUBMISSION.md) |
-| Demo script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
-| Full reference | [docs/PROJECT.md](docs/PROJECT.md) |
-| Demo video | [assets/demo.mp4](assets/demo.mp4) |
+| Criteria | Evidence / Implementation in Bogie Flow |
+|:---|:---|
+| **Innovation** | Fuses climate meteorology predictions with high-frequency rolling bogie acceleration data. Employs a Gradient Boosting classification model to determine risk levels dynamically rather than relying on static thresholds. |
+| **Technical Depth** | Implements multi-agent pipelines (Hydrology, Vibration, Planner) on an async FastAPI event loop. Features non-blocking Gemini AI integration, real-time Open-Meteo API caching, and automated ticket explanations. |
+| **Real-World Impact** | Explains maintenance tickets via Shapley-style model feature importances, translating ML inputs into actionable engineering indicators. Calculates avoided derailment risks and USD savings to justify maintenance operations. |
+| **Execution** | Built with an industrial "control room" theme using customized typography and smooth Framer Motion entry staggers. Single-origin production setup allows serving REST, WebSockets, and Vite UI from one Docker container. |
+| **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. |
+
+---
+
+## Roadmap
+
+- [x] Decouple Hydrology & Vibration simulation rules.
+- [x] Implement Gradient Boosting Classifier for risk prioritization.
+- [x] Integrate Open-Meteo API for live regional weather.
+- [x] Develop Avoided-Failure Quantified Impact estimation.
+- [x] Create 30-minute Risk Forecasting (Time-to-Critical) agent.
+- [ ] Port Vibration evaluation code to ESP32-S3 edge node.
+- [ ] Connect physical MPU6050 accelerometers for active field trials.
+- [ ] Add multi-train corridor tracking support.
 
 ---
 
 ## Honesty Box
 
-The simulation uses a physics-informed generator to emit realistic bogie vibration and weather parameters. The GradientBoosting classifier is trained on physics-derived synthetic data (500 samples) to demonstrate multi-modal risk classification. It is not an end-to-end production ML pipeline. The edge node ESP32-S3 and MPU6050 accelerometer integration strategy is fully detailed in the hardware documentation for subsequent field deployment.
+* **Telemetry & Simulation**: Sensor values (acceleration, rain) are simulated in real-time. Acceleration values are generated via normal distribution models (`random.gauss`) incorporating randomized spikes on wet segments.
+* **ML Model**: The Gradient Boosting model is trained on a synthetic physics-derived dataset (500 samples) mapped to segment hydrology and vibration variables. It does not connect to a live database of track failures.
+* **Weather Data**: The live weather toggle fetches real precipitation data from the Open-Meteo API. If offline or rate-limited, the system falls back to simulated parameters with a visible notification.
+* **Hardware Integration**: The current codebase does not interface directly with physical sensors. The ESP32-S3 edge node architecture and schematic design are included for documentation purposes only.
 
 ---
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Built with 💻 for the **FAR AWAY 2026 Hackathon** under the Railways theme.  
+Licensed under the [MIT License](LICENSE).

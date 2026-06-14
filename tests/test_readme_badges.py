@@ -23,6 +23,9 @@ def _collect_pytest_count() -> int:
 
 
 def _collect_vitest_count() -> int:
+    import os
+    env = os.environ.copy()
+    env["NO_COLOR"] = "1"
     result = subprocess.run(
         ["npm", "run", "test"],
         cwd=ROOT,
@@ -30,6 +33,7 @@ def _collect_vitest_count() -> int:
         text=True,
         check=True,
         shell=sys.platform == "win32",
+        env=env,
     )
     match = re.search(r"Tests\s+(\d+) passed", result.stdout)
     assert match, result.stdout
