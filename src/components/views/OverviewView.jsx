@@ -5,6 +5,7 @@ import CorridorBriefing from '../CorridorBriefing'
 import OverviewOpsStrip from '../OverviewOpsStrip'
 import ImpactPanel from '../ImpactPanel'
 import ForecastPanel from '../ForecastPanel'
+import ModelCardPanel from '../ModelCardPanel'
 import ScenarioMenu from '../ScenarioMenu'
 import PageHeader from '../ink/PageHeader.jsx'
 import HeroStatusLine from '../HeroStatusLine'
@@ -154,6 +155,7 @@ export default function OverviewView({
 
           <div className={LAYOUT.secondary}>
             <ForecastPanel forecast={forecast} />
+            <ModelCardPanel className="panel-stagger-4" />
             <CorridorBriefing
               train={train}
               segments={segments}

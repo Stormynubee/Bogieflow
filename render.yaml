@@ -24,3 +24,5 @@ services:
         sync: false
       - key: BOGIE_API_SECRET
         sync: false
+      - key: BOGIE_TRAIN_USE_REAL
+        value: "true"

@@ -88,3 +88,91 @@
   letter-spacing: 0.04em;
   color: var(--paper-dim);
 }
+
+.model-card-panel {
+  margin-top: var(--gutter);
+}
+
+.model-card-badge {
+  font-size: var(--type-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: var(--radius-soft);
+}
+
+.model-card-badge-validated {
+  color: var(--ink);
+}
+
+.model-card-badge-simulated {
+  color: var(--paper-muted);
+}
+
+.model-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.model-card-metric-label {
+  display: block;
+  font-size: var(--type-xs);
+  color: var(--paper-muted);
+}
+
+.model-card-metric-value {
+  font-family: var(--font-mono);
+  font-size: var(--type-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.model-card-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.model-card-confusion-svg {
+  width: min(100%, 180px);
+  height: auto;
+  color: var(--ink);
+}
+
+.model-card-axis-label {
+  font-size: 9px;
+  fill: var(--paper-muted);
+  font-family: var(--font-mono);
+}
+
+.model-card-cell-count {
+  font-size: 9px;
+  fill: var(--ink);
+}
+
+.model-card-importances {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 140px;
+}
+
+.model-card-importances li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line-faint);
+  font-size: var(--type-sm);
+}
+
+.model-card-error {
+  font-size: var(--type-sm);
+  color: var(--paper-muted);
+  margin: 0;
+}
+

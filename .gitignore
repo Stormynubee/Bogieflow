@@ -18,6 +18,9 @@ temp/
 # Bogie Flow specific ignores
 bogie_flow.egg-info/
 .superpowers/
+server/data/*.csv
+server/data/*.json
+server/agents/risk_model.meta.json
 
 
 .vercel

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-06-13
+
+### Added
+- Real-data training pipeline: `server/data/fetch_datasets.py`, `server/agents/dataset.py`, StratifiedKFold model evaluation, `risk_model.meta.json`.
+- `GET /api/model/card` with CV accuracy, macro F1, ROC-AUC, confusion matrix, and feature importances.
+- `ModelCardPanel` on Overview with Real/Synthetic honesty badge (`data-testid="model-card-panel"`).
+- `docs/DATA.md` — Open-Meteo + CWRU provenance and training instructions.
+- `tests/test_model_card.py` and `src/lib/modelCardDisplay.test.js`.
+
+### Changed
+- `train_and_save(use_real=…)` prefers real CSVs when present; synthetic 503-sample frame remains fallback.
+
 ## [1.6.1] - 2026-06-14
 
 ### Added

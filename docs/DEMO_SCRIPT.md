@@ -62,6 +62,7 @@ Record with backend + frontend running (`npm run dev:all`) or a deployed single-
 | 19 | Point at impact formulas | inline assumptions under each metric |
 | 20 | Wait ~30–60 s (or click **Reset corridor**) | `data-testid="scenario-reset"` in Scenario replay |
 | 21 | Show ticket closed + gauge drops | toast "Ticket closed — segment recovered" |
+| 22 | Scroll to **Risk model card** | `data-testid="model-card-panel"` — badge Simulated or Validated; confusion matrix + macro F1 |
 
 ---
 
@@ -71,8 +72,8 @@ Record with backend + frontend running (`npm run dev:all`) or a deployed single-
 
 | # | Action | UI target |
 |---|--------|-----------|
-| 22 | Optional: open guide FAB | `guide-fab` → `guide-launcher-chat` (default chat) — ask "Why was S4 flagged P1?" Or `guide-launcher-tour` for page walkthrough |
-| 23 | End card | GitHub repo + live deploy URL |
+| 23 | Optional: open guide FAB | `guide-fab` → `guide-launcher-chat` (default chat) — ask "Why was S4 flagged P1?" Or `guide-launcher-tour` for page walkthrough |
+| 24 | End card | GitHub repo + live deploy URL |
 
 ---
 

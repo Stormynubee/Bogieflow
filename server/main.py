@@ -40,7 +40,7 @@ from server.explain import explain_ticket
 from server.impact import compute_impact
 from server.simulation import SimulationEngine
 from server.static_routes import mount_static_routes
-from server.agents.risk_model import MODEL_PATH, train_and_save
+from server.agents.risk_model import MODEL_PATH, get_model_card, train_and_save
 
 clients: set[WebSocket] = set()
 sim: SimulationEngine | None = None
@@ -182,6 +182,11 @@ async def reset_corridor(_: None = Depends(require_mutating_auth)):
 async def set_weather_mode(body: WeatherModeRequest, _: None = Depends(require_mutating_auth)):
     engine = require_sim()
     return {"ok": True, **engine.set_live_weather(body.live)}
+
+
+@app.get("/api/model/card")
+def model_card():
+    return get_model_card()
 
 
 @app.get("/api/impact")

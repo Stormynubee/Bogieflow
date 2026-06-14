@@ -31,6 +31,13 @@ export function setWeatherMode(live) {
   return postJson('/api/weather/mode', { live })
 }
 
+export function fetchModelCard() {
+  return fetch(apiUrl('/api/model/card')).then(async (res) => {
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
+  })
+}
+
 export function fetchTicketExplain(ticketId) {
   return fetch(apiUrl(`/api/tickets/${ticketId}/explain`)).then(async (res) => {
     if (!res.ok) throw new Error(await res.text())
