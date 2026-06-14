@@ -18,9 +18,9 @@ export default function TopBar({ connected, reconnectAttempts = 0, openTicketCou
             {UI.topbar.tickets(openTicketCount)}
           </button>
         )}
-        <div className={`system-chip ${connected ? 'nominal' : 'warn'}`} data-testid="topbar-connection-status">
+        <div className={`system-chip ${connected ? 'nominal' : 'demo'}`} data-testid="topbar-connection-status">
           <span className="chip-dot" />
-          {connected ? UI.topbar.connected : UI.topbar.reconnecting(reconnectAttempts)}
+          {connected ? UI.topbar.connected : 'Demo'}
         </div>
       </div>
     </header>

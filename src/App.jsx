@@ -106,7 +106,7 @@ export default function App() {
   const footerSegment =
     train?.segment_id ?? highestRiskSegment(segments)?.id ?? '—'
   const uptimeLabel = connected ? formatUptime(uptimeSec) : '—'
-  const agentLabel = connected ? UI.footer.agentOk : UI.footer.agentReconnecting
+  const agentLabel = connected ? UI.footer.agentOk : 'Offline'
 
   const handleBootComplete = useCallback(() => setBooted(true), [])
 
@@ -151,7 +151,7 @@ export default function App() {
 
         <StatusTicker items={tickerItems} />
 
-        {!connected && <ReconnectBanner reconnectAttempts={reconnectAttempts} />}
+
 
         <main
           className={`main-grid ${view === 'overview' ? 'main-grid-overview' : ''} ${view !== 'overview' ? 'main-grid-single' : ''}`}

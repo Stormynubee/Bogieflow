@@ -927,6 +927,12 @@ body {
   border: 1px solid rgba(233, 72, 46, 0.12);
 }
 
+.system-chip.demo {
+  color: var(--paper-dim);
+  background: rgba(245, 245, 240, 0.04);
+  border: 1px solid rgba(245, 245, 240, 0.1);
+}
+
 .chip-dot {
   width: 6px;
   height: 6px;

@@ -36,7 +36,7 @@ export default function Sidebar({ connected, reconnectAttempts = 0, activeView, 
           {UI.nav.scan}
         </button>
         <p className={`sidebar-status ${connected ? 'online' : 'offline'}`} data-testid="sidebar-connection-status">
-          {connected ? UI.nav.linkActive : UI.nav.linkReconnecting(reconnectAttempts)}
+          {connected ? UI.nav.linkActive : 'Demo mode'}
         </p>
       </div>
     </nav>
