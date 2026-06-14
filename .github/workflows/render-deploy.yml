@@ -13,14 +13,25 @@ jobs:
       github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render deploy hook
+      - name: Trigger Render deploy
         env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
-            echo "RENDER_DEPLOY_HOOK secret not set — skip auto-deploy."
-            echo "Add deploy hook from Render Dashboard → bogie-flow → Settings → Deploy Hook"
+          if [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID" ]; then
+            curl -fsS -X POST \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Content-Type: application/json" \
+              "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+              -d '{}'
+            echo "Render deploy triggered via API."
             exit 0
           fi
-          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
-          echo "Render deploy triggered."
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+            echo "Render deploy triggered via deploy hook."
+            exit 0
+          fi
+          echo "Set RENDER_API_KEY + RENDER_SERVICE_ID (preferred) or RENDER_DEPLOY_HOOK — skip auto-deploy."
+          exit 0

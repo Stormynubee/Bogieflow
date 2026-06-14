@@ -102,7 +102,12 @@ vercel --prod --yes
 After merging to `main`, **trigger a Render deploy** so `/api/model/card` is live:
 
 1. [Render Dashboard](https://dashboard.render.com) → **bogie-flow** → **Manual Deploy** → **Deploy latest commit** (branch `main`).
-2. Or add GitHub secret `RENDER_DEPLOY_HOOK` (Settings → Deploy Hook URL) so `.github/workflows/render-deploy.yml` auto-triggers after CI.
+2. **Preferred (CI-gated):** GitHub Actions secrets on **Stormynubee/Bogieflow**:
+   - `RENDER_API_KEY` — [Render API key](https://dashboard.render.com/u/settings#api-keys)
+   - `RENDER_SERVICE_ID` — `srv-d8nfc36rnols73dnc53g`
+   
+   After CI passes on `main`, `.github/workflows/render-deploy.yml` calls `POST /v1/services/{id}/deploys`.
+3. **Alternative:** `RENDER_DEPLOY_HOOK` — copy Deploy Hook URL from Render → Settings → Deploy Hook (dashboard-only; not available via API).
 
 Verify after deploy (~5–10 min):
 
