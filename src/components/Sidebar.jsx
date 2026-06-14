@@ -1,4 +1,11 @@
-export default function Sidebar({ connected, onScan }) {
+const NAV_ITEMS = [
+  { id: 'overview', icon: 'dashboard', label: 'OVERVIEW' },
+  { id: 'analysis', icon: 'query_stats', label: 'ANALYSIS' },
+  { id: 'maintenance', icon: 'build', label: 'MAINTENANCE' },
+  { id: 'climate', icon: 'thermostat', label: 'CLIMATE' },
+]
+
+export default function Sidebar({ connected, activeView, onNavigate, onScan }) {
   return (
     <nav className="sidebar" aria-label="Main navigation">
       <div className="sidebar-header">
@@ -7,22 +14,17 @@ export default function Sidebar({ connected, onScan }) {
       </div>
 
       <div className="sidebar-nav">
-        <button type="button" className="nav-item nav-item-active">
-          <span className="material-symbols-outlined">dashboard</span>
-          OVERVIEW
-        </button>
-        <button type="button" className="nav-item" disabled>
-          <span className="material-symbols-outlined">query_stats</span>
-          ANALYSIS
-        </button>
-        <button type="button" className="nav-item" disabled>
-          <span className="material-symbols-outlined">build</span>
-          MAINTENANCE
-        </button>
-        <button type="button" className="nav-item" disabled>
-          <span className="material-symbols-outlined">thermostat</span>
-          CLIMATE
-        </button>
+        {NAV_ITEMS.map(({ id, icon, label }) => (
+          <button
+            key={id}
+            type="button"
+            className={`nav-item ${activeView === id ? 'nav-item-active' : ''}`}
+            onClick={() => onNavigate(id)}
+          >
+            <span className="material-symbols-outlined">{icon}</span>
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="sidebar-footer">

@@ -1,14 +1,18 @@
+import { useState } from 'react'
 import { useWebSocket } from './hooks/useWebSocket'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
-import CorridorMatrix from './components/CorridorMatrix'
-import ClimatePanel from './components/ClimatePanel'
-import ControlPanel from './components/ControlPanel'
-import AnomalyStream from './components/AnomalyStream'
+import OverviewView from './components/views/OverviewView'
+import AnalysisView from './components/views/AnalysisView'
+import MaintenanceView from './components/views/MaintenanceView'
+import ClimateView from './components/views/ClimateView'
 
 export default function App() {
   const { connected, segments, train, tickets, logs, activeRiskIndex } =
     useWebSocket()
+
+  const [view, setView] = useState('overview')
+  const [selectedSegmentId, setSelectedSegmentId] = useState('S3')
 
   const handleScan = async () => {
     try {
@@ -26,42 +30,61 @@ export default function App() {
     }
   }
 
+  const handleSegmentClick = (id) => {
+    setSelectedSegmentId(id)
+    setView('analysis')
+  }
+
   return (
     <div className="shell">
-      <Sidebar connected={connected} onScan={handleScan} />
+      <div className="scanline" aria-hidden="true" />
+      <Sidebar
+        connected={connected}
+        activeView={view}
+        onNavigate={setView}
+        onScan={handleScan}
+      />
 
       <div className="workspace">
         <TopBar connected={connected} />
 
-        <main className="main-grid">
-          <div className="main-primary">
-            <CorridorMatrix
+        <main className={`main-grid ${view !== 'overview' ? 'main-grid-single' : ''}`}>
+          {view === 'overview' && (
+            <OverviewView
               segments={segments}
               train={train}
+              tickets={tickets}
+              logs={logs}
               activeRiskIndex={activeRiskIndex}
+              onSegmentClick={handleSegmentClick}
             />
-            <ClimatePanel segments={segments} />
-            <div id="controls-panel" className="panel controls-panel">
-              <h2>
-                <span className="material-symbols-outlined panel-icon">tune</span>
-                INJECTION CONTROLS
-              </h2>
-              <ControlPanel />
-            </div>
-          </div>
-
-          <div className="main-secondary">
-            <AnomalyStream tickets={tickets} logs={logs} />
-          </div>
+          )}
+          {view === 'analysis' && (
+            <AnalysisView
+              segments={segments}
+              activeRiskIndex={activeRiskIndex}
+              logs={logs}
+              selectedSegmentId={selectedSegmentId}
+              onSelectSegment={setSelectedSegmentId}
+            />
+          )}
+          {view === 'maintenance' && (
+            <MaintenanceView tickets={tickets} logs={logs} />
+          )}
+          {view === 'climate' && <ClimateView segments={segments} />}
         </main>
 
         <footer className="app-footer">
           <span>
             <span className="footer-dot" />
-            UPTIME: 99.98% | AGENT: NOMINAL | CORRIDOR: S1–S6
+            UPTIME: 99.98% | AGENT: NOMINAL | SEGMENT: A-104
           </span>
-          <span className="footer-tagline">
-            Others monitor the rail. We monitor the ballast.
+          <span className="footer-links">
+            <a href="#station">STATION_MAP</a>
+            <span className="footer-sep">|</span>
+            <a href="#logs">NETWORK_LOGS</a>
+            <span className="footer-sep">|</span>
+            <a href="#sop">SOP_DOCS</a>
           </span>
         </footer>
       </div>

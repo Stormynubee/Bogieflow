@@ -1,8 +1,4 @@
-function formatTs(ts) {
-  if (!ts) return '[TS:--:--:--.---]'
-  const d = new Date(ts * 1000)
-  return `[TS:${d.toISOString().slice(11, 19)}.${String(d.getMilliseconds()).padStart(3, '0')}]`
-}
+import LogEntry from './LogEntry'
 
 export default function AnomalyStream({ tickets, logs }) {
   const entries = [
@@ -17,7 +13,7 @@ export default function AnomalyStream({ tickets, logs }) {
     ...logs.slice(-8).map((log, i) => ({
       key: `log-${log.timestamp}-${i}`,
       critical: log.message?.includes('CRITICAL') || log.message?.includes('P1'),
-      ts: log.timestamp,
+      timestamp: log.timestamp,
       node: log.agent,
       title: log.message?.slice(0, 48) || 'LOG',
       detail: '',
@@ -38,24 +34,7 @@ export default function AnomalyStream({ tickets, logs }) {
           <li className="stream-item stream-muted">Waiting for telemetry…</li>
         )}
         {entries.map((e) => (
-          <li
-            key={e.key}
-            className={`stream-item ${e.critical ? 'stream-critical' : ''}`}
-          >
-            <div className="stream-meta">
-              <span>{formatTs(e.ts)}</span>
-              <span>{e.node}</span>
-            </div>
-            <div className="stream-body">
-              <span className="material-symbols-outlined stream-icon">
-                {e.critical ? 'warning' : 'info'}
-              </span>
-              <div>
-                <div className="stream-title">{e.title}</div>
-                {e.detail && <div className="stream-detail">{e.detail}</div>}
-              </div>
-            </div>
-          </li>
+          <LogEntry key={e.key} entry={e} />
         ))}
       </ul>
     </section>
