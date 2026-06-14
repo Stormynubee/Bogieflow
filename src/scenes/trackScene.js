@@ -28,13 +28,25 @@ export function createTrackScene(container, { segmentsRef, trainRef, onSegmentSe
   const height = container.clientHeight
 
   const scene = new THREE.Scene()
+  scene.background = new THREE.Color(0x08090b)
   const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000)
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+  const renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   container.appendChild(renderer.domElement)
 
   const trackGroup = new THREE.Group()
+
+  // Ground plane beneath the track
+  const groundGeom = new THREE.PlaneGeometry(30, 12)
+  const groundMat = new THREE.MeshPhongMaterial({
+    color: 0x0c0d10,
+    shininess: 2,
+  })
+  const ground = new THREE.Mesh(groundGeom, groundMat)
+  ground.rotation.x = -Math.PI / 2
+  ground.position.y = -0.2
+  trackGroup.add(ground)
 
   // Ballast bed (wider, solid grey concrete slab)
   const ballastGeom = new THREE.BoxGeometry(22, 0.2, 3.2)
@@ -77,14 +89,22 @@ export function createTrackScene(container, { segmentsRef, trainRef, onSegmentSe
   
   SEGMENT_IDS.forEach((id) => {
     // Solid capsule indicating active segment risk
-    const markerGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16)
+    const markerGeom = new THREE.CylinderGeometry(0.25, 0.3, 1.0, 16)
     const markerMat = new THREE.MeshPhongMaterial({
       color: 0x22c55e,
       shininess: 100,
     })
     const marker = new THREE.Mesh(markerGeom, markerMat)
-    marker.position.set(segmentToX(id), 0.5, 0)
+    marker.position.set(segmentToX(id), 0.55, 0)
     marker.userData.segmentId = id
+
+    // Base ring for visual grounding
+    const ringGeom = new THREE.TorusGeometry(0.35, 0.05, 8, 24)
+    const ringMat = new THREE.MeshPhongMaterial({ color: 0x22c55e, shininess: 60 })
+    const ring = new THREE.Mesh(ringGeom, ringMat)
+    ring.rotation.x = Math.PI / 2
+    ring.position.y = -0.5
+    marker.add(ring)
     
     trackGroup.add(marker)
     markerPickables.push(marker)
@@ -92,11 +112,11 @@ export function createTrackScene(container, { segmentsRef, trainRef, onSegmentSe
   })
 
   // Pulsating anomaly sphere indicating location of active risk
-  const sphereGeom = new THREE.SphereGeometry(0.35, 32, 32)
+  const sphereGeom = new THREE.SphereGeometry(0.3, 32, 32)
   const sphereMat = new THREE.MeshPhongMaterial({
     color: 0xff5545,
     emissive: 0xff2200,
-    emissiveIntensity: 0.8,
+    emissiveIntensity: 0.5,
     shininess: 100,
   })
   const anomaly = new THREE.Mesh(sphereGeom, sphereMat)
@@ -173,10 +193,9 @@ export function createTrackScene(container, { segmentsRef, trainRef, onSegmentSe
     const targetX = worst ? segmentToX(worst.id) : 0
     anomaly.position.x += (targetX - anomaly.position.x) * 0.05
     
-    // Anomaly pulsation scale and intensity
-    const pulse = 1 + Math.sin(Date.now() * 0.008) * 0.15
+    // Anomaly pulsation — single smooth scale pulse, no emissive flicker
+    const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.08
     anomaly.scale.setScalar(pulse)
-    anomaly.material.emissiveIntensity = 0.5 + Math.sin(Date.now() * 0.01) * 0.3
 
     // Update segment markers colors & glow states
     for (const seg of segs) {

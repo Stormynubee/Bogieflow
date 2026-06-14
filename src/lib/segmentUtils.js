@@ -40,7 +40,7 @@ export function computeMetrics(segments, activeRiskIndex, focusSegment = null) {
   const az = focus.az ?? 0.3
 
   return {
-    peakAmplitude: Number((az || 0.3 + risk * 0.5).toFixed(2)),
+    peakAmplitude: Number(((az || 0.3) + risk * 0.5).toFixed(2)),
     fatigueIndex: Number((risk * 100).toFixed(1)),
     bearingTemp: Number((38 + risk * 12).toFixed(1)),
     liveFrequency: Number((42 + vibZ * 4).toFixed(1)),

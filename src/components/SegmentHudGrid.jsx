@@ -11,7 +11,7 @@ export default function SegmentHudGrid({ segments, onSegmentClick }) {
         <button
           key={seg.id}
           type="button"
-          className={`hud-cell ${isCritical(seg) ? 'hud-critical glow-active' : 'glass-panel'}`}
+          className={`hud-cell ${isCritical(seg) ? 'hud-critical' : ''}`}
           onClick={() => onSegmentClick?.(seg.id)}
         >
           {isCritical(seg) && (

@@ -28,7 +28,7 @@ export default function OverviewView({
               CORRIDOR RISK MATRIX
             </h2>
             <span className="live-badge">
-              LIVE FEED <span className="live-dot text-flicker">●</span>
+              LIVE FEED <span className="live-dot">●</span>
             </span>
           </div>
 

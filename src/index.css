@@ -30,14 +30,19 @@
   --transition-normal: 250ms ease;
 }
 
-/* Boot loader — full-viewport corridor startup */
+/* Boot splash — brand + terminal init panel */
 .boot-screen {
   position: fixed;
   inset: 0;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
-  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background:
+    radial-gradient(ellipse 85% 50% at 50% 42%, rgba(255, 85, 69, 0.06) 0%, transparent 70%),
+    var(--bg);
   transition: opacity var(--transition-normal);
 }
 
@@ -46,57 +51,41 @@
   pointer-events: none;
 }
 
-.boot-layout {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr;
-  align-content: center;
-  gap: clamp(32px, 6vh, 64px);
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: clamp(24px, 5vw, 72px) clamp(20px, 4vw, 48px) clamp(16px, 3vh, 32px);
+.boot-shell {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 4dvh, 28px);
+  width: min(100%, 480px);
+  animation: boot-shell-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@media (min-width: 768px) {
-  .boot-layout {
-    grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.15fr);
-    gap: clamp(40px, 8vw, 96px);
+@keyframes boot-shell-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.boot-intro {
+.boot-brand {
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.boot-accent {
+  align-items: center;
+  gap: clamp(14px, 3vw, 18px);
   flex-shrink: 0;
-  width: 4px;
-  align-self: stretch;
-  min-height: 120px;
-  background: linear-gradient(180deg, var(--primary) 0%, transparent 100%);
-  border-radius: 2px;
 }
 
-.boot-intro-copy {
+.boot-brand-copy {
   min-width: 0;
-}
-
-.boot-kicker {
-  margin: 0 0 10px;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--on-surface-variant);
 }
 
 .boot-title {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-size: clamp(1.625rem, 5.5vw, 2.25rem);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -104,126 +93,536 @@
 }
 
 .boot-tagline {
-  margin: 16px 0 0;
-  max-width: 28ch;
+  margin: 8px 0 0;
   font-family: var(--font-sans);
-  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
-  line-height: 1.55;
+  font-size: clamp(0.8125rem, 2.2vw, 0.9375rem);
+  line-height: 1.5;
   color: var(--on-surface-variant);
 }
 
-.boot-steps-panel {
-  width: 100%;
-  min-width: 0;
-  padding: clamp(16px, 3vw, 24px);
-  background: var(--surface);
+/* Terminal panel */
+.boot-terminal {
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 24px 48px rgba(0, 0, 0, 0.35);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
-.boot-steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.boot-terminal-out {
+  opacity: 0.65;
+  transform: scale(0.985);
 }
 
-.boot-step {
-  display: flex;
-  align-items: flex-start;
+.boot-terminal-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
   gap: 12px;
-  opacity: 0.35;
-  transition: opacity var(--transition-normal);
+  padding: 10px 14px;
+  background: var(--surface-dim);
+  border-bottom: 1px solid var(--outline-variant);
 }
 
-.boot-step-active,
-.boot-step-done {
-  opacity: 1;
+.boot-terminal-dots {
+  display: flex;
+  gap: 5px;
 }
 
-.boot-step-marker {
-  flex-shrink: 0;
-  width: 18px;
+.boot-terminal-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--surface-variant);
+}
+
+.boot-terminal-dots span:first-child {
+  background: rgba(255, 85, 69, 0.55);
+}
+
+.boot-terminal-title {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  line-height: 1.6;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
   color: var(--on-surface-variant);
   text-align: center;
 }
 
-.boot-step-active .boot-step-marker {
-  color: var(--primary);
+.boot-terminal-pct {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  color: var(--on-surface);
+  min-width: 2.5em;
+  text-align: right;
 }
 
-.boot-step-done .boot-step-marker {
+.boot-terminal-log {
+  margin: 0;
+  padding: 14px 16px 12px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 168px;
+  border-left: 2px solid var(--primary);
+  margin-left: 0;
+}
+
+.boot-term-line {
+  display: grid;
+  grid-template-columns: 2rem 5.5rem 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  transition: opacity var(--transition-normal);
+}
+
+.boot-term-pending {
+  opacity: 0.28;
+}
+
+.boot-term-active {
+  opacity: 1;
+}
+
+.boot-term-done {
+  opacity: 0.82;
+}
+
+.boot-term-status {
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.boot-term-done .boot-term-status {
   color: var(--color-healthy);
 }
 
-.boot-step-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.boot-term-active .boot-term-status {
+  color: var(--primary);
+}
+
+.boot-term-module {
+  color: var(--on-surface);
+  letter-spacing: 0.02em;
+}
+
+.boot-term-message {
+  color: var(--on-surface-variant);
   min-width: 0;
 }
 
-.boot-step-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+.boot-term-active .boot-term-message {
   color: var(--on-surface);
 }
 
-.boot-step-detail {
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  color: var(--on-surface-variant);
+.boot-term-cursor {
+  margin-left: 2px;
+  color: var(--primary);
+  animation: boot-term-blink 1s step-end infinite;
 }
 
-.boot-bar {
-  flex-shrink: 0;
-  width: 100%;
-  padding: 0 clamp(20px, 4vw, 48px) clamp(18px, 3vh, 28px);
-  max-width: 1100px;
-  margin: 0 auto;
+@keyframes boot-term-blink {
+  50% {
+    opacity: 0;
+  }
 }
 
-.boot-bar-track {
+.boot-terminal-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+
+.boot-progress-track {
   height: 2px;
   background: var(--surface-variant);
   border-radius: 1px;
   overflow: hidden;
 }
 
-.boot-bar-fill {
+.boot-progress-fill {
   height: 100%;
   background: var(--primary);
   transition: width 0.06s linear;
 }
 
-.boot-bar-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
+.boot-terminal-status {
   font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.1em;
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--on-surface-variant);
 }
 
-.boot-bar-pct {
+/* Continue CTA — glow, shimmer, countdown ring */
+.boot-continue-wrap {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.55s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.boot-continue-wrap-visible {
+  max-height: 80px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.boot-continue {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 85, 69, 0.45);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #1a1211 0%, #0e1014 55%, #121018 100%);
+  color: var(--on-primary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  isolation: isolate;
+  animation: boot-continue-pulse 5s ease-in-out infinite;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.boot-continue:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 120, 100, 0.75);
+  box-shadow:
+    0 0 28px rgba(255, 85, 69, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.boot-continue:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.boot-continue-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 85, 69, 0.22) 0%, transparent 62%);
+  z-index: 0;
+  animation: boot-continue-glow 5.5s ease-in-out infinite;
+}
+
+.boot-continue-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.14) 50%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  z-index: 1;
+  animation: boot-continue-shine 7s ease-in-out infinite;
+}
+
+.boot-continue-ring {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.boot-continue-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.boot-continue-ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 2.5;
+}
+
+.boot-continue-ring-fill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 119.38;
+  stroke-dashoffset: calc(119.38 - (119.38 * var(--ring-progress, 0) / 100));
+  transition: stroke-dashoffset 1.05s linear;
+  filter: drop-shadow(0 0 4px rgba(255, 85, 69, 0.65));
+}
+
+.boot-continue-label {
+  position: relative;
+  z-index: 2;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--on-surface);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .boot-screen-out {
-    transition: none;
+.boot-continue-hint {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  min-width: 2.5em;
+  text-align: right;
+}
+
+@keyframes boot-continue-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 85, 69, 0.25),
+      0 4px 16px rgba(0, 0, 0, 0.25);
   }
 
-  .boot-step {
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(255, 85, 69, 0),
+      0 0 24px rgba(255, 85, 69, 0.16),
+      0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@keyframes boot-continue-glow {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes boot-continue-shine {
+  0%,
+  18% {
+    transform: translateX(-120%);
+  }
+
+  38% {
+    transform: translateX(120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* Boot emblem (SVG mark) */
+.boot-mark {
+  flex-shrink: 0;
+  width: clamp(40px, 10vw, 48px);
+  animation: boot-mark-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.08s;
+}
+
+.boot-mark-out {
+  opacity: 0.5;
+  transition: opacity var(--transition-normal);
+}
+
+.boot-mark-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.boot-mark-frame {
+  fill: var(--surface-container);
+  stroke: var(--outline-variant);
+  stroke-width: 1;
+}
+
+.boot-mark-layer {
+  stroke: #1e2128;
+  stroke-width: 0.5;
+}
+
+.boot-mark-layer-a {
+  fill: #23262e;
+}
+
+.boot-mark-layer-b {
+  fill: #1a1d24;
+}
+
+.boot-mark-layer-c {
+  fill: #14161c;
+}
+
+.boot-mark-anomaly {
+  fill: var(--primary);
+  opacity: 0.85;
+  animation: boot-mark-anomaly 2.2s ease-in-out infinite;
+}
+
+.boot-mark-sleeper {
+  fill: #3a3f4a;
+}
+
+.boot-mark-chassis {
+  fill: #e8ebf0;
+}
+
+.boot-mark-wheel-ring {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.25;
+}
+
+.boot-mark-wheel-hub {
+  fill: #0a0b0e;
+}
+
+.boot-mark-wheel-spoke {
+  stroke: var(--primary-container);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.boot-mark-wheel-l,
+.boot-mark-wheel-r {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: boot-mark-wheel-spin var(--boot-mark-spin, 4.5s) linear infinite;
+}
+
+.boot-mark-wheel-r {
+  animation-direction: reverse;
+}
+
+.boot-mark-scan {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: boot-mark-scan 2.8s ease-in-out infinite;
+}
+
+.boot-mark-telemetry {
+  stroke: var(--on-surface-variant);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+@keyframes boot-mark-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes boot-mark-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes boot-mark-scan {
+  0%,
+  12% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 0.85;
+    transform: translateY(52px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(58px);
+  }
+}
+
+@keyframes boot-mark-anomaly {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@media (max-width: 380px) {
+  .boot-term-line {
+    grid-template-columns: 1.75rem 4.75rem 1fr;
+    gap: 8px;
+    font-size: 0.625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-shell {
+    animation: none;
+  }
+
+  .boot-mark-wheel-l,
+  .boot-mark-wheel-r,
+  .boot-mark-scan,
+  .boot-mark-anomaly,
+  .boot-term-cursor,
+  .boot-continue,
+  .boot-continue-glow,
+  .boot-continue-shine {
+    animation: none;
+  }
+
+  .boot-continue-wrap {
+    transition: opacity 0.2s ease;
+  }
+
+  .boot-mark {
+    animation: none;
+  }
+
+  .boot-terminal-out {
+    transform: none;
+  }
+
+  .boot-screen-out {
     transition: none;
   }
 }

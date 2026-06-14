@@ -16,12 +16,15 @@ export function attachOrbitZoom(container, camera, target, opts = {}) {
   // Initialize OrbitControls on the container element
   const controls = new OrbitControls(camera, container)
   controls.enableDamping = true
-  controls.dampingFactor = 0.05
+  controls.dampingFactor = 0.08
   controls.minDistance = minZoom
   controls.maxDistance = maxZoom
+  controls.maxPolarAngle = Math.PI * 0.48
+  controls.minPolarAngle = Math.PI * 0.15
   controls.target.copy(target)
   controls.enablePan = true
   controls.enableZoom = true
+  controls.saveState()
 
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2()
@@ -75,9 +78,6 @@ export function attachOrbitZoom(container, camera, target, opts = {}) {
 
   const resetView = () => {
     controls.reset()
-    camera.position.set(0, 3, initialZoom)
-    controls.target.copy(target)
-    controls.update()
   }
 
   const dispose = () => {

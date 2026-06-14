@@ -1,28 +1,34 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import BootFlowMark from './BootFlowMark'
+import BootTerminal from './BootTerminal'
+import BootContinueButton from './BootContinueButton'
+import { BOOT_LOG_LINES } from '../data/bootLogs.js'
 
-const BOOT_MS = 4000
+const BOOT_MS = 3200
+const AUTO_MS = 3000
 const FADE_MS = 420
-
-const STEPS = [
-  { at: 0, id: 'link', label: 'Corridor link', detail: 'Opening telemetry bridge' },
-  { at: 520, id: 'track', label: 'Track model', detail: 'Geometry compiled' },
-  { at: 1040, id: 'bogie', label: 'Bogie assembly', detail: 'Wheel pair mounted' },
-  { at: 1560, id: 'segments', label: 'Segments S1–S6', detail: 'Baseline nominal' },
-  { at: 2200, id: 'stream', label: 'Live stream', detail: 'Awaiting train packets' },
-  { at: 3000, id: 'handoff', label: 'Dashboard', detail: 'Loading overview' },
-]
 
 export default function BootLoader({ onComplete }) {
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
 
-  const [activeStep, setActiveStep] = useState(0)
+  const handoffStartedRef = useRef(false)
+
+  const [completedCount, setCompletedCount] = useState(0)
   const [progress, setProgress] = useState(0)
   const [phase, setPhase] = useState('boot')
+  const [countdown, setCountdown] = useState(3)
+
+  const handoff = useCallback(() => {
+    if (handoffStartedRef.current) return
+    handoffStartedRef.current = true
+    setPhase('exit')
+    window.setTimeout(() => onCompleteRef.current?.(), FADE_MS)
+  }, [])
 
   useEffect(() => {
-    const timers = STEPS.map(({ at }, index) =>
-      window.setTimeout(() => setActiveStep(index + 1), at),
+    const stepTimers = BOOT_LOG_LINES.map(({ at }, index) =>
+      window.setTimeout(() => setCompletedCount(index + 1), at),
     )
 
     const started = Date.now()
@@ -31,26 +37,33 @@ export default function BootLoader({ onComplete }) {
       setProgress(pct)
     }, 40)
 
-    const finishTimer = window.setTimeout(() => {
+    const readyTimer = window.setTimeout(() => {
+      setCompletedCount(BOOT_LOG_LINES.length)
       setProgress(100)
-      setActiveStep(STEPS.length)
-      setPhase('exit')
-      window.setTimeout(() => onCompleteRef.current?.(), FADE_MS)
+      setPhase('ready')
     }, BOOT_MS)
 
     return () => {
-      timers.forEach(clearTimeout)
+      stepTimers.forEach(clearTimeout)
       clearInterval(progressTimer)
-      clearTimeout(finishTimer)
+      clearTimeout(readyTimer)
     }
   }, [])
 
-  const statusText =
-    phase === 'exit'
-      ? 'Opening dashboard'
-      : progress >= 95
-        ? 'Almost there'
-        : 'Starting corridor systems'
+  useEffect(() => {
+    if (phase !== 'ready') return
+
+    setCountdown(3)
+    const autoTimer = window.setTimeout(handoff, AUTO_MS)
+    const tickTimer = window.setInterval(() => {
+      setCountdown((prev) => Math.max(0, prev - 1))
+    }, 1000)
+
+    return () => {
+      clearTimeout(autoTimer)
+      clearInterval(tickTimer)
+    }
+  }, [phase, handoff])
 
   return (
     <div
@@ -58,12 +71,14 @@ export default function BootLoader({ onComplete }) {
       role="status"
       aria-live="polite"
       aria-label="Loading Bogie Flow"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
     >
-      <div className="boot-layout">
-        <section className="boot-intro">
-          <span className="boot-accent" aria-hidden="true" />
-          <div className="boot-intro-copy">
-            <p className="boot-kicker">Climate-aware rail analytics</p>
+      <div className="boot-shell">
+        <header className="boot-brand">
+          <BootFlowMark phase={phase} progress={progress} />
+          <div className="boot-brand-copy">
             <h1 className="boot-title">Bogie Flow</h1>
             <p className="boot-tagline">
               Others monitor the rail.
@@ -71,41 +86,21 @@ export default function BootLoader({ onComplete }) {
               We monitor the ballast.
             </p>
           </div>
-        </section>
+        </header>
 
-        <section className="boot-steps-panel" aria-label="Startup progress">
-          <ol className="boot-steps">
-            {STEPS.map((step, index) => {
-              const done = index < activeStep
-              const current = index === activeStep && phase === 'boot'
-              return (
-                <li
-                  key={step.id}
-                  className={`boot-step ${done ? 'boot-step-done' : ''} ${current ? 'boot-step-active' : ''}`}
-                >
-                  <span className="boot-step-marker" aria-hidden="true">
-                    {done ? '✓' : current ? '●' : '○'}
-                  </span>
-                  <span className="boot-step-body">
-                    <span className="boot-step-label">{step.label}</span>
-                    <span className="boot-step-detail">{step.detail}</span>
-                  </span>
-                </li>
-              )
-            })}
-          </ol>
-        </section>
+        <BootTerminal
+          completedCount={completedCount}
+          progress={progress}
+          phase={phase}
+          countdown={countdown}
+        />
+
+        <BootContinueButton
+          visible={phase === 'ready' || phase === 'exit'}
+          countdown={countdown}
+          onContinue={handoff}
+        />
       </div>
-
-      <footer className="boot-bar">
-        <div className="boot-bar-track" aria-hidden="true">
-          <div className="boot-bar-fill" style={{ width: `${progress}%` }} />
-        </div>
-        <div className="boot-bar-meta">
-          <span className="boot-bar-status">{statusText}</span>
-          <span className="boot-bar-pct">{Math.round(progress)}%</span>
-        </div>
-      </footer>
     </div>
   )
 }

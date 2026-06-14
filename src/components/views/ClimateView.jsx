@@ -54,7 +54,7 @@ export default function ClimateView({ segments }) {
                   opacity: 0.4 + (s.rainfall ?? 0) * 0.6,
                   boxShadow:
                     (s.risk_index ?? 0) > 0.5
-                      ? '0 0 24px rgba(255,85,69,0.5)'
+                      ? '0 0 8px rgba(255,85,69,0.15)'
                       : 'none',
                 }}
               >

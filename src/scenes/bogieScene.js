@@ -11,8 +11,9 @@ export function createBogieScene(container, { focusSegmentRef }) {
   const height = container.clientHeight
 
   const scene = new THREE.Scene()
+  scene.background = new THREE.Color(0x08090b)
   const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000)
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+  const renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   container.appendChild(renderer.domElement)
@@ -34,14 +35,12 @@ export function createBogieScene(container, { focusSegmentRef }) {
   const wheelGroup1 = new THREE.Group()
   const wheelGroup2 = new THREE.Group()
 
-  // Tire (thick torus geometry, dark iron color)
+  // Tire (thick torus geometry, dark iron color — no emissive glow)
   const tireGeom = new THREE.TorusGeometry(0.9, 0.22, 16, 64)
   const tireMat = new THREE.MeshPhongMaterial({
     color: 0xff3b30,
-    emissive: 0x441111,
-    emissiveIntensity: 0.3,
-    specular: 0xffffff,
-    shininess: 90,
+    specular: 0x666666,
+    shininess: 70,
   })
   const tire1 = new THREE.Mesh(tireGeom, tireMat)
   const tire2 = new THREE.Mesh(tireGeom, tireMat)
@@ -66,6 +65,21 @@ export function createBogieScene(container, { focusSegmentRef }) {
   wheelGroup2.position.x = 1.6
   
   group.add(wheelGroup1, wheelGroup2)
+
+  // Brake discs (thin cylinders between wheels and hubs)
+  const brakeGeom = new THREE.CylinderGeometry(0.55, 0.55, 0.08, 32)
+  const brakeMat = new THREE.MeshPhongMaterial({
+    color: 0x2a2c30,
+    specular: 0x444444,
+    shininess: 40,
+  })
+  const brake1 = new THREE.Mesh(brakeGeom, brakeMat)
+  brake1.rotation.z = Math.PI / 2
+  brake1.position.set(-1.3, 0, 0)
+  const brake2 = new THREE.Mesh(brakeGeom, brakeMat)
+  brake2.rotation.z = Math.PI / 2
+  brake2.position.set(1.3, 0, 0)
+  group.add(brake1, brake2)
 
   // Suspension springs / dampers on top of axle (visual depth)
   const springGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.6, 16)
@@ -120,20 +134,15 @@ export function createBogieScene(container, { focusSegmentRef }) {
       risk = focus.risk_index ?? 0
       const color = hexToColor(focus.color)
       tireMat.color.setHex(color)
-      tireMat.emissive.setHex(color >> 3)
-      tireMat.emissiveIntensity = 0.2 + risk * 0.6
       
       // Speed increases with vibration z-score
       const z = focus.vib_z ?? 0
       speed = 0.01 + Math.min(0.2, (z + 1) * 0.015)
     }
 
-    // Auto rotate the wheel assembly (simulating train movement)
-    wheelGroup1.rotation.y += speed
-    wheelGroup2.rotation.y += speed
-    
-    // Subtle idle spin of the whole group for visual dynamics
-    group.rotation.y += 0.001
+    // Rotate wheels around x-axis (the axle runs along x)
+    wheelGroup1.rotation.x += speed
+    wheelGroup2.rotation.x += speed
 
     renderer.render(scene, camera)
   }

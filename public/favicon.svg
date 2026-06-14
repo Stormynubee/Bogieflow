@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="coralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7f70" />
+      <stop offset="100%" stop-color="#ff5545" />
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized Track Bed / Ballast at the bottom -->
+  <path d="M10 110 L118 110" stroke="#ff5545" stroke-width="4" stroke-linecap="round" opacity="0.3" />
+  <path d="M10 118 L118 118" stroke="#ff5545" stroke-width="2" stroke-linecap="round" opacity="0.15" />
+  
+  <!-- Main Bogie Frame (Chassis) -->
+  <path d="M24 48 L44 48 L50 36 L78 36 L84 48 L104 48 L104 60 L92 60 L86 54 L42 54 L36 60 L24 60 Z" fill="url(#coralGradient)" />
+  
+  <!-- Left Wheel Group -->
+  <circle cx="34" cy="82" r="22" fill="none" stroke="url(#coralGradient)" stroke-width="4" />
+  <circle cx="34" cy="82" r="10" fill="none" stroke="url(#coralGradient)" stroke-width="2" />
+  <circle cx="34" cy="82" r="4" fill="#ffffff" />
+  
+  <!-- Right Wheel Group -->
+  <circle cx="94" cy="82" r="22" fill="none" stroke="url(#coralGradient)" stroke-width="4" />
+  <circle cx="94" cy="82" r="10" fill="none" stroke="url(#coralGradient)" stroke-width="2" />
+  <circle cx="94" cy="82" r="4" fill="#ffffff" />
+  
+  <!-- Primary Suspension Springs -->
+  <line x1="34" y1="60" x2="34" y2="72" stroke="#ffffff" stroke-width="3" stroke-dasharray="2 2" />
+  <line x1="94" y1="60" x2="94" y2="72" stroke="#ffffff" stroke-width="3" stroke-dasharray="2 2" />
+  
+  <!-- Center Pivot / Air Spring -->
+  <rect x="56" y="24" width="16" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+  
+  <!-- Connecting link -->
+  <path d="M50 78 L78 78" stroke="url(#coralGradient)" stroke-width="3" />
+  <circle cx="64" cy="78" r="3" fill="#ffffff" />
+</svg>

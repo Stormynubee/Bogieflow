@@ -60,7 +60,7 @@ describe('computeMetrics', () => {
       0.5,
       { id: 'S4', risk_index: 0.5, vib_z: 2.5, az: 1.2 },
     )
-    expect(m.peakAmplitude).toBe(1.2)
+    expect(m.peakAmplitude).toBe(1.45)
     expect(m.fatigueIndex).toBe(50)
     expect(m.bearingTemp).toBeCloseTo(44, 0)
     expect(m.liveFrequency).toBe(52)

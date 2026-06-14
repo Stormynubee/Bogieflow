@@ -1,20 +1,41 @@
-# Bogie Flow
+Metadata-Version: 2.4
+Name: bogie-flow
+Version: 1.0.0
+Summary: Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways under Bogie Flow
+Author-email: Hansraj Tiwari <stormylalala2233@gmail.com>
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastapi>=0.100.0
+Requires-Dist: uvicorn[standard]>=0.22.0
+Requires-Dist: websockets>=11.0
+Requires-Dist: scikit-learn==1.8.0
+Requires-Dist: joblib>=1.2.0
+Requires-Dist: numpy>=1.24.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: httpx>=0.24.0; extra == "dev"
+Dynamic: license-file
+
+# RailTwin-X Lite
 
 **Others monitor the rail. We monitor the ballast.**
 
-![Bogie Flow Banner](assets/bogie_flow_banner.png)
-
 Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github-actions&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
-[![Pytest](https://img.shields.io/badge/Pytest-9%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
-[![Vitest](https://img.shields.io/badge/Vitest-14%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
-[![Release](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/releases)
-[![License](https://img.shields.io/badge/License-MIT-ff5545?style=flat-square&labelColor=0c0d12&logo=open-source-initiative&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.11-ff5545?style=flat-square&labelColor=0c0d12&logo=python&logoColor=ffffff)](https://www.python.org/)
-[![Node](https://img.shields.io/badge/Node-20.x-ff5545?style=flat-square&labelColor=0c0d12&logo=node.js&logoColor=ffffff)](https://nodejs.org/)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-9%20passing-brightgreen?style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
+[![Release Version](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/releases)
+[![License](https://img.shields.io/github/license/Stormynubee/Faraway2026Japan?label=License&style=flat-square)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)](https://www.python.org/)
+[![Node](https://img.shields.io/badge/Node-20.x-green?style=flat-square)](https://nodejs.org/)
 
-Bogie Flow is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
+RailTwin-X Lite is a real-time digital twin monitoring application designed for the FAR AWAY 2026 hackathon under the Railways theme. It fuses environmental climate indicators (rainfall and soil moisture) with train bogie z-axis vibration anomalies to dynamically calculate track-bed structural risk. The application identifies track ballast degradation issues, such as mud pumping, and auto-prioritizes emergency maintenance tickets using a multi-agent workflow integrated with a machine learning classification model.
 
 ---
 
