@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "railtwinx-lite"
 version = "1.0.0"
 authors = [
-    { name = "Hansraj Tiwari", email = "priyanktiwari434@gmail.com" }
+    { name = "Hansraj Tiwari", email = "stormylalala2233@gmail.com" }
 ]
 description = "Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways"
 readme = "README.md"
