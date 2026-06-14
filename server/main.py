@@ -24,6 +24,8 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from server.guide import ai_guide_answer
+from server.explain import explain_ticket
+from server.impact import compute_impact
 from server.simulation import SimulationEngine
 
 clients: set[WebSocket] = set()
@@ -112,6 +114,10 @@ class GuideChatRequest(BaseModel):
     history: list[dict[str, str]] = Field(default_factory=list)
 
 
+class WeatherModeRequest(BaseModel):
+    live: bool
+
+
 def health_payload() -> dict[str, Any]:
     return {"status": "ok", "service": "bogie-flow", "segments": 6}
 
@@ -138,6 +144,43 @@ async def inject_anomaly(body: AnomalyInject):
     engine = require_sim()
     result = engine.inject_anomaly(body.segment_id)
     return {"ok": True, **result}
+
+
+@app.post("/api/sim/reset")
+async def reset_corridor():
+    engine = require_sim()
+    return engine.reset_corridor()
+
+
+@app.post("/api/weather/mode")
+async def set_weather_mode(body: WeatherModeRequest):
+    engine = require_sim()
+    return {"ok": True, **engine.set_live_weather(body.live)}
+
+
+@app.get("/api/impact")
+def get_impact():
+    engine = require_sim()
+    open_tickets = [t.to_dict() for t in engine.tickets if t.status != "closed"]
+    return compute_impact(engine.active_risk_index(), open_tickets)
+
+
+@app.get("/api/tickets")
+def list_tickets():
+    engine = require_sim()
+    return {"tickets": [t.to_dict() for t in engine.tickets if t.status != "closed"]}
+
+
+@app.get("/api/tickets/{ticket_id}/explain")
+def ticket_explain(ticket_id: str):
+    engine = require_sim()
+    ticket = next((t for t in engine.tickets if t.id == ticket_id), None)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    segment = engine.segments.get(ticket.segment)
+    if not segment:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    return explain_ticket(ticket.to_dict(), segment.to_dict())
 
 
 @app.post("/api/guide/chat")

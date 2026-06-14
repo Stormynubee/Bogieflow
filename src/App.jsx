@@ -16,6 +16,7 @@ import ToastStack from './components/ToastStack'
 import { highestRiskSegment } from './lib/segmentUtils.js'
 import { injectMonsoon } from './lib/api.js'
 import { UI } from './content/uiCopy.js'
+import { useDemoScenario } from './hooks/useDemoScenario'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js'
 
 function formatUptime(seconds) {
@@ -38,10 +39,14 @@ export default function App() {
     activeRiskIndex,
     segmentHistory,
     lastTickAt,
+    forecast,
+    impact,
+    weatherStatus,
     dataReady,
   } = useWebSocket()
 
   const { toasts, push: pushToast } = useToast()
+  useDemoScenario({ connected, onToast: pushToast })
   const prevTicketsRef = useRef([])
   const reduced = usePrefersReducedMotion()
 
@@ -152,6 +157,8 @@ export default function App() {
                   activeRiskIndex={activeRiskIndex}
                   segmentHistory={segmentHistory}
                   lastTickAt={lastTickAt}
+                  forecast={forecast}
+                  impact={impact}
                   dataReady={dataReady}
                   onSegmentClick={handleSegmentClick}
                   onOpenStationMap={() => setStationMapOpen(true)}
@@ -183,7 +190,7 @@ export default function App() {
             )}
             {view === 'climate' && (
               <motion.div key="climate" className="view-shell" {...viewMotion}>
-                <ClimateView segments={segments} dataReady={dataReady} />
+                <ClimateView segments={segments} dataReady={dataReady} weatherStatus={weatherStatus} connected={connected} />
               </motion.div>
             )}
           </AnimatePresence>

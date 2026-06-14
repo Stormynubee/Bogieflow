@@ -7,8 +7,8 @@
 Climate-aware track-bed risk evaluation and agent-based telemetry fusion for railways.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github-actions&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml)
-[![Pytest](https://img.shields.io/badge/Pytest-23%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
-[![Vitest](https://img.shields.io/badge/Vitest-52%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
+[![Pytest](https://img.shields.io/badge/Pytest-35%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=pytest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/)
+[![Vitest](https://img.shields.io/badge/Vitest-60%20passing-ff5545?style=flat-square&labelColor=0c0d12&logo=vitest&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/)
 [![Release](https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=ff5545&labelColor=0c0d12&logo=github&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/releases)
 [![License](https://img.shields.io/badge/License-MIT-ff5545?style=flat-square&labelColor=0c0d12&logo=open-source-initiative&logoColor=ffffff)](https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11-ff5545?style=flat-square&labelColor=0c0d12&logo=python&logoColor=ffffff)](https://www.python.org/)

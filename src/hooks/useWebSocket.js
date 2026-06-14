@@ -36,6 +36,9 @@ export function useWebSocket() {
   const [activeRiskIndex, setActiveRiskIndex] = useState(0)
   const [segmentHistory, setSegmentHistory] = useState(emptyHistory)
   const [lastTickAt, setLastTickAt] = useState(null)
+  const [forecast, setForecast] = useState(null)
+  const [impact, setImpact] = useState(null)
+  const [weatherStatus, setWeatherStatus] = useState({ live_weather: false, source: 'simulation', note: null })
   const wsRef = useRef(null)
   const retryRef = useRef(null)
   const reconnectAttemptsRef = useRef(0)
@@ -136,6 +139,19 @@ export function useWebSocket() {
         case 'agent_log':
           setLogs((prev) => [...prev.slice(-49), msg])
           break
+        case 'forecast':
+          setForecast(msg)
+          break
+        case 'impact':
+          setImpact(msg)
+          break
+        case 'weather_status':
+          setWeatherStatus({
+            live_weather: msg.live_weather,
+            source: msg.source,
+            note: msg.note ?? null,
+          })
+          break
         default:
           break
       }
@@ -162,6 +178,9 @@ export function useWebSocket() {
     activeRiskIndex,
     segmentHistory,
     lastTickAt,
+    forecast,
+    impact,
+    weatherStatus,
     dataReady: segments.length > 0,
   }
 }

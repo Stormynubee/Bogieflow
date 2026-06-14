@@ -3,6 +3,9 @@ import ClimatePanel from '../ClimatePanel'
 import AnomalyStream from '../AnomalyStream'
 import CorridorBriefing from '../CorridorBriefing'
 import OverviewOpsStrip from '../OverviewOpsStrip'
+import ImpactPanel from '../ImpactPanel'
+import ForecastPanel from '../ForecastPanel'
+import ScenarioMenu from '../ScenarioMenu'
 import HeroStatusLine from '../HeroStatusLine'
 import RiskGaugeDial from '../RiskGaugeDial'
 import MetricBar from '../MetricBar'
@@ -20,6 +23,8 @@ export default function OverviewView({
   activeRiskIndex,
   segmentHistory,
   lastTickAt,
+  forecast,
+  impact,
   dataReady,
   onSegmentClick,
   onOpenStationMap,
@@ -67,6 +72,8 @@ export default function OverviewView({
         />
 
         <div className="overview-side-stack">
+          <ImpactPanel impact={impact} />
+          <ForecastPanel forecast={forecast} />
           <CorridorBriefing
             train={train}
             segments={segments}
@@ -83,6 +90,7 @@ export default function OverviewView({
             onNavigate={onNavigate}
             onInjectToast={onInjectToast}
           />
+          <ScenarioMenu connected={connected} onInjectToast={onInjectToast} />
         </div>
       </div>
 

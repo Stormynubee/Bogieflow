@@ -17,6 +17,8 @@ MAX_TICKETS = 100
 DECAY_RATE = 0.98
 RAINFALL_FLOOR = 0.1
 MOISTURE_FLOOR = 0.2
+TICK_INTERVAL_S = 0.5
+HISTORY_LIMIT = 24
 
 
 class SimulationEngine:
@@ -36,6 +38,12 @@ class SimulationEngine:
         self._healthy_streak: dict[str, int] = {sid: 0 for sid in SEGMENT_IDS}
         self._ticket_cooldown: dict[str, int] = {sid: 0 for sid in SEGMENT_IDS}
         self._anomaly_segments: set[str] = set()
+        self._segment_history: dict[str, dict[str, list[float]]] = {
+            sid: {"rainfall": [], "moisture": []} for sid in SEGMENT_IDS
+        }
+        self.live_weather = False
+        self.weather_source = "simulation"
+        self._weather_fallback_note: str | None = None
         random.seed(7)
 
     def active_risk_index(self) -> float:
@@ -81,13 +89,16 @@ class SimulationEngine:
         seg.state = self._resolve_state(result["risk_index"], seg.state)
 
     def _decay_segments(self) -> None:
+        self._apply_live_weather()
         for sid, seg in self.segments.items():
             if sid in self._anomaly_segments:
                 continue
-            seg.rainfall = max(RAINFALL_FLOOR, seg.rainfall * DECAY_RATE)
-            seg.soil_moisture = max(MOISTURE_FLOOR, seg.soil_moisture * DECAY_RATE)
+            if not self.live_weather or self.weather_source != "live":
+                seg.rainfall = max(RAINFALL_FLOOR, seg.rainfall * DECAY_RATE)
+                seg.soil_moisture = max(MOISTURE_FLOOR, seg.soil_moisture * DECAY_RATE)
             prev_state = seg.state
             self._apply_hydrology(sid)
+            self._record_history(sid, seg.rainfall, seg.soil_moisture)
             if seg.state == "HEALTHY":
                 self._healthy_streak[sid] += 1
             else:
@@ -96,6 +107,75 @@ class SimulationEngine:
                 self._close_open_tickets(sid)
             if seg.state != prev_state:
                 self.on_event(self._segment_update_payload(sid))
+
+    def _record_history(self, segment_id: str, rainfall: float, soil_moisture: float) -> None:
+        bucket = self._segment_history.setdefault(segment_id, {"rainfall": [], "moisture": []})
+        bucket["rainfall"] = (bucket["rainfall"] + [rainfall])[-HISTORY_LIMIT:]
+        bucket["moisture"] = (bucket["moisture"] + [soil_moisture])[-HISTORY_LIMIT:]
+
+    def set_live_weather(self, enabled: bool) -> dict:
+        self.live_weather = enabled
+        if not enabled:
+            self.weather_source = "simulation"
+            self._weather_fallback_note = None
+        return {"live_weather": self.live_weather, "weather_source": self.weather_source}
+
+    def reset_corridor(self) -> dict:
+        self.__init__(on_event=self.on_event)
+        self.on_event(self.state_snapshot())
+        return {"ok": True, "message": "Corridor reset to nominal baseline"}
+
+    def _apply_live_weather(self) -> None:
+        if not self.live_weather:
+            return
+        from server.weather import apply_live_weather_to_segment
+
+        any_live = False
+        any_fallback = False
+        for sid, seg in self.segments.items():
+            rain, moisture, source = apply_live_weather_to_segment(
+                sid, seg.rainfall, seg.soil_moisture
+            )
+            seg.rainfall = rain
+            seg.soil_moisture = moisture
+            if source == "live":
+                any_live = True
+            else:
+                any_fallback = True
+            self._apply_hydrology(sid)
+            self._record_history(sid, seg.rainfall, seg.soil_moisture)
+        if any_live and not any_fallback:
+            self.weather_source = "live"
+            self._weather_fallback_note = None
+        elif any_fallback:
+            self.weather_source = "simulation"
+            self._weather_fallback_note = "fell back to sim"
+
+    def _broadcast_analytics(self) -> None:
+        from server.agents.forecast import build_forecast
+        from server.impact import impact_message
+
+        segment_dicts = [s.to_dict() for s in self.segments.values()]
+        risk_by_id = {s["id"]: s.get("risk_index", 0) for s in segment_dicts}
+        forecast_msg = build_forecast(segment_dicts, self._segment_history)
+        ranked = sorted(
+            forecast_msg["segments"],
+            key=lambda r: (r["projected_risk"], risk_by_id.get(r["id"], 0)),
+            reverse=True,
+        )[:3]
+        forecast_msg["inspect_next"] = [r["id"] for r in ranked]
+        self.on_event(forecast_msg)
+        open_tickets = [t.to_dict() for t in self.tickets if t.status != "closed"]
+        self.on_event(impact_message(self.active_risk_index(), open_tickets))
+        if self.live_weather or self._weather_fallback_note:
+            self.on_event(
+                {
+                    "type": "weather_status",
+                    "live_weather": self.live_weather,
+                    "source": self.weather_source,
+                    "note": self._weather_fallback_note,
+                }
+            )
 
     def _close_open_tickets(self, segment_id: str) -> None:
         for ticket in self.tickets:
@@ -130,6 +210,7 @@ class SimulationEngine:
         seg.k_effective = result["k_effective"]
         seg.state = result["state"]
         self._push_log("hydrology", f"{segment_id}: {result['description']}")
+        self._record_history(segment_id, seg.rainfall, seg.soil_moisture)
         self.on_event(self._segment_update_payload(segment_id))
         vib = {"anomaly": True, "z_score": 4.0, "az": seg.az}
         if seg.risk_index >= 0.7:
@@ -202,6 +283,7 @@ class SimulationEngine:
             }
         )
         self._evaluate_segment(seg_id, vib)
+        self._broadcast_analytics()
 
     def _advance_train(self) -> None:
         self.train.progress += 0.15

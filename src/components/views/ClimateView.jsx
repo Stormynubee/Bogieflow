@@ -1,6 +1,7 @@
 import { highestRiskSegment } from '../../lib/segmentUtils.js'
 import PanelHeader from '../PanelHeader'
 import DashboardSkeleton from '../DashboardSkeleton'
+import WeatherToggle from '../WeatherToggle'
 import { UI } from '../../content/uiCopy.js'
 
 function avg(segments, key) {
@@ -8,7 +9,7 @@ function avg(segments, key) {
   return segments.reduce((a, s) => a + (s[key] ?? 0), 0) / segments.length
 }
 
-export default function ClimateView({ segments, dataReady }) {
+export default function ClimateView({ segments, dataReady, weatherStatus, connected }) {
   if (!dataReady) {
     return (
       <div className="climate-layout" data-testid="view-climate">
@@ -46,6 +47,11 @@ export default function ClimateView({ segments, dataReady }) {
         <p className="analysis-breadcrumb">CORRIDOR · ENVIRONMENTAL STRESS</p>
         <h1 className="climate-page-title">Climate impact</h1>
         <p className="analysis-sub">Live precipitation and model-derived wear projections</p>
+        <WeatherToggle
+          liveWeather={weatherStatus?.live_weather}
+          weatherNote={weatherStatus?.note}
+          connected={connected}
+        />
       </header>
 
       <div className="climate-grid-main">

@@ -3787,6 +3787,165 @@ a:focus-visible,
   }
 }
 
+/* Impact, forecast, scenario, weather, XAI */
+.impact-panel,
+.forecast-panel,
+.scenario-menu {
+  margin-bottom: 0;
+}
+
+.impact-estimate-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--on-surface-muted);
+}
+
+.impact-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.impact-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.impact-metric-label {
+  font-size: 0.75rem;
+  color: var(--on-surface-muted);
+}
+
+.impact-metric-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.impact-metric-formula {
+  font-size: 0.65rem;
+  color: var(--on-surface-muted);
+  font-family: var(--font-mono);
+}
+
+.forecast-inspect-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.forecast-inspect-label {
+  font-size: 0.75rem;
+  color: var(--on-surface-muted);
+}
+
+.forecast-inspect-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 85, 69, 0.12);
+  color: var(--state-critical);
+}
+
+.forecast-segment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.forecast-segment-row {
+  display: grid;
+  grid-template-columns: 2rem 1fr 2.5rem 3.5rem;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.forecast-sparkline {
+  width: 100%;
+  height: 28px;
+  color: var(--accent-primary);
+}
+
+.forecast-eta-stable {
+  color: var(--on-surface-muted);
+}
+
+.scenario-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weather-toggle {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.weather-toggle-btn {
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-elevated);
+  color: var(--on-surface);
+  cursor: pointer;
+}
+
+.weather-toggle-live {
+  border-color: var(--accent-primary);
+}
+
+.weather-fallback-note {
+  font-size: 0.75rem;
+  color: var(--state-warning);
+}
+
+.ticket-explain-toggle {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ticket-explain-body {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--surface-elevated);
+  font-size: 0.8rem;
+}
+
+.ticket-explain-factors {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.ticket-explain-factors dt {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--on-surface-muted);
+}
+
+.ticket-explain-tech {
+  font-size: 0.65rem;
+  color: var(--on-surface-muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guide-typing-dot {
     animation: none;

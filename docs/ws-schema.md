@@ -108,6 +108,54 @@ Status may update to `"closed"` when a segment recovers to HEALTHY.
 }
 ```
 
+### `forecast` (additive)
+
+30-minute risk projection per segment from rainfall/soil trends and the decay model.
+
+```json
+{
+  "type": "forecast",
+  "horizon_minutes": 30,
+  "inspect_next": ["S4", "S2", "S1"],
+  "segments": [
+    {
+      "id": "S4",
+      "projected_risk": 0.82,
+      "sparkline": [0.75, 0.78, 0.82],
+      "time_to_critical_min": 12.5,
+      "status": "rising"
+    }
+  ]
+}
+```
+
+### `impact` (additive)
+
+Quantified estimates from live risk and open tickets (labeled as estimates).
+
+```json
+{
+  "type": "impact",
+  "prevented_cost_usd": 125000,
+  "inspection_hours_saved": 14.5,
+  "derailment_reduction_pct": 42.3,
+  "assumptions": { "label": "estimates — not audited financials" }
+}
+```
+
+### `weather_status` (additive)
+
+Open-Meteo toggle state when live weather is enabled or fallback occurs.
+
+```json
+{
+  "type": "weather_status",
+  "live_weather": true,
+  "source": "simulation",
+  "note": "fell back to sim"
+}
+```
+
 ## Color mapping
 
 | State | Color |
@@ -121,5 +169,9 @@ Status may update to `"closed"` when a segment recovers to HEALTHY.
 - `GET /health`, `GET /api/health` — service status
 - `POST /api/inject/monsoon` — `{ "segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85 }`
 - `POST /api/inject/anomaly` — `{ "segment_id": "S4" }` (diagnostic backup)
+- `POST /api/sim/reset` — reset corridor to nominal baseline
+- `POST /api/weather/mode` — `{ "live": true }` toggle Open-Meteo feed
+- `GET /api/impact` — current quantified impact snapshot
+- `GET /api/tickets/{id}/explain` — XAI factors + model importances + rationale
 
 Returns **503** when the simulation engine is not ready.

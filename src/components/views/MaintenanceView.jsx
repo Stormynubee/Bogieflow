@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import LogEntry from '../LogEntry'
 import PanelHeader from '../PanelHeader'
 import DashboardSkeleton from '../DashboardSkeleton'
+import TicketExplain from '../TicketExplain'
 import { UI } from '../../content/uiCopy.js'
 import { formatTicketAge } from '../../hooks/useTicketAge.js'
 
 export default function MaintenanceView({ tickets, logs, dataReady }) {
   const [firstSeen, setFirstSeen] = useState({})
+  const [openExplain, setOpenExplain] = useState(null)
 
   useEffect(() => {
     const ts = Date.now()
@@ -51,12 +53,13 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                 <th>Reason</th>
                 <th>Age</th>
                 <th>Status</th>
+                <th>Explain</th>
               </tr>
             </thead>
             <tbody>
               {openTickets.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="empty-row maintenance-empty">
+                  <td colSpan={6} className="empty-row maintenance-empty">
                     <span className="maintenance-empty-title">{UI.maintenance.emptyTitle}</span>
                     <span className="maintenance-empty-sub">{UI.maintenance.emptySub}</span>
                   </td>
@@ -78,6 +81,13 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                     <span className={`status-pill ${t.status === 'closed' ? 'status-nominal' : 'status-open'}`}>
                       {t.status ?? 'open'}
                     </span>
+                  </td>
+                  <td>
+                    <TicketExplain
+                      ticketId={t.id}
+                      open={openExplain === t.id}
+                      onToggle={() => setOpenExplain(openExplain === t.id ? null : t.id)}
+                    />
                   </td>
                 </tr>
               ))}
