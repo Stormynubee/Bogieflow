@@ -60,10 +60,17 @@ Then redeploy (Vite bakes env vars at build time):
 vercel --prod --yes
 ```
 
-Or via CLI:
+Or via CLI (Windows — avoids BOM/CRLF from clipboard paste):
 
 ```powershell
-echo https://bogie-flow.onrender.com | vercel env add VITE_API_BASE production
+node scripts/set-vercel-api-base.mjs
+vercel --prod --yes
+```
+
+Or manually:
+
+```powershell
+cmd /c "echo|set /p=https://bogie-flow.onrender.com| vercel env add VITE_API_BASE production --force"
 vercel --prod --yes
 ```
 
