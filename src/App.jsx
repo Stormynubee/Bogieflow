@@ -52,7 +52,13 @@ export default function App() {
   } = useWebSocket()
 
   const { toasts, push: pushToast } = useToast()
-  useDemoScenario({ connected: realConnected, onToast: pushToast })
+  useDemoScenario({
+    dataReady,
+    realConnected,
+    localInjectMonsoon,
+    localInjectAnomaly,
+    onToast: pushToast,
+  })
   const prevTicketsRef = useRef([])
   const reduced = usePrefersReducedMotion()
 
@@ -114,7 +120,7 @@ export default function App() {
   const footerSegment =
     train?.segment_id ?? highestRiskSegment(segments)?.id ?? '—'
   const uptimeLabel = dataReady ? formatUptime(uptimeSec) : '—'
-  const agentLabel = connected ? UI.footer.agentOk : 'Demo simulation'
+  const agentLabel = realConnected ? UI.footer.agentOk : 'Demo simulation'
 
   const handleBootComplete = useCallback(() => setBooted(true), [])
 
@@ -132,7 +138,7 @@ export default function App() {
     dataReady && { label: 'RISK', value: `${Math.round((activeRiskIndex ?? 0) * 100)}%` },
     dataReady && { label: 'UPTIME', value: uptimeLabel },
     dataReady && openTickets > 0 && { label: 'TICKETS', value: String(openTickets) },
-    !connected && dataReady && { label: 'MODE', value: 'Demo' },
+    !realConnected && dataReady && { label: 'MODE', value: 'Demo' },
   ].filter(Boolean)
 
   if (!booted) {
@@ -143,8 +149,7 @@ export default function App() {
     <div className="shell">
       <GrainOverlay />
       <Sidebar
-        connected={connected}
-        realConnected={realConnected}
+        connected={realConnected}
         reconnectAttempts={reconnectAttempts}
         activeView={view}
         onNavigate={setView}
@@ -153,8 +158,7 @@ export default function App() {
 
       <div className="workspace">
         <TopBar
-          connected={connected}
-          realConnected={realConnected}
+          connected={realConnected}
           reconnectAttempts={reconnectAttempts}
           openTicketCount={openTickets}
           onNavigateMaintenance={goMaintenance}

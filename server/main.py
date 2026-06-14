@@ -18,6 +18,12 @@ def parse_allowed_origins(value: str | None = None) -> list[str]:
     )
     return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
+
+def parse_allowed_origin_regex(value: str | None = None) -> str | None:
+    raw = value if value is not None else os.environ.get("ALLOWED_ORIGIN_REGEX", "")
+    raw = raw.strip()
+    return raw or None
+
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -98,20 +104,24 @@ app = FastAPI(title="Bogieflow", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_allowed_origins(),
+    allow_origin_regex=parse_allowed_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+SEGMENT_ID_PATTERN = r"^S[1-6]$"
+
+
 class MonsoonInject(BaseModel):
-    segment_id: str = Field(examples=["S4"])
+    segment_id: str = Field(pattern=SEGMENT_ID_PATTERN, examples=["S4"])
     rainfall: float = Field(ge=0.0, le=1.0, default=0.9)
     soil_moisture: float = Field(ge=0.0, le=1.0, default=0.85)
 
 
 class AnomalyInject(BaseModel):
-    segment_id: str = Field(examples=["S4"])
+    segment_id: str = Field(pattern=SEGMENT_ID_PATTERN, examples=["S4"])
 
 
 class GuideChatRequest(BaseModel):

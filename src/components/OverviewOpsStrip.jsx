@@ -48,8 +48,8 @@ export default function OverviewOpsStrip({
         explainer={UI.simulation.sub}
         className="panel-head-compact"
         aside={
-          <span className={`ops-link-pill ${connected ? 'ops-link-ok' : 'ops-link-off'}`}>
-            {connected ? UI.simulation.apiReady : UI.simulation.apiOffline}
+          <span className={`ops-link-pill ${realConnected ? 'ops-link-ok' : 'ops-link-off'}`}>
+            {realConnected ? UI.simulation.apiReady : UI.simulation.apiOffline}
           </span>
         }
       />

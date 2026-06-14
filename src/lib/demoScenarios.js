@@ -60,3 +60,21 @@ export async function runScenario(scenarioId, api, options = {}) {
   }
   return calls
 }
+
+/** Pick REST or local inject fns for demo scenario replay. */
+export function createScenarioApi({
+  realConnected,
+  injectMonsoon,
+  injectAnomaly,
+  localInjectMonsoon,
+  localInjectAnomaly,
+}) {
+  if (realConnected) {
+    return { injectMonsoon, injectAnomaly }
+  }
+  return {
+    injectMonsoon: (segmentId, rainfall, soilMoisture) =>
+      Promise.resolve(localInjectMonsoon(segmentId, rainfall, soilMoisture)),
+    injectAnomaly: (segmentId) => Promise.resolve(localInjectAnomaly(segmentId)),
+  }
+}

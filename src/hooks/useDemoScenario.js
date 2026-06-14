@@ -1,19 +1,38 @@
 import { useEffect, useRef } from 'react'
-import { parseDemoParam, runScenario } from '../lib/demoScenarios.js'
+import { parseDemoParam, runScenario, createScenarioApi } from '../lib/demoScenarios.js'
 import { injectAnomaly, injectMonsoon } from '../lib/api.js'
 
-/** Auto-play ?demo= scenario once WebSocket is ready. */
-export function useDemoScenario({ connected, onToast }) {
+export function canStartDemoScenario({ demoId, dataReady, alreadyPlayed }) {
+  return Boolean(demoId && dataReady && !alreadyPlayed)
+}
+
+/** Auto-play ?demo= scenario once dashboard data is ready (live or offline). */
+export function useDemoScenario({
+  dataReady,
+  realConnected,
+  localInjectMonsoon,
+  localInjectAnomaly,
+  onToast,
+}) {
   const playedRef = useRef(false)
 
   useEffect(() => {
     const demoId = parseDemoParam(window.location.search)
-    if (!demoId || !connected || playedRef.current) return
+    if (!canStartDemoScenario({ demoId, dataReady, alreadyPlayed: playedRef.current })) return
     playedRef.current = true
-    runScenario(demoId, { injectMonsoon, injectAnomaly })
+
+    const api = createScenarioApi({
+      realConnected,
+      injectMonsoon,
+      injectAnomaly,
+      localInjectMonsoon,
+      localInjectAnomaly,
+    })
+
+    runScenario(demoId, api)
       .then(() => onToast?.('Demo scenario started', 'success'))
-      .catch(() => onToast?.('Demo scenario failed — backend offline', 'error'))
-  }, [connected, onToast])
+      .catch(() => onToast?.('Demo scenario failed', 'error'))
+  }, [dataReady, realConnected, localInjectMonsoon, localInjectAnomaly, onToast])
 }
 
 export function queueDemoUntilReady(demoId, getConnected, runner) {

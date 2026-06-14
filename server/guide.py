@@ -61,7 +61,7 @@ def _gemini_contents(history: list[dict[str, str]] | None, message: str) -> list
 
 
 def _call_gemini(api_key: str, model: str, message: str, history: list[dict[str, str]] | None) -> str:
-    url = f"{GEMINI_API_BASE}/models/{model}:generateContent?key={api_key}"
+    url = f"{GEMINI_API_BASE}/models/{model}:generateContent"
     payload = {
         "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": _gemini_contents(history, message),
@@ -70,7 +70,10 @@ def _call_gemini(api_key: str, model: str, message: str, history: list[dict[str,
     req = urllib.request.Request(
         url,
         data=json.dumps(payload).encode(),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        },
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=8) as resp:
@@ -89,5 +92,13 @@ def ai_guide_answer(message: str, history: list[dict[str, str]] | None = None) -
         content = _call_gemini(api_key, model, message, history)
         answer, technical = _split_technical(content)
         return {"answer": answer, "technical": technical, "source": "ai", "model": model}
-    except (urllib.error.URLError, urllib.error.HTTPError, KeyError, json.JSONDecodeError, IndexError):
+    except (
+        urllib.error.URLError,
+        urllib.error.HTTPError,
+        KeyError,
+        json.JSONDecodeError,
+        IndexError,
+        TimeoutError,
+        OSError,
+    ):
         return local_guide_answer(message)

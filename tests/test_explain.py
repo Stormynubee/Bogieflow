@@ -3,7 +3,8 @@
 from server.explain import explain_ticket, local_ticket_rationale
 
 
-def test_explain_returns_factors_and_importances():
+def test_explain_returns_factors_and_importances(monkeypatch):
+    monkeypatch.delenv("GUIDE_AI_API_KEY", raising=False)
     ticket = {
         "id": "T-001",
         "priority": "P1",
@@ -33,7 +34,8 @@ def test_local_rationale_mentions_segment_and_priority():
     assert "P1" in text
 
 
-def test_explain_api(client):
+def test_explain_api(client, monkeypatch):
+    monkeypatch.delenv("GUIDE_AI_API_KEY", raising=False)
     engine = client.app.state if hasattr(client.app, "state") else None
     # Seed a ticket via inject
     client.post(

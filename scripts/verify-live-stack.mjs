@@ -84,6 +84,58 @@ async function main() {
     fail('bundle', err.message)
   }
 
+  try {
+    const inject = await fetch(`${backend}/api/inject/monsoon`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: vercelOrigin,
+      },
+      body: JSON.stringify({ segment_id: 'S4', rainfall: 0.9, soil_moisture: 0.85 }),
+      signal: AbortSignal.timeout(60_000),
+    })
+    if (!inject.ok) fail('inject', `${inject.status} ${inject.statusText}`)
+    else {
+      const body = await inject.json()
+      if (!body.ok || body.segment?.id !== 'S4') fail('inject', JSON.stringify(body))
+      else pass('POST /api/inject/monsoon')
+    }
+  } catch (err) {
+    fail('inject', err.message)
+  }
+
+  try {
+    const wsBase = backend.replace('https://', 'wss://').replace('http://', 'ws://')
+    await new Promise((resolve, reject) => {
+      const ws = new WebSocket(`${wsBase}/ws`)
+      const timer = setTimeout(() => {
+        ws.close()
+        reject(new Error('WebSocket snapshot timeout'))
+      }, 20_000)
+      ws.onmessage = (event) => {
+        clearTimeout(timer)
+        try {
+          const msg = JSON.parse(event.data)
+          if (msg.type !== 'state_snapshot' || msg.segments?.length !== 6) {
+            reject(new Error(`unexpected frame: ${event.data.slice(0, 120)}`))
+          } else {
+            ws.close()
+            resolve()
+          }
+        } catch (err) {
+          reject(err)
+        }
+      }
+      ws.onerror = () => {
+        clearTimeout(timer)
+        reject(new Error('WebSocket connection failed'))
+      }
+    })
+    pass('WebSocket state_snapshot')
+  } catch (err) {
+    fail('websocket', err.message)
+  }
+
   if (process.exitCode) process.exit(process.exitCode)
   console.log('\nLive stack verification passed.')
 }

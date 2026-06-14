@@ -4,8 +4,9 @@ import {
   parseDemoParam,
   runScenario,
   scenarioStepSequence,
+  createScenarioApi,
 } from './demoScenarios.js'
-import { queueDemoUntilReady } from '../hooks/useDemoScenario.js'
+import { canStartDemoScenario, queueDemoUntilReady } from '../hooks/useDemoScenario.js'
 
 describe('demoScenarios', () => {
   it('monsoon sweep dispatches exact inject sequence', async () => {
@@ -55,5 +56,78 @@ describe('demoScenarios', () => {
     expect(runner).toHaveBeenCalledWith('monsoon-sweep')
     cancel()
     vi.useRealTimers()
+  })
+
+  it('createScenarioApi uses local monsoon inject when offline', async () => {
+    const localInjectMonsoon = vi.fn()
+    const remoteInjectMonsoon = vi.fn().mockResolvedValue({ ok: true })
+    const api = createScenarioApi({
+      realConnected: false,
+      injectMonsoon: remoteInjectMonsoon,
+      injectAnomaly: vi.fn(),
+      localInjectMonsoon,
+      localInjectAnomaly: vi.fn(),
+    })
+
+    await api.injectMonsoon('S4', 0.9, 0.85)
+
+    expect(localInjectMonsoon).toHaveBeenCalledWith('S4', 0.9, 0.85)
+    expect(remoteInjectMonsoon).not.toHaveBeenCalled()
+  })
+
+  it('createScenarioApi uses REST inject when live', async () => {
+    const localInjectMonsoon = vi.fn()
+    const remoteInjectMonsoon = vi.fn().mockResolvedValue({ ok: true })
+    const api = createScenarioApi({
+      realConnected: true,
+      injectMonsoon: remoteInjectMonsoon,
+      injectAnomaly: vi.fn(),
+      localInjectMonsoon,
+      localInjectAnomaly: vi.fn(),
+    })
+
+    await api.injectMonsoon('S4', 0.9, 0.85)
+
+    expect(remoteInjectMonsoon).toHaveBeenCalledWith('S4', 0.9, 0.85)
+    expect(localInjectMonsoon).not.toHaveBeenCalled()
+  })
+
+  it('bearing fault offline scenario runs via local anomaly inject', async () => {
+    const localInjectAnomaly = vi.fn()
+    const api = createScenarioApi({
+      realConnected: false,
+      injectMonsoon: vi.fn(),
+      injectAnomaly: vi.fn(),
+      localInjectMonsoon: vi.fn(),
+      localInjectAnomaly,
+    })
+
+    await runScenario('bearing-fault-s3', api, { wait: () => Promise.resolve() })
+
+    expect(localInjectAnomaly).toHaveBeenCalledWith('S3')
+  })
+
+  it('canStartDemoScenario when dataReady without live backend', () => {
+    expect(
+      canStartDemoScenario({
+        demoId: 'monsoon-sweep',
+        dataReady: true,
+        alreadyPlayed: false,
+      }),
+    ).toBe(true)
+    expect(
+      canStartDemoScenario({
+        demoId: 'monsoon-sweep',
+        dataReady: false,
+        alreadyPlayed: false,
+      }),
+    ).toBe(false)
+    expect(
+      canStartDemoScenario({
+        demoId: null,
+        dataReady: true,
+        alreadyPlayed: false,
+      }),
+    ).toBe(false)
   })
 })

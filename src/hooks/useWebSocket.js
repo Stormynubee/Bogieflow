@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 
 import { wsUrl } from '../lib/config.js'
 import { computeActiveRiskIndex, applySegmentUpdate } from '../lib/wsReducer.js'
+import { applyLocalMonsoon, applyLocalAnomaly } from '../lib/localDemoInject.js'
+import { resolveConnectionState } from '../lib/connectionState.js'
+import { parseWebSocketMessage } from '../lib/wsMessage.js'
 import { onSocketClose, onSocketOpen } from '../lib/wsReconnect.js'
 
 const HISTORY_LIMIT = 24
@@ -81,6 +84,10 @@ export function useWebSocket() {
   const retryRef = useRef(null)
   const reconnectAttemptsRef = useRef(0)
   const connectRef = useRef(() => {})
+  const segmentsRef = useRef(segments)
+  const ticketsRef = useRef(tickets)
+  segmentsRef.current = segments
+  ticketsRef.current = tickets
 
   const recordHistory = useCallback((segmentId, fields) => {
     setSegmentHistory((prev) => appendSample(prev, segmentId, fields))
@@ -112,7 +119,9 @@ export function useWebSocket() {
 
     ws.onmessage = (event) => {
       setLastTickAt(Date.now())
-      const msg = JSON.parse(event.data)
+      const parsed = parseWebSocketMessage(event.data)
+      if (!parsed.ok) return
+      const msg = parsed.message
       switch (msg.type) {
         case 'state_snapshot': {
           const segs = msg.segments || []
@@ -196,75 +205,27 @@ export function useWebSocket() {
   }, [recordHistory])
 
   const localInjectMonsoon = useCallback((segmentId, rainfall = 0.9, soilMoisture = 0.85) => {
-    setSegments((prev) =>
-      prev.map((s) => {
-        if (s.id !== segmentId) return s
-        const risk_index = Math.max(s.risk_index, (rainfall * 0.4 + soilMoisture * 0.6))
-        const k_effective = Math.max(50.0, 100.0 - risk_index * 30.0)
-        let state = 'HEALTHY'
-        if (risk_index >= 0.7) state = 'CRITICAL_MUD_PUMPING'
-        else if (risk_index >= 0.35) state = 'WARNING_WATERLOGGING'
-        return {
-          ...s,
-          rainfall,
-          soil_moisture: soilMoisture,
-          risk_index,
-          k_effective,
-          state,
-          color: state === 'CRITICAL_MUD_PUMPING' ? '#ef4444' : state === 'WARNING_WATERLOGGING' ? '#eab308' : '#22c55e'
-        }
-      })
-    )
-    setLogs((prev) => [
-      ...prev.slice(-49),
-      {
-        timestamp: Date.now() / 1000,
-        level: 'WARNING',
-        message: `Hydrology anomaly: heavy precipitation detected on segment ${segmentId}`,
-        agent: 'HydrologyAgent',
-        segment_id: segmentId
-      }
-    ])
+    setSegments((prev) => {
+      const { segments: next, activeRiskIndex: risk, log } = applyLocalMonsoon(
+        prev,
+        segmentId,
+        rainfall,
+        soilMoisture,
+      )
+      setActiveRiskIndex(risk)
+      setLogs((logs) => [...logs.slice(-49), log])
+      return next
+    })
   }, [])
 
   const localInjectAnomaly = useCallback((segmentId) => {
-    setSegments((prev) =>
-      prev.map((s) => {
-        if (s.id !== segmentId) return s
-        return {
-          ...s,
-          vib_z: 3.5,
-          risk_index: 0.85,
-          state: 'CRITICAL_MUD_PUMPING',
-          color: '#ef4444'
-        }
-      })
-    )
     const ticketId = `TK-${segmentId}-${Date.now().toString().slice(-4)}`
-    setTickets((prev) => {
-      if (prev.some(t => t.segment === segmentId && t.status !== 'closed')) return prev
-      return [
-        ...prev,
-        {
-          id: ticketId,
-          segment: segmentId,
-          status: 'open',
-          priority: 'high',
-          issue: 'MUD_PUMPING',
-          created_at: new Date().toISOString()
-        }
-      ]
-    })
-    setLogs((prev) => [
-      ...prev.slice(-49),
-      {
-        timestamp: Date.now() / 1000,
-        level: 'CRITICAL',
-        message: `Structural failure: critical mud pumping detected on segment ${segmentId}`,
-        agent: 'VibrationAgent',
-        segment_id: segmentId
-      }
-    ])
+    const { segments: nextSegments, tickets: nextTickets, activeRiskIndex: risk, log } =
+      applyLocalAnomaly(segmentsRef.current, ticketsRef.current, segmentId, ticketId)
+    setSegments(nextSegments)
+    setTickets(nextTickets)
+    setActiveRiskIndex(risk)
+    setLogs((logs) => [...logs.slice(-49), log])
   }, [])
 
   const localReset = useCallback(() => {
@@ -387,9 +348,12 @@ export function useWebSocket() {
   }, [realConnected, segments])
 
 
+  const dataReady = segments.length > 0
+  const connection = resolveConnectionState({ realConnected, hasSegments: dataReady })
+
   return {
-    connected: realConnected,
-    realConnected,
+    connected: connection.connected,
+    realConnected: connection.realConnected,
     reconnectAttempts,
     segments,
     train,
@@ -401,7 +365,7 @@ export function useWebSocket() {
     forecast,
     impact,
     weatherStatus,
-    dataReady: segments.length > 0,
+    dataReady: connection.dataReady,
     localInjectMonsoon,
     localInjectAnomaly,
     localReset,
