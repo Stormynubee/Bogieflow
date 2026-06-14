@@ -52,6 +52,8 @@ Set **Production** environment variables in [Vercel project settings](https://ve
 | `VITE_WS_BASE` | *(leave empty — auto-derived as `wss://bogie-flow.onrender.com/ws`)* |
 | `VITE_BOGIE_API_SECRET` | **Same value as `BOGIE_API_SECRET` on Render** |
 
+Paste env values as plain text only — no BOM or trailing `\r` from Windows clipboards (they break WebSocket URL parsing in older builds).
+
 Then redeploy (Vite bakes env vars at build time):
 
 ```powershell
