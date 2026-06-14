@@ -14,6 +14,7 @@ import {
   scrollDriveProgress,
   shellDriveTravel,
   findScrollParent,
+  resolveScrollContainer,
 } from './corridorScrub.js'
 import { CORRIDOR_FRAME_COUNT } from '../data/corridorFrames.js'
 
@@ -145,5 +146,11 @@ describe('corridorScrub', () => {
     })
 
     expect(findScrollParent(viewport)).toBe(mainGrid)
+  })
+
+  it('resolveScrollContainer prefers explicit scroll pane over walk-up', () => {
+    const dashboardPane = { className: 'overview-dashboard-pane' }
+    const viewport = { parentElement: { className: 'overview-corridor-pane' } }
+    expect(resolveScrollContainer(viewport, dashboardPane)).toBe(dashboardPane)
   })
 })

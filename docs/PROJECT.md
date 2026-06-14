@@ -400,7 +400,7 @@ Covers (design appendix — not all implemented in Round 1 runtime):
 
 ## 16. Hardware (Round 2 path)
 
-**Doc:** [hardware/README.md](../hardware/README.md)
+**Doc:** [hardware/README.md](../hardware/README.md) · [SENSORS.md](SENSORS.md) (dashboard field sensors)
 
 | Part | Role |
 |------|------|

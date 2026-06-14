@@ -1,0 +1,90 @@
+/* Final ink overrides — purge residual hue accents from legacy CSS */
+
+.corridor-scrub-rail,
+.corridor-scrub-thumb,
+.corridor-viewport:focus-visible {
+  border-color: var(--line-strong) !important;
+  outline-color: var(--paper) !important;
+  box-shadow: none !important;
+}
+
+.hud-cell,
+.segment-strip .hud-cell {
+  border-radius: var(--radius-soft);
+  box-shadow: none;
+}
+
+.hud-critical {
+  background: var(--ink-900);
+}
+
+.severity-critical,
+.status-critical {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+.status-nominal {
+  color: var(--paper-dim);
+  border-color: var(--line);
+}
+
+.btn-authorize {
+  background: var(--paper);
+  color: var(--ink-900);
+  border: none;
+  border-radius: var(--radius-soft);
+  box-shadow: none;
+}
+
+.btn-authorize:hover:not(:disabled) {
+  background: var(--paper-dim);
+}
+
+.chart-swatch-bar {
+  background: var(--paper-dim);
+}
+
+.chart-swatch-line {
+  background: var(--paper-muted);
+}
+
+.correlation-svg rect {
+  fill: var(--paper-dim);
+}
+
+.data-kind-pill {
+  border: 1px solid var(--line);
+  color: var(--paper-muted);
+  background: transparent;
+  border-radius: var(--radius-soft);
+}
+
+.impact-metric-value {
+  font-family: var(--font-mono);
+  font-size: var(--type-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.impact-estimate-tag {
+  color: var(--paper-muted);
+  border: 1px solid var(--line);
+}
+
+.weather-toggle-segmented {
+  margin-bottom: 8px;
+}
+
+.climate-page-controls {
+  margin-bottom: var(--gutter);
+}
+
+.maintenance-table .status-pill.status-critical {
+  border-left: 2px solid var(--signal);
+}
+
+.empty-state-nominal {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+}

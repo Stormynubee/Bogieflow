@@ -2,10 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CORRIDOR_FRAME_COUNT } from '../data/corridorFrames.js'
 import {
   clampProgress,
-  findScrollParent,
   progressToScrollDriveTop,
   readScrollDriveProgress,
+  resolveScrollContainer,
   scrollDriveAvailable,
+  scrollTravel,
   wheelDeltaToProgress,
   xToProgress,
 } from '../lib/corridorScrub.js'
@@ -17,12 +18,12 @@ const WHEEL_SENSITIVITY = 0.022
 /**
  * @param {React.RefObject<HTMLElement | null>} viewportRef
  * @param {number} frameCount
- * @param {{ driveShellRef?: React.RefObject<HTMLElement | null>, stickyRef?: React.RefObject<HTMLElement | null> }} [options]
+ * @param {{ driveShellRef?: React.RefObject<HTMLElement | null>, stickyRef?: React.RefObject<HTMLElement | null>, scrollContainerRef?: React.RefObject<HTMLElement | null>, scrollContainerEl?: HTMLElement | null }} [options]
  */
 export function useCorridorScrub(
   viewportRef,
   frameCount = CORRIDOR_FRAME_COUNT,
-  { driveShellRef, stickyRef } = {},
+  { driveShellRef, stickyRef, scrollContainerRef, scrollContainerEl } = {},
 ) {
   const scrollIntentRef = useRef(0)
   const targetProgressRef = useRef(0)
@@ -91,8 +92,11 @@ export function useCorridorScrub(
     const viewport = viewportRef.current
     if (!viewport) return
 
-    scrollElRef.current = findScrollParent(viewport)
+    const explicitScroll =
+      scrollContainerEl ?? scrollContainerRef?.current ?? null
+    scrollElRef.current = resolveScrollContainer(viewport, explicitScroll)
     const scrollEl = scrollElRef.current
+    if (!scrollEl) return
 
     const onScroll = () => {
       if (syncingScrollRef.current || !driveIsAvailable()) return
@@ -102,9 +106,19 @@ export function useCorridorScrub(
     const onScrollElWheel = (e) => {
       if (syncingScrollRef.current || e.shiftKey) return
 
+      const beforeTop = scrollEl.scrollTop
+      const travel = scrollTravel(scrollEl)
+
       if (driveIsAvailable()) {
         requestAnimationFrame(() => {
-          if (!syncingScrollRef.current) applyScrollIntent()
+          if (syncingScrollRef.current) return
+          if (travel > 0 && scrollEl.scrollTop === beforeTop && e.deltaY !== 0) {
+            scrollEl.scrollTop = Math.max(
+              0,
+              Math.min(travel, scrollEl.scrollTop + e.deltaY),
+            )
+          }
+          applyScrollIntent()
         })
         return
       }
@@ -128,6 +142,8 @@ export function useCorridorScrub(
     if (driveShellRef?.current) ro.observe(driveShellRef.current)
     if (stickyRef?.current) ro.observe(stickyRef.current)
 
+    if (explicitScroll) ro.observe(explicitScroll)
+
     return () => {
       scrollEl.removeEventListener('scroll', onScroll)
       scrollEl.removeEventListener('wheel', onScrollElWheel)
@@ -137,6 +153,8 @@ export function useCorridorScrub(
     viewportRef,
     driveShellRef,
     stickyRef,
+    scrollContainerRef,
+    scrollContainerEl,
     applyScrollIntent,
     driveIsAvailable,
     frameCount,

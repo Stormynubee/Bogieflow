@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import LogEntry from '../LogEntry'
 import PanelHeader from '../PanelHeader'
+import PageHeader from '../ink/PageHeader.jsx'
 import DashboardSkeleton from '../DashboardSkeleton'
 import TicketExplain from '../TicketExplain'
 import { UI } from '../../content/uiCopy.js'
@@ -37,6 +38,12 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
 
   return (
     <div className="maintenance-layout" data-guide="maintenance-main" data-testid="view-maintenance">
+      <PageHeader
+        eyebrow="CORRIDOR / MAINTENANCE"
+        title="Work orders"
+        lede="Prioritized tickets and network logs from the agent planner"
+        data-testid="maintenance-page-header"
+      />
       <section className="panel panel-editorial maintenance-tickets panel-stagger-1">
         <PanelHeader
           icon="build"

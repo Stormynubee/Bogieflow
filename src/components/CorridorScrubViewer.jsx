@@ -98,7 +98,7 @@ export default function CorridorScrubViewer({
   return (
     <div
       ref={viewportRef}
-      className={`corridor-viewport ${hovered ? 'corridor-viewport-hover' : ''} ${className}`.trim()}
+      className={`corridor-viewport corridor-viewport-duotone ${hovered ? 'corridor-viewport-hover' : ''} ${className}`.trim()}
       role="application"
       aria-label="Corridor frame canvas. Scroll the page, Shift + wheel, horizontal drag, or scrub bar to advance frames."
       aria-live="polite"

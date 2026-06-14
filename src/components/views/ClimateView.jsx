@@ -1,6 +1,7 @@
 import { highestRiskSegment } from '../../lib/segmentUtils.js'
 import PanelHeader from '../PanelHeader'
 import DashboardSkeleton from '../DashboardSkeleton'
+import PageHeader from '../ink/PageHeader.jsx'
 import WeatherToggle from '../WeatherToggle'
 import { UI } from '../../content/uiCopy.js'
 
@@ -43,16 +44,20 @@ export default function ClimateView({ segments, dataReady, weatherStatus, connec
 
   return (
     <div className="climate-layout" data-guide="climate-main" data-testid="view-climate">
-      <header className="climate-page-header panel-stagger-1">
-        <p className="analysis-breadcrumb">CORRIDOR · ENVIRONMENTAL STRESS</p>
-        <h1 className="climate-page-title">Climate impact</h1>
-        <p className="analysis-sub">Live precipitation and model-derived wear projections</p>
+      <PageHeader
+        eyebrow="CORRIDOR / ENVIRONMENTAL STRESS"
+        title="Climate impact"
+        lede="Live precipitation and model-derived wear projections"
+        data-testid="climate-page-header"
+        className="panel-stagger-1"
+      />
+      <div className="climate-page-controls panel-stagger-1">
         <WeatherToggle
           liveWeather={weatherStatus?.live_weather}
           weatherNote={weatherStatus?.note}
           connected={connected}
         />
-      </header>
+      </div>
 
       <div className="climate-grid-main">
         <section className="panel panel-editorial heatmap-card panel-stagger-2 climate-measured">
@@ -76,7 +81,7 @@ export default function ClimateView({ segments, dataReady, weatherStatus, connec
                   opacity: 0.45 + (s.rainfall ?? 0) * 0.55,
                   boxShadow:
                     (s.risk_index ?? 0) > 0.5
-                      ? '0 0 10px rgba(255, 85, 69, 0.2)'
+                      ? 'inset 0 0 0 1px var(--signal)'
                       : 'none',
                 }}
               >

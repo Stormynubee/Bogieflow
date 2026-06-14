@@ -8,6 +8,7 @@ import { recommendedAction } from '../../lib/corridorStatus.js'
 import { soilRainCorrelationData } from '../../lib/chartData.js'
 import { apiUrl } from '../../lib/config.js'
 import { UI } from '../../content/uiCopy.js'
+import PageHeader from '../ink/PageHeader.jsx'
 import MetricBar from '../MetricBar'
 import BogieAnalysisPanel from '../BogieAnalysisPanel'
 import PanelHeader from '../PanelHeader'
@@ -50,7 +51,7 @@ function SoilRainCorrelation({ segments, segmentHistory, focusId }) {
               y={80 - h * 0.7}
               width={barW - 8}
               height={h * 0.7}
-              fill={i === peakIndex ? 'var(--signal-critical)' : 'rgba(61, 154, 128, 0.45)'}
+              fill={i === peakIndex ? 'var(--signal)' : 'var(--paper-dim)'}
             />
           ))}
           <polyline

@@ -18,6 +18,8 @@ import { injectMonsoon } from './lib/api.js'
 import { UI } from './content/uiCopy.js'
 import { useDemoScenario } from './hooks/useDemoScenario'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js'
+import GrainOverlay from './components/ink/GrainOverlay.jsx'
+import StatusTicker from './components/ink/StatusTicker.jsx'
 
 function formatUptime(seconds) {
   const h = Math.floor(seconds / 3600)
@@ -117,12 +119,20 @@ export default function App() {
         transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
       }
 
+  const tickerItems = [
+    connected && { label: 'SEG', value: footerSegment },
+    connected && { label: 'RISK', value: `${Math.round((activeRiskIndex ?? 0) * 100)}%` },
+    connected && { label: 'UPTIME', value: uptimeLabel },
+    connected && openTickets > 0 && { label: 'TICKETS', value: String(openTickets) },
+  ].filter(Boolean)
+
   if (!booted) {
     return <BootLoader onComplete={handleBootComplete} />
   }
 
   return (
     <div className="shell">
+      <GrainOverlay />
       <Sidebar
         connected={connected}
         reconnectAttempts={reconnectAttempts}
@@ -138,6 +148,8 @@ export default function App() {
           openTicketCount={openTickets}
           onNavigateMaintenance={goMaintenance}
         />
+
+        <StatusTicker items={tickerItems} />
 
         {!connected && <ReconnectBanner reconnectAttempts={reconnectAttempts} />}
 

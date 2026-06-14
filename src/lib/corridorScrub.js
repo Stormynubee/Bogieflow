@@ -158,3 +158,13 @@ export function findScrollParent(el) {
   }
   return document.documentElement
 }
+
+/**
+ * Prefer an explicit scroll container (e.g. overview dashboard pane) over DOM walk-up.
+ * @param {HTMLElement | null | undefined} viewportEl
+ * @param {HTMLElement | null | undefined} explicitScrollEl
+ */
+export function resolveScrollContainer(viewportEl, explicitScrollEl) {
+  if (explicitScrollEl) return explicitScrollEl
+  return findScrollParent(viewportEl)
+}

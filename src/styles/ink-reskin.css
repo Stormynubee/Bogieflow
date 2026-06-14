@@ -1,0 +1,587 @@
+/* Ink reskin — global typography, shell, panels, gauge SVG, guide monochrome */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--type-base);
+  line-height: 1.55;
+  background: var(--ink-900);
+  color: var(--paper);
+}
+
+.shell {
+  background: var(--ink-900);
+}
+
+:focus-visible {
+  outline: 1px solid var(--paper);
+  outline-offset: 2px;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.sidebar-editorial {
+  background: var(--ink-850);
+  border-right: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.sidebar-brand {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.nav-item {
+  border-radius: var(--radius-soft);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.nav-item-active {
+  background: var(--ink-700);
+  border-color: var(--line-strong);
+  color: var(--paper);
+}
+
+.btn-scan {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-soft);
+  background: var(--ink-800);
+  color: var(--paper);
+  box-shadow: none;
+}
+
+.btn-scan:hover {
+  background: var(--ink-700);
+  border-color: var(--paper-dim);
+}
+
+.panel {
+  border: none;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.panel-hero-gauge,
+.panel-calm {
+  background: var(--ink-850);
+  background-image: var(--grid-blueprint);
+  background-size: var(--grid-blueprint-size);
+}
+
+.panel-hero-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-hero-gauge .panel-head-calm {
+  margin-bottom: 0;
+}
+
+.panel-hero-gauge .hero-gauge-row {
+  margin-top: 0;
+}
+
+.panel-title-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.panel-head-calm {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.topbar {
+  border-bottom: 1px solid var(--line);
+  background: var(--ink-900);
+  box-shadow: none;
+}
+
+.app-footer {
+  border-top: 1px solid var(--line);
+  background: var(--ink-850);
+  font-family: var(--font-mono);
+  font-size: var(--type-xs);
+  letter-spacing: 0.04em;
+}
+
+.footer-dot {
+  background: var(--paper-dim);
+}
+
+.footer-dot.online {
+  background: var(--paper);
+}
+
+/* Risk gauge SVG instrument */
+.risk-gauge-bracket-wrap {
+  flex-shrink: 0;
+}
+
+.risk-gauge-bracket-wrap .ink-brackets-inner {
+  padding: 10px 12px 4px;
+}
+
+.risk-gauge-svg {
+  display: block;
+  width: 148px;
+  height: auto;
+}
+
+.risk-gauge-track {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+
+.risk-gauge-fill {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.risk-gauge-fill-healthy {
+  stroke: var(--paper);
+}
+
+.risk-gauge-fill-warning {
+  stroke: var(--paper-dim);
+  stroke-dasharray: 2 3;
+}
+
+.risk-gauge-fill-critical {
+  stroke: var(--signal);
+}
+
+.risk-gauge-tick {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.risk-gauge-num {
+  fill: var(--paper-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.risk-gauge-needle-line {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  transition: transform var(--transition-normal);
+}
+
+.risk-gauge-needle-healthy,
+.risk-gauge-needle-warning {
+  stroke: var(--paper);
+}
+
+.risk-gauge-needle-critical {
+  stroke: var(--signal);
+}
+
+.risk-gauge-needle-static {
+  transition: none;
+}
+
+.risk-gauge-hub-svg {
+  fill: var(--paper);
+}
+
+.risk-gauge-value {
+  font-size: var(--type-2xl);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.risk-gauge-label-healthy {
+  color: var(--paper);
+}
+
+.risk-gauge-label-warning {
+  color: var(--paper-dim);
+}
+
+.risk-gauge-label-critical {
+  color: var(--signal);
+}
+
+.risk-gauge-label-critical::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  vertical-align: middle;
+}
+
+/* Field sensors stack */
+.sensor-stack-panel {
+  min-width: 0;
+}
+
+.sensor-stack-compact {
+  padding: 0 20px;
+}
+
+.sensor-stack-compact-label {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--type-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+}
+
+.sensor-stack-grid {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sensor-stack-grid-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sensor-stack-grid-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 18px 16px;
+}
+
+.sensor-stack-card {
+  border: 1px solid var(--line);
+  background: var(--ink-900);
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.sensor-stack-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sensor-stack-icon {
+  font-size: 18px;
+  color: var(--paper-dim);
+  flex-shrink: 0;
+}
+
+.sensor-stack-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.sensor-stack-name {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--paper);
+}
+
+.sensor-stack-role {
+  margin: 2px 0 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--paper-muted);
+}
+
+.sensor-stack-pill {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border: 1px solid var(--line-strong);
+}
+
+.sensor-pill-live {
+  color: var(--paper);
+  border-color: var(--paper-dim);
+}
+
+.sensor-pill-sim {
+  color: var(--paper-muted);
+}
+
+.sensor-pill-ok {
+  color: var(--paper-dim);
+}
+
+.sensor-stack-reading {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.sensor-stack-value {
+  font-size: var(--type-lg);
+  font-weight: 700;
+  color: var(--paper);
+  line-height: 1.1;
+}
+
+.sensor-stack-unit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--paper-muted);
+  text-transform: lowercase;
+}
+
+.sensor-stack-secondary {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: var(--paper-muted);
+}
+
+@media (max-width: 1100px) {
+  .sensor-stack-grid-compact,
+  .sensor-stack-grid-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Guide — monochrome */
+.guide-fab {
+  border-radius: var(--radius-soft);
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.guide-fab:hover,
+.guide-fab-open {
+  border-color: var(--paper-dim);
+  color: var(--paper);
+  background: var(--ink-700);
+}
+
+.guide-fab-icon {
+  color: var(--paper);
+}
+
+.guide-launcher-kicker {
+  color: var(--paper-muted);
+}
+
+.guide-launcher {
+  border-radius: var(--radius-soft);
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+.guide-launcher-option:hover {
+  border-color: var(--line-strong);
+  background: var(--ink-700);
+}
+
+.guide-launcher-option-default {
+  border-color: var(--line-strong);
+}
+
+.guide-launcher-default-tag {
+  background: var(--ink-700);
+  color: var(--paper-dim);
+}
+
+.guide-start-tour {
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--paper-dim);
+}
+
+.guide-start-tour:hover {
+  background: var(--ink-700);
+  color: var(--paper);
+}
+
+.guide-btn-primary {
+  background: var(--paper);
+  color: var(--ink-900);
+  border: none;
+}
+
+.guide-spotlight-ring {
+  stroke: var(--paper);
+}
+
+/* Boot monochrome */
+.boot-screen {
+  background: var(--ink-900);
+}
+
+.boot-screen::before {
+  background-image: var(--grid-blueprint);
+  background-size: 16px 16px;
+  opacity: 0.4;
+}
+
+.boot-continue-ring-fill {
+  stroke: var(--paper);
+  filter: none;
+}
+
+.boot-continue-hint {
+  color: var(--paper-muted);
+}
+
+@keyframes boot-continue-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 243, 238, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 0 2px rgba(244, 243, 238, 0);
+  }
+}
+
+/* Segment HUD states */
+.seg-hud-cell.state-healthy,
+.segment-chip-healthy {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+}
+
+.seg-hud-critical .seg-hud-id,
+.text-critical {
+  color: var(--signal);
+}
+
+/* Hero status */
+.hero-status-line {
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hero-status-lamp-healthy {
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.hero-status-lamp-warning {
+  background: var(--paper-dim);
+  background-image: var(--hatch-warning);
+}
+
+.hero-status-lamp-critical {
+  background: var(--signal);
+}
+
+.hero-status-seg-chip {
+  border-radius: var(--radius-soft);
+  border: 1px solid var(--line);
+}
+
+.hero-status-seg-critical {
+  border-left: 3px solid var(--signal);
+}
+
+/* Tables / ledger */
+.ticket-table th {
+  font-family: var(--font-mono);
+  font-size: var(--type-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.ticket-table td {
+  border-bottom: 1px solid var(--line);
+}
+
+.priority-critical {
+  color: var(--signal);
+  border: 1px solid var(--signal);
+}
+
+/* Toast */
+.toast {
+  border-radius: var(--radius-soft);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  background: var(--ink-800);
+}
+
+.toast-warn {
+  border-left: 3px solid var(--paper-dim);
+}
+
+.toast-error {
+  border-left: 3px solid var(--signal);
+}
+
+.toast-success {
+  border-left: 3px solid var(--paper);
+}
+
+/* Stagger reveals */
+.panel-stagger-1 {
+  animation: ink-panel-in var(--transition-normal) var(--ease-ink) both;
+}
+
+.panel-stagger-2 {
+  animation: ink-panel-in var(--transition-normal) var(--ease-ink) 0.06s both;
+}
+
+.panel-stagger-3 {
+  animation: ink-panel-in var(--transition-normal) var(--ease-ink) 0.12s both;
+}
+
+.panel-stagger-4 {
+  animation: ink-panel-in var(--transition-normal) var(--ease-ink) 0.18s both;
+}
+
+@keyframes ink-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .risk-gauge-dial {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

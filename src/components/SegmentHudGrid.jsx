@@ -2,14 +2,16 @@ import { motion } from 'framer-motion'
 import { segmentLabel, isCritical } from '../lib/segmentUtils.js'
 
 function severityClass(seg) {
-  if (seg?.state === 'CRITICAL_MUD_PUMPING') return 'hud-critical severity-critical'
-  if (isCritical(seg)) return 'hud-critical'
-  return ''
+  if (seg?.state === 'CRITICAL_MUD_PUMPING' || isCritical(seg)) {
+    return 'hud-critical state-critical seg-hud-critical'
+  }
+  if (seg?.state === 'WARNING_WATERLOGGING') return 'state-watch'
+  return 'state-ok'
 }
 
 function stripStatusLabel(seg) {
   if (seg?.state === 'CRITICAL_MUD_PUMPING') return 'CRITICAL'
-  if (seg?.state === 'WARNING_WATERLOGGING') return 'VIB WARN'
+  if (seg?.state === 'WARNING_WATERLOGGING') return 'WATCH'
   const pct = Math.round((1 - (seg?.risk_index ?? 0)) * 100)
   return `OP ${pct}%`
 }

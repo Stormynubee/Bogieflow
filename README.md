@@ -438,7 +438,7 @@ npm run test
 | **Technical Depth** | Implements multi-agent pipelines (Hydrology, Vibration, Planner) on an async FastAPI event loop. Features non-blocking Gemini AI integration, real-time Open-Meteo API caching, and automated ticket explanations. |
 | **Real-World Impact** | Explains maintenance tickets via Shapley-style model feature importances, translating ML inputs into actionable engineering indicators. Calculates avoided derailment risks and USD savings to justify maintenance operations. |
 | **Execution** | Built with an industrial "control room" theme using customized typography and smooth Framer Motion entry staggers. Single-origin production setup allows serving REST, WebSockets, and Vite UI from one Docker container. |
-| **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. |
+| **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. See [docs/SENSORS.md](docs/SENSORS.md) for sensor details. |
 
 ---
 

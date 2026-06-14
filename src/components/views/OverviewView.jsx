@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import ClimatePanel from '../ClimatePanel'
 import AnomalyStream from '../AnomalyStream'
 import CorridorBriefing from '../CorridorBriefing'
@@ -6,12 +6,15 @@ import OverviewOpsStrip from '../OverviewOpsStrip'
 import ImpactPanel from '../ImpactPanel'
 import ForecastPanel from '../ForecastPanel'
 import ScenarioMenu from '../ScenarioMenu'
+import PageHeader from '../ink/PageHeader.jsx'
 import HeroStatusLine from '../HeroStatusLine'
 import RiskGaugeDial from '../RiskGaugeDial'
+import SensorStackPanel from '../SensorStackPanel'
 import MetricBar from '../MetricBar'
 import CorridorCommandDock from '../CorridorCommandDock'
 import DashboardSkeleton from '../DashboardSkeleton'
 import PanelHeader from '../PanelHeader'
+import { OVERVIEW_SPLIT_CLASSES as LAYOUT } from '../../lib/overviewSplitLayout.js'
 
 export default function OverviewView({
   segments,
@@ -32,7 +35,14 @@ export default function OverviewView({
   onGoMaintenance,
   onInjectToast,
 }) {
-  const overviewShellRef = useRef(null)
+  const scrollRef = useRef(null)
+  const shellRef = useRef(null)
+  const [scrollPaneEl, setScrollPaneEl] = useState(null)
+
+  const setScrollPaneRef = useCallback((node) => {
+    scrollRef.current = node
+    setScrollPaneEl(node)
+  }, [])
 
   if (!dataReady) {
     return (
@@ -43,66 +53,106 @@ export default function OverviewView({
   }
 
   return (
-    <div className="overview-page" ref={overviewShellRef} data-testid="view-overview">
-      <HeroStatusLine segments={segments} onSegmentClick={onSegmentClick} />
+    <div className={`overview-page ${LAYOUT.page}`} data-testid="view-overview">
+      <div
+        className={LAYOUT.scrollPane}
+        ref={setScrollPaneRef}
+        data-testid="overview-dashboard-scroll"
+      >
+        <div className={LAYOUT.shell} ref={shellRef}>
+          <div className={LAYOUT.headerBlock}>
+            <PageHeader
+              eyebrow="CORRIDOR / OVERVIEW"
+              title="Track-bed operations"
+              lede="Scroll anywhere on the overview to scrub corridor frames · live alerts below"
+              data-testid="overview-page-header"
+            />
+            <HeroStatusLine segments={segments} onSegmentClick={onSegmentClick} />
+          </div>
 
-      <CorridorCommandDock
-        placement="hero"
-        segments={segments}
-        onSegmentClick={onSegmentClick}
-        driveShellRef={overviewShellRef}
-        lastTickAt={lastTickAt}
-        className="panel-stagger-1"
-      />
+          <div className={LAYOUT.workspace}>
+            <aside className={LAYOUT.corridorPane} data-guide="corridor-feed">
+              <CorridorCommandDock
+                placement={LAYOUT.corridorPlacement}
+                segments={segments}
+                onSegmentClick={onSegmentClick}
+                driveShellRef={shellRef}
+                scrollContainerRef={scrollRef}
+                scrollContainerEl={scrollPaneEl}
+                lastTickAt={lastTickAt}
+                className="panel-stagger-1"
+              />
+              <div className={LAYOUT.corridorOpsRow}>
+                <OverviewOpsStrip
+                  train={train}
+                  connected={connected}
+                  onNavigate={onNavigate}
+                  onInjectToast={onInjectToast}
+                />
+                <ScenarioMenu connected={connected} onInjectToast={onInjectToast} />
+              </div>
+              <div className={LAYOUT.fieldSensors}>
+                <SensorStackPanel
+                  segments={segments}
+                  activeRiskIndex={activeRiskIndex}
+                  connected={connected}
+                  variant="strip"
+                />
+              </div>
+            </aside>
 
-      <div className="overview-grid">
-        <section
-          className="panel panel-hero-gauge panel-stagger-2"
-          data-testid="risk-gauge"
-          data-guide="metrics"
-        >
-          <PanelHeader
-            icon="speed"
-            title="Corridor risk gauge"
-            explainer="Highest active track-bed risk across segments S1–S6"
-          />
-          <div className="hero-gauge-row">
-            <RiskGaugeDial activeRiskIndex={activeRiskIndex} />
-            <MetricBar
+            <div className={LAYOUT.metricsPane}>
+              <ClimatePanel segments={segments} segmentHistory={segmentHistory} />
+              <div className="overview-deck">
+                <section
+                  className="panel panel-hero-gauge panel-stagger-2"
+                  data-testid="risk-gauge"
+                  data-guide="metrics"
+                >
+                  <PanelHeader
+                    icon="speed"
+                    title="Corridor risk gauge"
+                    explainer="Highest active track-bed risk across segments S1–S6"
+                  />
+                  <SensorStackPanel
+                    segments={segments}
+                    activeRiskIndex={activeRiskIndex}
+                    connected={connected}
+                    variant="compact"
+                  />
+                  <div className="hero-gauge-row">
+                    <RiskGaugeDial activeRiskIndex={activeRiskIndex} />
+                    <MetricBar
+                      segments={segments}
+                      activeRiskIndex={activeRiskIndex}
+                      variant="strip"
+                      animate
+                    />
+                  </div>
+                </section>
+                <ImpactPanel impact={impact} />
+              </div>
+            </div>
+          </div>
+
+          <section className={`${LAYOUT.alertsStage} panel-stagger-3`} data-testid="overview-alerts">
+            <AnomalyStream tickets={tickets} logs={logs} maxEntries={14} />
+          </section>
+
+          <div className={LAYOUT.secondary}>
+            <ForecastPanel forecast={forecast} />
+            <CorridorBriefing
+              train={train}
               segments={segments}
-              activeRiskIndex={activeRiskIndex}
-              variant="strip"
-              animate
+              tickets={tickets}
+              openTicketCount={openTicketCount}
+              onAnalyzeSegment={onSegmentClick}
+              onGoMaintenance={onGoMaintenance}
+              onOpenStationMap={onOpenStationMap}
             />
           </div>
-        </section>
-
-        <div className="overview-side-stack">
-          <ImpactPanel impact={impact} />
-          <ForecastPanel forecast={forecast} />
-          <CorridorBriefing
-            train={train}
-            segments={segments}
-            tickets={tickets}
-            openTicketCount={openTicketCount}
-            onAnalyzeSegment={onSegmentClick}
-            onGoMaintenance={onGoMaintenance}
-            onOpenStationMap={onOpenStationMap}
-          />
-          <ClimatePanel segments={segments} segmentHistory={segmentHistory} />
-          <OverviewOpsStrip
-            train={train}
-            connected={connected}
-            onNavigate={onNavigate}
-            onInjectToast={onInjectToast}
-          />
-          <ScenarioMenu connected={connected} onInjectToast={onInjectToast} />
         </div>
       </div>
-
-      <aside className="overview-aside panel-stagger-4">
-        <AnomalyStream tickets={tickets} logs={logs} maxEntries={8} />
-      </aside>
     </div>
   )
 }

@@ -17,10 +17,12 @@
     "preview": "vite preview",
     "test": "vitest run",
     "shots": "node scripts/capture-screenshots.mjs",
+    "shots:ink": "node scripts/capture-ink-screenshots.mjs",
     "start": "python -m uvicorn server.main:app --host 0.0.0.0 --port 8000"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
+    "lucide-react": "^0.511.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

@@ -16,6 +16,8 @@ export default function CorridorCommandDock({
   segments,
   onSegmentClick,
   driveShellRef,
+  scrollContainerRef,
+  scrollContainerEl,
   lastTickAt,
   placement = 'grid',
   className = '',
@@ -29,7 +31,9 @@ export default function CorridorCommandDock({
 
   const scrub = useCorridorScrub(viewportRef, CORRIDOR_FRAME_COUNT, {
     driveShellRef,
-    stickyRef: dockRef,
+    stickyRef: placement === 'split' ? undefined : dockRef,
+    scrollContainerRef,
+    scrollContainerEl,
   })
 
   const dismissHint = () => {
@@ -74,7 +78,7 @@ export default function CorridorCommandDock({
   return (
     <motion.section
       ref={dockRef}
-      className={`panel corridor-command-dock ${placement === 'hero' ? 'corridor-feed-hero' : ''} ${className}`.trim()}
+      className={`panel corridor-command-dock ${placement === 'hero' ? 'corridor-feed-hero' : ''} ${placement === 'split' ? 'corridor-feed-split' : ''} ${placement === 'stack' ? 'corridor-feed-stack' : ''} ${className}`.trim()}
       data-guide="corridor-feed"
       {...dockMotion}
     >
@@ -84,7 +88,7 @@ export default function CorridorCommandDock({
         explainer={showHint ? UI.corridor.scrubHint : UI.corridor.feedSub}
       />
 
-      <motion.div {...canvasMotion}>
+      <motion.div className="corridor-canvas-wrap" {...canvasMotion}>
         <CorridorScrubViewer
           viewportRef={viewportRef}
           displayProgressRef={scrub.displayProgressRef}

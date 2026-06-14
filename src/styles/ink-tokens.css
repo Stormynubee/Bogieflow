@@ -1,0 +1,97 @@
+/* Bogie Flow — ink & paper design tokens (monochrome + single signal) */
+
+:root,
+[data-theme='ink'] {
+  --ink-900: #0a0a0b;
+  --ink-850: #0e0e10;
+  --ink-800: #141417;
+  --ink-700: #1b1b1f;
+  --line: rgba(245, 245, 240, 0.09);
+  --line-strong: rgba(245, 245, 240, 0.18);
+  --paper: #f4f3ee;
+  --paper-dim: #b6b6b0;
+  --paper-muted: #6e6e68;
+  --signal: #e9482e;
+
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-sans: 'Hanken Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --type-xs: 0.75rem;
+  --type-sm: 0.8125rem;
+  --type-base: 0.9375rem;
+  --type-md: 1.125rem;
+  --type-lg: 1.375rem;
+  --type-xl: 1.875rem;
+  --type-2xl: 2.75rem;
+
+  --ease-ink: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 140ms;
+  --dur-normal: 220ms;
+
+  --radius-sharp: 0;
+  --radius-soft: 2px;
+  --radius-pill: 999px;
+
+  --gutter: clamp(20px, 3vw, 32px);
+  --space-section: clamp(36px, 5vh, 56px);
+  --space-panel: 20px;
+  --corridor-dock-height: clamp(220px, 34vh, 360px);
+
+  --transition-fast: var(--dur-fast) var(--ease-ink);
+  --transition-normal: var(--dur-normal) var(--ease-ink);
+  --shadow-panel: none;
+
+  /* Legacy aliases — keep existing CSS working */
+  --bg: var(--ink-900);
+  --surface: var(--ink-800);
+  --surface-container: var(--ink-800);
+  --surface-container-low: var(--ink-900);
+  --surface-container-high: var(--ink-700);
+  --surface-dim: var(--ink-850);
+  --surface-variant: var(--ink-700);
+  --primary: var(--paper);
+  --primary-container: var(--ink-700);
+  --on-primary: var(--ink-900);
+  --on-primary-container: var(--paper);
+  --accent: var(--paper);
+  --accent-warm: var(--paper-dim);
+  --on-surface: var(--paper);
+  --on-surface-muted: var(--paper-dim);
+  --on-surface-variant: var(--paper-muted);
+  --outline-variant: var(--line);
+  --signal-critical: var(--signal);
+  --color-critical: var(--signal);
+  --state-healthy: var(--paper);
+  --state-warning: var(--paper-dim);
+  --color-healthy: var(--paper);
+  --color-warning: var(--paper-dim);
+  --error-container: var(--ink-700);
+  --on-error-container: var(--paper);
+  --radius: var(--radius-soft);
+  --panel-radius: var(--radius-soft);
+  --focus-ring: 0 0 0 1px var(--ink-900), 0 0 0 2px var(--paper);
+  --hero-min-height: clamp(280px, 45vh, 520px);
+
+  --hatch-warning: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 3px,
+    rgba(245, 245, 240, 0.04) 3px,
+    rgba(245, 245, 240, 0.04) 4px
+  );
+  --grid-blueprint: radial-gradient(circle at 1px 1px, rgba(245, 245, 240, 0.06) 1px, transparent 0);
+  --grid-blueprint-size: 8px 8px;
+}
+
+[data-theme='paper'] {
+  --ink-900: #fafaf7;
+  --ink-850: #f3f2ed;
+  --ink-800: #ebeae4;
+  --ink-700: #deddd6;
+  --line: rgba(17, 17, 17, 0.1);
+  --line-strong: rgba(17, 17, 17, 0.2);
+  --paper: #111111;
+  --paper-dim: #444444;
+  --paper-muted: #666666;
+}
