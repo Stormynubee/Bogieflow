@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
 MODEL_PATH = Path(__file__).resolve().parent / "risk_model.joblib"
+_model: GradientBoostingClassifier | None = None
 
 
 def train_and_save(path: Path | None = None) -> GradientBoostingClassifier:
@@ -13,7 +14,6 @@ def train_and_save(path: Path | None = None) -> GradientBoostingClassifier:
     rainfall = np.random.uniform(0, 1, 500).tolist()
     soil_moisture = np.random.uniform(0, 1, 500).tolist()
     vib_z = np.random.uniform(0, 5, 500).tolist()
-    # Guarantee P1/P2/OK classes for sklearn + demo predict
     rainfall.extend([0.95, 0.9, 0.2])
     soil_moisture.extend([0.9, 0.85, 0.15])
     vib_z.extend([4.5, 4.0, 0.5])
@@ -31,13 +31,18 @@ def train_and_save(path: Path | None = None) -> GradientBoostingClassifier:
     model = GradientBoostingClassifier(n_estimators=50, random_state=42)
     model.fit(X, labels)
     joblib.dump(model, target)
+    global _model
+    _model = model
     return model
 
 
-def load_risk_model():
-    if not MODEL_PATH.exists():
-        train_and_save()
-    return joblib.load(MODEL_PATH)
+def load_risk_model() -> GradientBoostingClassifier:
+    global _model
+    if _model is None:
+        if not MODEL_PATH.exists():
+            train_and_save()
+        _model = joblib.load(MODEL_PATH)
+    return _model
 
 
 def predict_priority(rainfall: float, soil_moisture: float, z_score: float) -> str:

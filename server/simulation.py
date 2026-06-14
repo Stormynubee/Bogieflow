@@ -5,9 +5,18 @@ from typing import Callable
 from server.agents.hydrology import HydrologyAgent
 from server.agents.planner import PlannerAgent
 from server.agents.vibration import VibrationAgent
-from server.models import AgentLog, Segment, Train
+from server.models import AgentLog, Segment, Ticket, Train
 
 SEGMENT_IDS = [f"S{i}" for i in range(1, 7)]
+
+PRIORITY_RANK = {"P1": 2, "P2": 1, "OK": 0}
+TICKET_COOLDOWN_TICKS = 20
+HEALTHY_CLOSE_TICKS = 6
+MAX_LOGS = 200
+MAX_TICKETS = 100
+DECAY_RATE = 0.98
+RAINFALL_FLOOR = 0.1
+MOISTURE_FLOOR = 0.2
 
 
 class SimulationEngine:
@@ -20,10 +29,13 @@ class SimulationEngine:
             sid: Segment(id=sid) for sid in SEGMENT_IDS
         }
         self.train = Train(segment_id="S1", progress=0.0)
-        self.tickets: list = []
+        self.tickets: list[Ticket] = []
         self.logs: list[AgentLog] = []
         self._ticket_counter = 0
         self._segment_index = 0
+        self._healthy_streak: dict[str, int] = {sid: 0 for sid in SEGMENT_IDS}
+        self._ticket_cooldown: dict[str, int] = {sid: 0 for sid in SEGMENT_IDS}
+        self._anomaly_segments: set[str] = set()
         random.seed(7)
 
     def active_risk_index(self) -> float:
@@ -44,25 +56,104 @@ class SimulationEngine:
     def _push_log(self, agent: str, message: str) -> None:
         log = AgentLog(agent=agent, message=message, timestamp=time.time())
         self.logs.append(log)
+        if len(self.logs) > MAX_LOGS:
+            self.logs = self.logs[-MAX_LOGS:]
         self.on_event(log.to_dict())
+
+    def _resolve_state(self, risk_index: float, prev_state: str) -> str:
+        if risk_index >= 0.70:
+            return "CRITICAL_MUD_PUMPING"
+        if risk_index >= 0.35:
+            return "WARNING_WATERLOGGING"
+        if risk_index < 0.32:
+            return "HEALTHY"
+        if prev_state in ("WARNING_WATERLOGGING", "CRITICAL_MUD_PUMPING"):
+            if prev_state == "CRITICAL_MUD_PUMPING" and risk_index < 0.70:
+                return "WARNING_WATERLOGGING"
+            return prev_state
+        return "HEALTHY"
+
+    def _apply_hydrology(self, segment_id: str) -> None:
+        seg = self.segments[segment_id]
+        result = self.hydrology.evaluate(seg.rainfall, seg.soil_moisture, seg.nominal_stiffness)
+        seg.risk_index = result["risk_index"]
+        seg.k_effective = result["k_effective"]
+        seg.state = self._resolve_state(result["risk_index"], seg.state)
+
+    def _decay_segments(self) -> None:
+        for sid, seg in self.segments.items():
+            if sid in self._anomaly_segments:
+                continue
+            seg.rainfall = max(RAINFALL_FLOOR, seg.rainfall * DECAY_RATE)
+            seg.soil_moisture = max(MOISTURE_FLOOR, seg.soil_moisture * DECAY_RATE)
+            prev_state = seg.state
+            self._apply_hydrology(sid)
+            if seg.state == "HEALTHY":
+                self._healthy_streak[sid] += 1
+            else:
+                self._healthy_streak[sid] = 0
+            if self._healthy_streak[sid] >= HEALTHY_CLOSE_TICKS:
+                self._close_open_tickets(sid)
+            if seg.state != prev_state:
+                self.on_event(self._segment_update_payload(sid))
+
+    def _close_open_tickets(self, segment_id: str) -> None:
+        for ticket in self.tickets:
+            if ticket.segment == segment_id and ticket.status == "open":
+                ticket.status = "closed"
+                self._ticket_cooldown[segment_id] = 0
+                self.on_event(ticket.to_dict())
+                self._push_log("planner", f"{segment_id}: ticket {ticket.id} auto-closed — segment HEALTHY")
+
+    def _open_ticket_for_segment(self, segment_id: str) -> Ticket | None:
+        for ticket in reversed(self.tickets):
+            if ticket.segment == segment_id and ticket.status == "open":
+                return ticket
+        return None
+
+    def _trim_tickets(self) -> None:
+        if len(self.tickets) <= MAX_TICKETS:
+            return
+        open_tickets = [t for t in self.tickets if t.status == "open"]
+        closed = [t for t in self.tickets if t.status != "open"]
+        keep_closed = closed[-(MAX_TICKETS - len(open_tickets)) :]
+        self.tickets = open_tickets + keep_closed
 
     def inject_monsoon(self, segment_id: str, rainfall: float, soil_moisture: float) -> dict:
         seg = self.segments[segment_id]
+        self._anomaly_segments.discard(segment_id)
         seg.rainfall = rainfall
         seg.soil_moisture = soil_moisture
+        self._healthy_streak[segment_id] = 0
         result = self.hydrology.evaluate(rainfall, soil_moisture, seg.nominal_stiffness)
         seg.risk_index = result["risk_index"]
         seg.k_effective = result["k_effective"]
         seg.state = result["state"]
         self._push_log("hydrology", f"{segment_id}: {result['description']}")
         self.on_event(self._segment_update_payload(segment_id))
+        vib = {"anomaly": True, "z_score": 4.0, "az": seg.az}
+        if seg.risk_index >= 0.7:
+            seg.vib_z = 4.0
+        self._evaluate_segment(segment_id, vib)
         return {"segment": seg.to_dict(), "hydrology": result}
 
     def inject_anomaly(self, segment_id: str) -> dict:
         seg = self.segments[segment_id]
-        seg.force_anomaly = True
-        vib = self.vibration.push(segment_id, az=2.8)
+        self._anomaly_segments.add(segment_id)
+        window = self.vibration._windows.setdefault(segment_id, [])
+        window.clear()
+        window.extend([0.3] * 19)
+        az = 2.8
+        vib = self.vibration.push(segment_id, az=az)
+        seg.az = az
+        seg.vib_z = vib.get("z_score", 0.0)
+        if seg.risk_index < 0.5:
+            seg.rainfall = max(seg.rainfall, 0.6)
+            seg.soil_moisture = max(seg.soil_moisture, 0.55)
+            self._apply_hydrology(segment_id)
+        self.on_event(self._segment_update_payload(segment_id))
         self._evaluate_segment(segment_id, vib)
+        self._anomaly_segments.discard(segment_id)
         return {"segment": seg.to_dict(), "vibration": vib}
 
     def _segment_update_payload(self, segment_id: str) -> dict:
@@ -81,6 +172,11 @@ class SimulationEngine:
         }
 
     def tick(self) -> None:
+        for sid in SEGMENT_IDS:
+            if self._ticket_cooldown[sid] > 0:
+                self._ticket_cooldown[sid] -= 1
+
+        self._decay_segments()
         self._advance_train()
         seg_id = self.train.segment_id
         az = self._sample_az(seg_id)
@@ -117,10 +213,9 @@ class SimulationEngine:
     def _sample_az(self, segment_id: str) -> float:
         seg = self.segments[segment_id]
         base = 0.3 + random.gauss(0, 0.05)
-        if seg.force_anomaly or seg.risk_index > 0.7:
-            if random.random() < 0.6 or seg.force_anomaly:
+        if seg.risk_index > 0.7:
+            if random.random() < 0.6:
                 base += random.uniform(1.2, 2.5)
-                seg.force_anomaly = False
         return max(0.05, base)
 
     def _evaluate_segment(self, segment_id: str, vib: dict) -> None:
@@ -139,14 +234,42 @@ class SimulationEngine:
                 "vibration",
                 f"{segment_id}: z-score {vib['z_score']:.2f} exceeds threshold — anomaly detected",
             )
-        if ticket:
-            self._ticket_counter += 1
-            ticket.id = f"T-{self._ticket_counter:03d}"
-            self.tickets.append(ticket)
+        if not ticket:
+            return
+
+        existing = self._open_ticket_for_segment(segment_id)
+        new_rank = PRIORITY_RANK.get(ticket.priority, 0)
+        if existing:
+            existing_rank = PRIORITY_RANK.get(existing.priority, 0)
+            if new_rank <= existing_rank:
+                existing.reason = ticket.reason
+                existing.model_label = ticket.model_label
+                self.on_event(existing.to_dict())
+                return
+            existing.priority = ticket.priority
+            existing.reason = ticket.reason
+            existing.model_label = ticket.model_label
+            self.on_event(existing.to_dict())
             if ticket.priority == "P1":
                 seg.state = "CRITICAL_MUD_PUMPING"
             elif ticket.priority == "P2" and seg.state == "HEALTHY":
                 seg.state = "WARNING_WATERLOGGING"
-            self.on_event(ticket.to_dict())
             self.on_event(self._segment_update_payload(segment_id))
-            self._push_log("planner", f"{segment_id}: {ticket.reason} (model: {ticket.model_label})")
+            self._push_log("planner", f"{segment_id}: upgraded to {ticket.priority} (model: {ticket.model_label})")
+            return
+
+        if self._ticket_cooldown.get(segment_id, 0) > 0:
+            return
+
+        self._ticket_counter += 1
+        ticket.id = f"T-{self._ticket_counter:03d}"
+        self.tickets.append(ticket)
+        self._trim_tickets()
+        self._ticket_cooldown[segment_id] = TICKET_COOLDOWN_TICKS
+        if ticket.priority == "P1":
+            seg.state = "CRITICAL_MUD_PUMPING"
+        elif ticket.priority == "P2" and seg.state == "HEALTHY":
+            seg.state = "WARNING_WATERLOGGING"
+        self.on_event(ticket.to_dict())
+        self.on_event(self._segment_update_payload(segment_id))
+        self._push_log("planner", f"{segment_id}: {ticket.reason} (model: {ticket.model_label})")

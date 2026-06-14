@@ -18,6 +18,7 @@ def parse_allowed_origins(value: str | None = None) -> list[str]:
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
 
 from server.guide import ai_guide_answer
 from server.simulation import SimulationEngine
@@ -116,7 +117,7 @@ async def inject_anomaly(body: AnomalyInject):
 
 @app.post("/api/guide/chat")
 async def guide_chat(body: GuideChatRequest):
-    return ai_guide_answer(body.message, body.history)
+    return await run_in_threadpool(ai_guide_answer, body.message, body.history)
 
 
 @app.websocket("/ws")

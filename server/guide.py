@@ -73,7 +73,7 @@ def _call_gemini(api_key: str, model: str, message: str, history: list[dict[str,
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=8) as resp:
         data = json.loads(resp.read().decode())
     return data["candidates"][0]["content"]["parts"][0]["text"]
 

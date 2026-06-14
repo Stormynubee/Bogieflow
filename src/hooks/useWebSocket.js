@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
 import { wsUrl } from '../lib/config.js'
+import { computeActiveRiskIndex, applySegmentUpdate } from '../lib/wsReducer.js'
 
 const HISTORY_LIMIT = 24
 const SEGMENT_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
@@ -76,10 +77,11 @@ export function useWebSocket() {
           break
         }
         case 'segment_update': {
-          setSegments((prev) =>
-            prev.map((s) => (s.id === msg.id ? { ...s, ...msg } : s)),
-          )
-          setActiveRiskIndex((prev) => Math.max(prev, msg.risk_index ?? 0))
+          setSegments((prev) => {
+            const next = applySegmentUpdate(prev, msg)
+            setActiveRiskIndex(computeActiveRiskIndex(next))
+            return next
+          })
           recordHistory(msg.id, {
             soil_moisture: msg.soil_moisture,
             rainfall: msg.rainfall,
@@ -104,7 +106,12 @@ export function useWebSocket() {
           break
         case 'ticket':
           setTickets((prev) => {
-            if (prev.some((t) => t.id === msg.id)) return prev
+            const idx = prev.findIndex((t) => t.id === msg.id)
+            if (idx >= 0) {
+              const next = [...prev]
+              next[idx] = { ...next[idx], ...msg }
+              return next
+            }
             return [...prev, msg]
           })
           break
