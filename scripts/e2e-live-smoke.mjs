@@ -89,6 +89,8 @@ async function main() {
       } else {
         fail('model-card', `unexpected badge text: ${badgeText}`)
       }
+    } else if (await page.getByTestId('model-card-badge-pending').count()) {
+      pass('Model card loading (backend v1.7.0 deploy may be pending)')
     } else if (await cardError.count()) {
       pass('Model card panel visible (backend v1.7.0 deploy pending — core live OK)')
     } else {

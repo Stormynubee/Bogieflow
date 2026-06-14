@@ -101,7 +101,7 @@ export default function ModelCardPanel({ className = '' }) {
     }
   }, [])
 
-  const badge = modelCardBadge(card?.data_source ?? 'synthetic')
+  const badge = card ? modelCardBadge(card.data_source) : null
   const metrics = modelCardMetricRows(card)
 
   return (
@@ -114,12 +114,18 @@ export default function ModelCardPanel({ className = '' }) {
         title="Risk model card"
         explainer="GradientBoosting fusion — CV metrics from training frame (see docs/DATA.md)"
         aside={
-          <span
-            className={`model-card-badge model-card-badge-${badge.variant}`}
-            data-testid="model-card-badge"
-          >
-            {badge.text} · {badge.honesty}
-          </span>
+          badge ? (
+            <span
+              className={`model-card-badge model-card-badge-${badge.variant}`}
+              data-testid="model-card-badge"
+            >
+              {badge.text} · {badge.honesty}
+            </span>
+          ) : (
+            <span className="model-card-badge model-card-badge-pending" data-testid="model-card-badge-pending">
+              Loading…
+            </span>
+          )
         }
       />
 
