@@ -6,6 +6,16 @@ import { applyLocalMonsoon, applyLocalAnomaly } from '../lib/localDemoInject.js'
 import { resolveConnectionState } from '../lib/connectionState.js'
 import { parseWebSocketMessage } from '../lib/wsMessage.js'
 import { onSocketClose, onSocketOpen } from '../lib/wsReconnect.js'
+import {
+  advanceTrainProgress,
+  computeActiveRiskFromSegments,
+  DEMO_TICK_MS,
+  normalizeTrainProgress,
+  tickDemoForecast,
+  tickDemoHistory,
+  tickDemoImpact,
+  tickDemoSegments,
+} from '../lib/demoSimulation.js'
 
 const HISTORY_LIMIT = 24
 const SEGMENT_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
@@ -126,7 +136,10 @@ export function useWebSocket() {
         case 'state_snapshot': {
           const segs = msg.segments || []
           setSegments(segs)
-          setTrain(msg.train || { segment_id: 'S1', progress: 0 })
+          setTrain({
+            segment_id: msg.train?.segment_id ?? 'S1',
+            progress: normalizeTrainProgress(msg.train?.progress ?? 0),
+          })
           setTickets(msg.tickets || [])
           setLogs(msg.logs || [])
           setActiveRiskIndex(msg.active_risk_index ?? 0)
@@ -169,7 +182,10 @@ export function useWebSocket() {
           })
           break
         case 'train_update':
-          setTrain({ segment_id: msg.segment_id, progress: msg.progress })
+          setTrain({
+            segment_id: msg.segment_id,
+            progress: normalizeTrainProgress(msg.progress),
+          })
           break
         case 'ticket':
           setTickets((prev) => {
@@ -258,94 +274,30 @@ export function useWebSocket() {
     if (realConnected) return
 
     const interval = setInterval(() => {
-      // 1. Move train progress locally
-      setTrain((prev) => {
-        let progress = prev.progress + 4
-        let segment_id = prev.segment_id
-        if (progress >= 100) {
-          progress = 0
-          const currentIdx = SEGMENT_IDS.indexOf(segment_id)
-          segment_id = SEGMENT_IDS[(currentIdx + 1) % SEGMENT_IDS.length]
-        }
-        return { segment_id, progress }
-      })
+      setTrain((prev) => advanceTrainProgress(prev))
 
-      // 2. Fluctuate segments slightly
       setSegments((prev) => {
-        const next = prev.map((s) => {
-          const rainfall = Math.max(0.01, Math.min(1.0, s.rainfall + (Math.random() - 0.5) * 0.01))
-          const soil_moisture = Math.max(0.1, Math.min(1.0, s.soil_moisture + (Math.random() - 0.5) * 0.01))
-          const vib_z = Math.max(0.01, Math.min(4.0, s.vib_z + (Math.random() - 0.5) * 0.04))
-          const risk_index = Math.max(0.01, Math.min(1.0, (rainfall * 0.4 + soil_moisture * 0.6) * (1 + (vib_z > 3.0 ? 0.3 : 0))))
-          const k_effective = Math.max(50.0, Math.min(100.0, 100.0 - risk_index * 30.0))
-          
-          let state = 'HEALTHY'
-          if (risk_index >= 0.7) state = 'CRITICAL_MUD_PUMPING'
-          else if (risk_index >= 0.35) state = 'WARNING_WATERLOGGING'
-
-          return {
-            ...s,
-            rainfall,
-            soil_moisture,
-            vib_z,
-            risk_index,
-            k_effective,
-            state,
-            color: state === 'CRITICAL_MUD_PUMPING' ? '#ef4444' : state === 'WARNING_WATERLOGGING' ? '#eab308' : '#22c55e'
-          }
-        })
-        
-        // compute active risk index
-        const maxRisk = Math.max(...next.map(s => s.risk_index), 0)
-        setActiveRiskIndex(maxRisk)
+        const next = tickDemoSegments(prev)
+        setActiveRiskIndex(computeActiveRiskFromSegments(next))
         return next
       })
 
-      // 3. Jitter history for segments
-      setSegmentHistory((prevHistory) => {
-        const nextHistory = { ...prevHistory }
-        SEGMENT_IDS.forEach((id) => {
-          const bucket = nextHistory[id] ?? { moisture: [], rainfall: [], vib_z: [] }
-          const nextMoisture = [...bucket.moisture.slice(1), 0.2 + 0.05 * Math.sin(Date.now() * 0.0001)]
-          const nextRainfall = [...bucket.rainfall.slice(1), 0.1 + 0.03 * Math.cos(Date.now() * 0.0001)]
-          const nextVib = [...bucket.vib_z.slice(1), 0.02 + 0.02 * Math.sin(Date.now() * 0.0002)]
-          nextHistory[id] = { moisture: nextMoisture, rainfall: nextRainfall, vib_z: nextVib }
-        })
-        return nextHistory
-      })
+      setSegmentHistory((prevHistory) => tickDemoHistory(prevHistory, SEGMENT_IDS))
 
-      // 4. Update impact Cost
-      setImpact((prev) => {
-        if (!prev) return prev
-        return {
-          ...prev,
-          prevented_cost_usd: prev.prevented_cost_usd + Math.round(Math.random() * 5),
-        }
-      })
+      setImpact((prev) => tickDemoImpact(prev))
 
-      // 5. Update forecast sparklines
       setForecast((prev) => {
-        if (!prev) return prev
-        return {
-          ...prev,
-          segments: prev.segments.map((seg) => {
-            const currentSpark = seg.sparkline || []
-            const currentRisk = segments.find(s => s.id === seg.id)?.risk_index ?? seg.projected_risk
-            const nextSpark = [...currentSpark.slice(1), currentRisk]
-            return {
-              ...seg,
-              projected_risk: currentRisk,
-              sparkline: nextSpark
-            }
-          })
-        }
+        const riskById = Object.fromEntries(
+          segmentsRef.current.map((s) => [s.id, s.risk_index]),
+        )
+        return tickDemoForecast(prev, riskById)
       })
 
       setLastTickAt(Date.now())
-    }, 2000)
+    }, DEMO_TICK_MS)
 
     return () => clearInterval(interval)
-  }, [realConnected, segments])
+  }, [realConnected])
 
 
   const dataReady = segments.length > 0

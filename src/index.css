@@ -1180,6 +1180,14 @@ body {
   background: var(--accent);
 }
 
+.scrub-live-pill-sim {
+  color: var(--on-surface-variant);
+}
+
+.scrub-live-pill-sim .scrub-live-dot {
+  background: var(--on-surface-variant);
+}
+
 .scrub-hint {
   font-family: var(--font-mono);
   font-size: 0.625rem;

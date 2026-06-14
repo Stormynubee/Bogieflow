@@ -143,7 +143,12 @@ export default function OverviewView({
                 className={`${LAYOUT.metricsAlerts} panel-stagger-3`}
                 data-testid="overview-alerts"
               >
-                <AnomalyStream tickets={tickets} logs={logs} maxEntries={14} />
+                <AnomalyStream
+                  tickets={tickets}
+                  logs={logs}
+                  maxEntries={14}
+                  liveConnected={realConnected}
+                />
               </section>
             </div>
           </div>

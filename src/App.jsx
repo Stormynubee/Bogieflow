@@ -19,6 +19,8 @@ import { useDemoScenario } from './hooks/useDemoScenario'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js'
 import GrainOverlay from './components/ink/GrainOverlay.jsx'
 import StatusTicker from './components/ink/StatusTicker.jsx'
+import ReconnectBanner from './components/ReconnectBanner'
+import { shouldShowReconnectBanner } from './lib/reconnectUi.js'
 
 function formatUptime(seconds) {
   const h = Math.floor(seconds / 3600)
@@ -141,6 +143,11 @@ export default function App() {
     !realConnected && dataReady && { label: 'MODE', value: 'Demo' },
   ].filter(Boolean)
 
+  const showReconnectBanner = shouldShowReconnectBanner({
+    reconnectAttempts,
+    realConnected,
+  })
+
   if (!booted) {
     return <BootLoader onComplete={handleBootComplete} />
   }
@@ -163,6 +170,10 @@ export default function App() {
           openTicketCount={openTickets}
           onNavigateMaintenance={goMaintenance}
         />
+
+        {showReconnectBanner && (
+          <ReconnectBanner reconnectAttempts={reconnectAttempts} />
+        )}
 
         <StatusTicker items={tickerItems} />
 

@@ -1,7 +1,14 @@
 import LogEntry from './LogEntry'
 import { UI } from '../content/uiCopy.js'
+import { anomalyIngestPillLabel } from '../lib/anomalyStreamUi.js'
 
-export default function AnomalyStream({ tickets, logs, animate = false, maxEntries = 12 }) {
+export default function AnomalyStream({
+  tickets,
+  logs,
+  animate = false,
+  maxEntries = 12,
+  liveConnected = false,
+}) {
   const entries = [
     ...tickets.map((t) => ({
       key: t.id,
@@ -28,8 +35,9 @@ export default function AnomalyStream({ tickets, logs, animate = false, maxEntri
           <span className="material-symbols-outlined panel-icon">sensors</span>
           {UI.anomaly.title}
         </h2>
-        <span className="scrub-live-pill">
-          <span className="scrub-live-dot" aria-hidden="true" /> Live
+        <span className={`scrub-live-pill ${liveConnected ? '' : 'scrub-live-pill-sim'}`}>
+          <span className="scrub-live-dot" aria-hidden="true" />{' '}
+          {anomalyIngestPillLabel(liveConnected)}
         </span>
       </div>
       <ul className="stream-list">
