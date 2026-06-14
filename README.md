@@ -23,66 +23,42 @@ Bogie Flow is a real-time digital twin monitoring application designed for the F
 The following diagram illustrates the flow of simulated telemetry data through the specialized agent systems, the classification model, the WebSocket hub, and the React frontend dashboard.
 
 ```mermaid
-flowchart LR
-    %% Subgraph Definitions
-    subgraph UI_IN [Dashboard Controller]
-        Ctrl[Control Panel]
+flowchart TD
+    %% Subgraph 1: Control & Ingestion
+    subgraph INGEST [Control & Ingest]
+        Ctrl[Control Panel] -->|POST /inject| REST[REST Inject API]
     end
 
-    subgraph API_IN [REST Gateway]
-        REST[REST Inject Endpoint]
+    %% Subgraph 2: Processing Pipeline
+    subgraph PIPELINE [Telemetry & Analysis Pipeline]
+        Train[Train Position] -->|z-acceleration| Vib[Vibration Agent]
+        Segments[S1 to S6] -->|moisture/rainfall| Hydro[Hydrology Agent]
+        
+        Hydro -->|stiffness index| ML[ML Risk Classifier]
+        Vib -->|rolling z-score| ML
+        
+        Hydro -->|wetness report| Plan[Planner Agent]
+        ML -->|predicted tier| Plan
     end
 
-    subgraph SIM [Simulation Loop]
-        Train[Train Position]
-        Segments[S1 to S6]
-    end
-
-    subgraph AGENTS [Multi-Agent Analysis]
-        Hydro[Hydrology Agent]
-        Vib[Vibration Agent]
-        ML[ML Risk Classifier]
-        Plan[Planner Agent]
-    end
-
-    subgraph API_OUT [WebSocket Gateway]
+    %% Subgraph 3: Real-Time Display
+    subgraph DISPLAY [Real-Time Display]
         WS[WebSocket Hub]
+        WS -->|live track state| Map[TrackMap SVG]
+        WS -->|system risk index| Gauge[RiskGauge CSS]
+        WS -->|work tickets| Queue[Maintenance Queue]
     end
 
-    subgraph UI_OUT [Dashboard Display]
-        Map[TrackMap SVG]
-        Gauge[RiskGauge CSS]
-        Queue[Maintenance Queue]
-    end
-
-    %% Wiring / Data Flow Connections
-    Ctrl -->|POST /inject| REST
+    %% Cross-subgraph connections
     REST -->|Force Anomaly| Segments
-    
-    Segments -->|Moisture & Rain| Hydro
-    Train -->|z-Acceleration| Vib
-    
-    Hydro -->|Stiffness Index| ML
-    Vib -->|Rolling z-Score| ML
-    
-    Hydro -->|Wetness Report| Plan
-    ML -->|Risk Tier Prediction| Plan
-    
-    Train -->|Train Position| WS
-    Segments -->|Segment Stiffness| WS
-    Plan -->|Maintenance Ticket| WS
-    
-    WS -->|Live Telemetry| Map
-    WS -->|Active Risk Index| Gauge
-    WS -->|Work Tickets| Queue
+    Train -->|position stream| WS
+    Segments -->|stiffness stream| WS
+    Plan -->|dispatch tickets| WS
 
-    %% Stylized Color Customizations
-    style UI_IN fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
-    style API_IN fill:#151720,stroke:#232630,stroke-width:2px,color:#ffffff
-    style SIM fill:#0e1014,stroke:#ff5545,stroke-width:2px,stroke-dasharray:5 5,color:#ffffff
-    style AGENTS fill:#151720,stroke:#ff5545,stroke-width:2px,color:#ffffff
-    style API_OUT fill:#151720,stroke:#232630,stroke-width:2px,color:#ffffff
-    style UI_OUT fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
+    %% Styling
+    style INGEST fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
+    style PIPELINE fill:#151720,stroke:#ff5545,stroke-width:2px,color:#ffffff
+    style DISPLAY fill:#0e1014,stroke:#232630,stroke-width:2px,color:#ffffff
 
     style Ctrl fill:#232630,stroke:#9098a8,color:#ffffff
     style REST fill:#232630,stroke:#9098a8,color:#ffffff
