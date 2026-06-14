@@ -1,5 +1,7 @@
+import { apiUrl } from './config.js'
+
 export async function postJson(path, body) {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

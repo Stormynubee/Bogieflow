@@ -5,6 +5,7 @@ import {
   segmentCoordinates,
 } from '../../lib/segmentUtils.js'
 import { soilRainCorrelationData } from '../../lib/chartData.js'
+import { apiUrl } from '../../lib/config.js'
 import MetricBar from '../MetricBar'
 import BogieAnalysisPanel from '../BogieAnalysisPanel'
 
@@ -88,7 +89,7 @@ export default function AnalysisView({
   const handleAuthorize = async () => {
     setDeployState('loading')
     try {
-      const res = await fetch('/api/inject/anomaly', {
+      const res = await fetch(apiUrl('/api/inject/anomaly'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ segment_id: focus.id }),

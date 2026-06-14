@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
-const WS_URL =
-  import.meta.env.DEV
-    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
-    : 'ws://localhost:8000/ws'
+import { wsUrl } from '../lib/config.js'
 
 const HISTORY_LIMIT = 24
 const SEGMENT_IDS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
@@ -45,7 +42,7 @@ export function useWebSocket() {
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
 
-    const ws = new WebSocket(WS_URL)
+    const ws = new WebSocket(wsUrl())
     wsRef.current = ws
 
     ws.onopen = () => setConnected(true)

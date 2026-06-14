@@ -10,6 +10,7 @@ import MaintenanceView from './components/views/MaintenanceView'
 import ClimateView from './components/views/ClimateView'
 import BootLoader from './components/BootLoader'
 import { highestRiskSegment } from './lib/segmentUtils.js'
+import { apiUrl } from './lib/config.js'
 import { UI } from './content/uiCopy.js'
 
 function formatUptime(seconds) {
@@ -49,7 +50,7 @@ export default function App() {
 
   const handleScan = async () => {
     try {
-      await fetch('/api/inject/monsoon', {
+      await fetch(apiUrl('/api/inject/monsoon'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
