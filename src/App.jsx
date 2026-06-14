@@ -3,6 +3,7 @@ import { useWebSocket } from './hooks/useWebSocket'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import StationMapModal from './components/StationMapModal'
+import GuideCoach from './components/guide/GuideCoach'
 import OverviewView from './components/views/OverviewView'
 import AnalysisView from './components/views/AnalysisView'
 import MaintenanceView from './components/views/MaintenanceView'
@@ -138,7 +139,7 @@ export default function App() {
           {view === 'climate' && <ClimateView segments={segments} />}
         </main>
 
-        <footer className="app-footer">
+        <footer className="app-footer" data-guide="app-footer">
           <span>
             <span className="footer-dot" />
             {UI.footer.uptime}: {uptimeLabel} | {UI.footer.agent}: {agentLabel} |{' '}
@@ -164,6 +165,12 @@ export default function App() {
           </span>
         </footer>
       </div>
+
+      <GuideCoach
+        view={view}
+        setView={setView}
+        onOpenStationMap={() => setStationMapOpen(true)}
+      />
 
       <StationMapModal
         open={stationMapOpen}

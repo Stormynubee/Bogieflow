@@ -2,8 +2,8 @@ import LogEntry from '../LogEntry'
 
 export default function MaintenanceView({ tickets, logs }) {
   return (
-    <div className="maintenance-layout">
-      <section className="panel maintenance-tickets">
+    <div className="maintenance-layout" data-guide="maintenance-main">
+      <section className="panel panel-editorial maintenance-tickets">
         <div className="panel-head">
           <h2>
             <span className="material-symbols-outlined panel-icon">build</span>
@@ -50,7 +50,7 @@ export default function MaintenanceView({ tickets, logs }) {
         </div>
       </section>
 
-      <section id="network-logs" className="panel maintenance-logs">
+      <section id="network-logs" className="panel panel-editorial maintenance-logs">
         <div className="panel-head">
           <h2>
             <span className="material-symbols-outlined panel-icon">terminal</span>

@@ -30,7 +30,7 @@ export default function ClimateView({ segments }) {
   })
 
   return (
-    <div className="climate-layout">
+    <div className="climate-layout" data-guide="climate-main">
       <header className="climate-page-header">
         <p className="analysis-breadcrumb">CORRIDOR &gt; ENVIRONMENTAL STRESS</p>
         <h1 className="climate-page-title">Climate Impact Strategy</h1>
@@ -38,7 +38,7 @@ export default function ClimateView({ segments }) {
       </header>
 
       <div className="climate-grid-main">
-        <section className="panel heatmap-card">
+        <section className="panel panel-editorial heatmap-card">
           <div className="panel-head">
             <h2>
               <span className="material-symbols-outlined panel-icon">map</span>
@@ -76,7 +76,7 @@ export default function ClimateView({ segments }) {
           </p>
         </section>
 
-        <section className="panel longevity-card">
+        <section className="panel panel-editorial longevity-card">
           <div className="panel-head">
             <h2>
               <span className="material-symbols-outlined panel-icon">schedule</span>
@@ -105,7 +105,7 @@ export default function ClimateView({ segments }) {
         </section>
       </div>
 
-      <section className="panel vibration-table-card">
+      <section className="panel panel-editorial vibration-table-card">
         <div className="panel-head">
           <h2>
             <span className="material-symbols-outlined panel-icon">vibration</span>
