@@ -10,6 +10,7 @@
 const backend = (process.argv[2] || process.env.LIVE_BACKEND_URL || '').replace(/\/$/, '')
 const vercelOrigin = process.env.LIVE_VERCEL_ORIGIN || 'https://bogieflow.vercel.app'
 const frontend = process.env.LIVE_FRONTEND_URL || 'https://bogieflow.vercel.app'
+const apiSecret = process.env.LIVE_API_SECRET || ''
 
 if (!backend) {
   console.error('Usage: node scripts/verify-live-stack.mjs <BACKEND_URL>')
@@ -85,16 +86,21 @@ async function main() {
   }
 
   try {
+    const injectHeaders = {
+      'Content-Type': 'application/json',
+      Origin: vercelOrigin,
+    }
+    if (apiSecret) injectHeaders['X-Bogie-Api-Key'] = apiSecret
+
     const inject = await fetch(`${backend}/api/inject/monsoon`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Origin: vercelOrigin,
-      },
+      headers: injectHeaders,
       body: JSON.stringify({ segment_id: 'S4', rainfall: 0.9, soil_moisture: 0.85 }),
       signal: AbortSignal.timeout(60_000),
     })
-    if (!inject.ok) fail('inject', `${inject.status} ${inject.statusText}`)
+    if (inject.status === 401 && !apiSecret) {
+      console.log('SKIP POST /api/inject/monsoon (set LIVE_API_SECRET for authenticated inject)')
+    } else if (!inject.ok) fail('inject', `${inject.status} ${inject.statusText}`)
     else {
       const body = await inject.json()
       if (!body.ok || body.segment?.id !== 'S4') fail('inject', JSON.stringify(body))

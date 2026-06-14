@@ -17,7 +17,7 @@ Split architecture: **Vercel** serves the static React SPA; **Render** runs Fast
    - Runtime: Docker (multi-stage build from [`Dockerfile`](../Dockerfile))
    - Health check: `/api/health`
    - `ALLOWED_ORIGINS` pre-set for both Vercel domains
-3. When prompted, optionally enter `GUIDE_AI_API_KEY` for Gemini guide chat.
+3. When prompted, set `GUIDE_AI_API_KEY` (optional) and **`BOGIE_API_SECRET`** (required for production — generate a long random string).
 4. Wait for the first deploy (Docker build ~5–10 min on free tier).
 
 **Expected backend URL:** `https://bogie-flow.onrender.com`
@@ -50,6 +50,7 @@ Set **Production** environment variables in [Vercel project settings](https://ve
 |----------|-------|
 | `VITE_API_BASE` | `https://bogie-flow.onrender.com` |
 | `VITE_WS_BASE` | *(leave empty — auto-derived as `wss://bogie-flow.onrender.com/ws`)* |
+| `VITE_BOGIE_API_SECRET` | **Same value as `BOGIE_API_SECRET` on Render** |
 
 Then redeploy (Vite bakes env vars at build time):
 
@@ -69,8 +70,10 @@ vercel --prod --yes
 | Variable | Vercel | Render | Purpose |
 |----------|:------:|:------:|---------|
 | `VITE_API_BASE` | Yes | No | REST API prefix for frontend |
+| `VITE_BOGIE_API_SECRET` | Yes | No | Shared secret for inject/reset/guide POSTs |
 | `VITE_WS_BASE` | Optional | No | WebSocket URL override |
 | `ALLOWED_ORIGINS` | No | Yes | CORS for Vercel domains |
+| `BOGIE_API_SECRET` | No | Yes | Backend auth for mutating routes |
 | `GUIDE_AI_API_KEY` | No | Optional | Gemini AI features |
 | `GUIDE_AI_MODEL` | No | Optional | Gemini model name |
 | `PORT` | No | Auto | Uvicorn bind port |

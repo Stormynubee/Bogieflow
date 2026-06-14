@@ -1,5 +1,6 @@
 import { GUIDE_KNOWLEDGE, GUIDE_FALLBACK } from '../data/guideKnowledge.js'
 import { apiUrl } from './config.js'
+import { mutateHeaders } from './apiAuth.js'
 
 /**
  * Score keyword overlap for local knowledge retrieval.
@@ -58,7 +59,7 @@ export async function fetchAiGuideMessage(message, { history = [] } = {}) {
   try {
     const res = await fetch(apiUrl('/api/guide/chat'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: mutateHeaders(),
       body: JSON.stringify({ message, history }),
     })
     if (!res.ok) return null

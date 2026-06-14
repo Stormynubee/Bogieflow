@@ -24,10 +24,16 @@ def parse_allowed_origin_regex(value: str | None = None) -> str | None:
     raw = raw.strip()
     return raw or None
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
+
+from server.auth import (
+    GUIDE_HISTORY_MAX,
+    require_guide_chat,
+    require_mutating_auth,
+)
 
 from server.guide import ai_guide_answer
 from server.explain import explain_ticket
@@ -124,9 +130,14 @@ class AnomalyInject(BaseModel):
     segment_id: str = Field(pattern=SEGMENT_ID_PATTERN, examples=["S4"])
 
 
+class GuideHistoryMessage(BaseModel):
+    role: str = Field(pattern=r"^(user|assistant)$")
+    content: str = Field(max_length=2000)
+
+
 class GuideChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
-    history: list[dict[str, str]] = Field(default_factory=list)
+    history: list[GuideHistoryMessage] = Field(default_factory=list, max_length=GUIDE_HISTORY_MAX)
 
 
 class WeatherModeRequest(BaseModel):
@@ -148,27 +159,27 @@ def api_health():
 
 
 @app.post("/api/inject/monsoon")
-async def inject_monsoon(body: MonsoonInject):
+async def inject_monsoon(body: MonsoonInject, _: None = Depends(require_mutating_auth)):
     engine = require_sim()
     result = engine.inject_monsoon(body.segment_id, body.rainfall, body.soil_moisture)
     return {"ok": True, **result}
 
 
 @app.post("/api/inject/anomaly")
-async def inject_anomaly(body: AnomalyInject):
+async def inject_anomaly(body: AnomalyInject, _: None = Depends(require_mutating_auth)):
     engine = require_sim()
     result = engine.inject_anomaly(body.segment_id)
     return {"ok": True, **result}
 
 
 @app.post("/api/sim/reset")
-async def reset_corridor():
+async def reset_corridor(_: None = Depends(require_mutating_auth)):
     engine = require_sim()
     return engine.reset_corridor()
 
 
 @app.post("/api/weather/mode")
-async def set_weather_mode(body: WeatherModeRequest):
+async def set_weather_mode(body: WeatherModeRequest, _: None = Depends(require_mutating_auth)):
     engine = require_sim()
     return {"ok": True, **engine.set_live_weather(body.live)}
 
@@ -199,8 +210,9 @@ def ticket_explain(ticket_id: str):
 
 
 @app.post("/api/guide/chat")
-async def guide_chat(body: GuideChatRequest):
-    return await run_in_threadpool(ai_guide_answer, body.message, body.history)
+async def guide_chat(body: GuideChatRequest, _: None = Depends(require_guide_chat)):
+    history = [item.model_dump() for item in body.history]
+    return await run_in_threadpool(ai_guide_answer, body.message, history)
 
 
 @app.websocket("/ws")

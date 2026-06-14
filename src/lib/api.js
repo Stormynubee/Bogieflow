@@ -1,9 +1,10 @@
 import { apiUrl } from './config.js'
+import { mutateHeaders } from './apiAuth.js'
 
 export async function postJson(path, body) {
   const res = await fetch(apiUrl(path), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: mutateHeaders(),
     body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(await res.text())

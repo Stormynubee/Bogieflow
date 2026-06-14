@@ -22,3 +22,5 @@ services:
         value: gemini-3.1-flash-lite
       - key: GUIDE_AI_API_KEY
         sync: false
+      - key: BOGIE_API_SECRET
+        sync: false
