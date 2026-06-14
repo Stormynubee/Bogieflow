@@ -1,6 +1,6 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
-# Deploy: Dashboard → New → Blueprint → connect Stormynubee/Faraway2026Japan
-# Or: https://render.com/deploy?repo=https://github.com/Stormynubee/Faraway2026Japan
+# Deploy: Dashboard → New → Blueprint → connect Stormynubee/Bogieflow
+# Or: https://render.com/deploy?repo=https://github.com/Stormynubee/Bogieflow
 
 services:
   - type: web
@@ -9,7 +9,7 @@ services:
     plan: free
     region: oregon
     branch: main
-    repo: https://github.com/Stormynubee/Faraway2026Japan
+    repo: https://github.com/Stormynubee/Bogieflow
     healthCheckPath: /api/health
     envVars:
       - key: PORT

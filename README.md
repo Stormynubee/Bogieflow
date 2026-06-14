@@ -15,26 +15,26 @@
 <p align="center">
   <a href="https://bogieflow.vercel.app"><strong>▶ Live Demo</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/releases">Releases</a>
+  <a href="https://github.com/Stormynubee/Bogieflow/releases">Releases</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github-actions&logoColor=ffffff" alt="CI Status" />
+  <a href="https://github.com/Stormynubee/Bogieflow/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Bogieflow/ci.yml?branch=main&label=CI&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github-actions&logoColor=ffffff" alt="CI Status" />
   </a>
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/">
-    <img src="https://img.shields.io/badge/Pytest-76%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
+  <a href="https://github.com/Stormynubee/Bogieflow/blob/main/tests/">
+    <img src="https://img.shields.io/badge/Pytest-77%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
   </a>
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/">
+  <a href="https://github.com/Stormynubee/Bogieflow/blob/main/src/lib/">
     <img src="https://img.shields.io/badge/Vitest-132%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
   </a>
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/releases">
-    <img src="https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github&logoColor=ffffff" alt="Latest Release" />
+  <a href="https://github.com/Stormynubee/Bogieflow/releases">
+    <img src="https://img.shields.io/github/v/release/Stormynubee/Bogieflow?label=v1.7.0&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github&logoColor=ffffff" alt="Latest Release" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE">
+  <a href="https://github.com/Stormynubee/Bogieflow/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=open-source-initiative&logoColor=ffffff" alt="License MIT" />
   </a>
   <a href="https://www.python.org/">
@@ -86,6 +86,7 @@ Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade e
 | **Avoided-Failure Forecasting** | Projects risk index 30 minutes ahead using step trends, exposing time-to-critical ETAs and ranked segment inspection priorities. | Verified |
 | **Live Weather Toggle** | Fuses live Open-Meteo API data per segment coordinates with a 10-minute cache, falling back to simulation parameters cleanly. | Verified |
 | **Explainable AI (XAI)** | Interrogates Gradient Boosting model feature importances and pulls plain-language rationales (Gemini API with offline local fallback templates). | Verified |
+| **Risk Model Card** | `GET /api/model/card` exposes CV accuracy, macro F1, ROC-AUC, confusion matrix, and Real/Synthetic training provenance ([docs/DATA.md](docs/DATA.md)). | Verified (v1.7.0) |
 | **Scenario Replay & Demo** | Playbacks for Monsoon sweeps, bearing faults, or resets; client-side demo fallback when no backend WebSocket. | Verified (demo on Vercel; live REST when backend connected) |
 | **Interactive Tour Coach** | Step-by-step tour guides and chatbot to explain telemetry anomalies. | Verified |
 
@@ -209,8 +210,8 @@ Every 500 ms, the asynchronous simulation loop ticks, moving the train position.
 Clone the repository and spin up both the FastAPI backend and Vite React development server using a single command:
 
 ```bash
-git clone https://github.com/Stormynubee/Faraway2026Japan.git
-cd Faraway2026Japan
+git clone https://github.com/Stormynubee/Bogieflow.git
+cd Bogieflow
 python -m pip install -r requirements.txt
 npm install
 npm run dev:all
@@ -236,7 +237,16 @@ Copy `.env.example` to `.env`.
 Key variables:
 - `ALLOWED_ORIGINS`: Comma-separated CORS origins (empty defaults to localhost dev origins).
 - `GUIDE_AI_API_KEY`: Optional Google Gemini API key to enable plain-language guide chat and ticket explainers.
-- `VITE_API_BASE` / `VITE_WS_BASE`: Optional URLs, only needed when splitting hosts in production (leave empty for Vite proxy and single-URL deployments).
+- `VITE_API_BASE` / `VITE_WS_BASE`: Optional URLs for split Vercel + Render deploys (leave empty for Vite proxy / single-origin Docker).
+- `BOGIE_TRAIN_USE_REAL`: When `true` (default), train on Open-Meteo + CWRU CSVs in `server/data/` if present; otherwise synthetic fallback. See [docs/DATA.md](docs/DATA.md).
+- `BOGIE_TRAINING_DATA_DIR`: Optional override for training CSV directory.
+
+Fetch real training data locally:
+
+```bash
+python -m server.data.fetch_datasets
+python -m server.agents.train_risk_model
+```
 
 ---
 
@@ -264,7 +274,7 @@ The Vite React frontend is deployed on Vercel as a static SPA with **client-side
 - **Demo mode**: Without a hosted FastAPI backend, the dashboard runs a local telemetry simulation (header shows **Demo**, field sensors show **Simulated** ingest).
 - **Full stack**: Set `VITE_API_BASE=https://bogie-flow.onrender.com` in [Vercel project settings](https://vercel.com/priyank-tiwaris-projects-91cadde5/faraway-2026-japan/settings/environment-variables), then redeploy.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Stormynubee/Faraway2026Japan)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Stormynubee/Bogieflow)
 
 ---
 
@@ -282,7 +292,7 @@ The Vite React frontend is deployed on Vercel as a static SPA with **client-side
 ## Project Structure
 
 ```
-Faraway2026Japan/
+Faraway2026Japan/          # repo also published as github.com/Stormynubee/Bogieflow
 ├── .github/
 │   ├── dependabot.yml
 │   ├── issue_template/
@@ -317,6 +327,8 @@ Faraway2026Japan/
 │   ├── SUBMISSION.md
 │   ├── DESIGN.md
 │   ├── DEMO_SCRIPT.md
+│   ├── DATA.md
+│   ├── DEPLOY-LIVE.md
 │   └── plans/
 │       ├── 2026-06-14-bogie-flow-rebrand.md
 │       ├── 2026-06-14-corridor-scrub-dashboard.md
@@ -329,13 +341,17 @@ Faraway2026Japan/
 │   └── generate_social_preview.mjs
 ├── server/
 │   ├── agents/
+│   │   ├── dataset.py
 │   │   ├── forecast.py
 │   │   ├── hydrology.py
 │   │   ├── planner.py
 │   │   ├── risk_model.joblib
+│   │   ├── risk_model.meta.json
 │   │   ├── risk_model.py
 │   │   ├── train_risk_model.py
 │   │   └── vibration.py
+│   ├── data/
+│   │   └── fetch_datasets.py
 │   ├── env.py
 │   ├── explain.py
 │   ├── guide.py
@@ -383,6 +399,7 @@ Faraway2026Japan/
 │   │   ├── ForecastPanel.jsx
 │   │   ├── HeroStatusLine.jsx
 │   │   ├── ImpactPanel.jsx
+│   │   ├── ModelCardPanel.jsx
 │   │   ├── LogEntry.jsx
 │   │   ├── MetricBar.jsx
 │   │   ├── OverviewOpsStrip.jsx
@@ -418,6 +435,7 @@ Faraway2026Japan/
 │   │   ├── guideChat.js
 │   │   ├── guideLauncher.js
 │   │   ├── impactDisplay.js
+│   │   ├── modelCardDisplay.js
 │   │   ├── overviewSplitLayout.js
 │   │   ├── riskGaugeGeometry.js
 │   │   ├── scrubRail.js
@@ -446,6 +464,8 @@ Faraway2026Japan/
 │   ├── test_planner.py
 │   ├── test_readme_badges.py
 │   ├── test_recovery.py
+│   ├── test_model_card.py
+│   ├── test_live_stack_smoke.py
 │   ├── test_risk_model.py
 │   ├── test_sim_guard.py
 │   ├── test_static_serving.py
@@ -466,13 +486,20 @@ Verify both test suites locally by running the following commands:
 ```bash
 python -m pytest tests/ -v
 ```
-*(Verifies CORS middleware, static single-origin routing, ML model caching, ticket de-duplication, Open-Meteo cache fallbacks, and forecast projections. 42 tests passing).*
+*(Verifies CORS middleware, static single-origin routing, ML model card API, model caching, ticket de-duplication, Open-Meteo cache fallbacks, and forecast projections. 77 tests collected.)*
 
 ### Frontend Vitest Suite
 ```bash
 npm run test
 ```
-*(Verifies WebSocket reducer state, config path derivations, corridor scrub, guide launcher, sensor stack state, Overview split layout calculation, risk gauge geometries, and custom kinetic counters. 91 tests passing).*
+*(Verifies WebSocket reducer state, model card display helpers, config path derivations, corridor scrub, guide launcher, sensor stack state, Overview split layout calculation, risk gauge geometries, and custom kinetic counters. 132 tests passing.)*
+
+### Live stack smoke (production)
+```bash
+node scripts/verify-live-stack.mjs
+node scripts/e2e-live-smoke.mjs https://bogieflow.vercel.app
+LIVE_BACKEND_URL=https://bogie-flow.onrender.com python -m pytest tests/test_live_stack_smoke.py -v
+```
 
 ---
 
@@ -492,6 +519,7 @@ npm run test
 
 - [x] Decouple Hydrology & Vibration simulation rules.
 - [x] Implement Gradient Boosting Classifier for risk prioritization.
+- [x] Ground ML training in Open-Meteo + CWRU data with model card API (v1.7.0).
 - [x] Integrate Open-Meteo API for live regional weather.
 - [x] Develop Avoided-Failure Quantified Impact estimation.
 - [x] Create 30-minute Risk Forecasting (Time-to-Critical) agent.
@@ -503,8 +531,9 @@ npm run test
 
 ## Honesty Box
 
-* **Telemetry & Simulation**: Sensor values (acceleration, rain) are simulated in real-time. Acceleration values are generated via normal distribution models (`random.gauss`) incorporating randomized spikes on wet segments.
-* **ML Model**: The Gradient Boosting model is trained on a synthetic physics-derived dataset (500 samples) mapped to segment hydrology and vibration variables. It does not connect to a live database of track failures.
+* **Telemetry & Simulation**: Sensor values (acceleration, rain) are simulated in real-time unless a live ingest path is connected. Acceleration values are generated via normal distribution models (`random.gauss`) incorporating randomized spikes on wet segments.
+* **ML Model**: Training prefers real Open-Meteo monsoon hydrology + CWRU-class bearing vibration CSVs when `server/data/` is populated (`python -m server.data.fetch_datasets`). The Docker/Render build attempts this fetch automatically. Without CSVs, a **Simulated** 503-sample physics-derived frame is used — see the Overview **Risk model card** badge and [docs/DATA.md](docs/DATA.md).
+* **Model metrics**: CV accuracy / F1 on the training frame are **not** field-validated derailment prediction — they document classifier fit only.
 * **Weather Data**: The live weather toggle fetches real precipitation data from the Open-Meteo API. If offline or rate-limited, the system falls back to simulated parameters with a visible notification.
 * **Hardware Integration**: The current codebase does not interface directly with physical sensors. The ESP32-S3 edge node architecture and schematic design are included for documentation purposes only.
 

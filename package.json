@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Stormynubee/Faraway2026Japan.git"
+    "url": "git+https://github.com/Stormynubee/Bogieflow.git"
   },
   "keywords": [
     "railways",
@@ -48,7 +48,7 @@
   "author": "Hansraj Tiwari <stormylalala2233@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Stormynubee/Faraway2026Japan/issues"
+    "url": "https://github.com/Stormynubee/Bogieflow/issues"
   },
-  "homepage": "https://github.com/Stormynubee/Faraway2026Japan#readme"
+  "homepage": "https://github.com/Stormynubee/Bogieflow#readme"
 }

@@ -24,6 +24,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY server ./server
 COPY --from=frontend /app/dist ./dist
 
+# Fetch Open-Meteo + CWRU training CSVs when network allows; train risk model at image build.
+RUN python -m server.data.fetch_datasets || true
+RUN python -m server.agents.train_risk_model
+
 EXPOSE 8000
 
 CMD ["sh", "-c", "uvicorn server.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

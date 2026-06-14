@@ -63,6 +63,17 @@ def test_live_monsoon_inject_returns_ok():
     assert data["segment"]["id"] == "S4"
 
 
+def test_live_model_card_returns_metrics():
+    response = httpx.get(f"{LIVE_BACKEND_URL}/api/model/card", timeout=60.0)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["data_source"] in ("real", "synthetic")
+    assert data["honesty_label"] in ("Validated", "Simulated")
+    assert "confusion_matrix" in data
+    assert "macro_f1" in data
+    assert data["n_samples"] >= 100
+
+
 def test_live_websocket_receives_state_snapshot():
     import json
 

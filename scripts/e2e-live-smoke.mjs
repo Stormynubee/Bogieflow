@@ -77,6 +77,17 @@ async function main() {
       pass('Inject monsoon clicked (no toast — may be ok in demo)')
     }
 
+    const modelCard = page.getByTestId('model-card-panel')
+    await modelCard.scrollIntoViewIfNeeded()
+    await modelCard.waitFor({ state: 'visible', timeout: 15_000 })
+    const badge = page.getByTestId('model-card-badge')
+    const badgeText = (await badge.textContent())?.trim() ?? ''
+    if (badgeText.includes('Simulated') || badgeText.includes('Validated')) {
+      pass(`Model card badge: ${badgeText}`)
+    } else {
+      fail('model-card', `unexpected badge text: ${badgeText}`)
+    }
+
     await page.getByTestId('nav-climate').click()
     await page.waitForTimeout(800)
     await page.getByTestId('view-climate').waitFor({ state: 'visible', timeout: 10_000 })
