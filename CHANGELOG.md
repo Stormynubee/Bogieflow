@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-06-14
+
+### Added
+- Elegant black-and-white ink & paper UI redesign theme and assets.
+- Overview split layout (corridor feed left, climate + gauge + sensors right).
+- Field sensors panel stacked below impact in Overview.
+- Ink components library (`CornerBrackets`, `Eyebrow`, `GrainOverlay`, etc.).
+- 91 Vitest unit and integration tests.
+
+### Changed
+- Re-captured and promoted all canonical screenshots in monochrome.
+- Updated Shields.io badges to match the monochrome rebrand palette.
+- Generated monochrome brand banner and social preview card.
+
 ## [1.6.0] - 2026-06-14
 
 ### Added

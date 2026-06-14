@@ -8,15 +8,15 @@ const htmlContent = `
 <head>
 <meta charset="utf-8">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700&family=JetBrains+Mono&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
   
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     width: 1280px;
     height: 640px;
-    background-color: #070a0e;
-    color: #e8edf4;
-    font-family: 'DM Sans', sans-serif;
+    background-color: #0a0a0b;
+    color: #f4f3ee;
+    font-family: 'Hanken Grotesk', sans-serif;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -31,8 +31,8 @@ const htmlContent = `
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: 
-      radial-gradient(circle at 10% 20%, rgba(255, 85, 69, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(61, 214, 198, 0.1) 0%, transparent 50%);
+      radial-gradient(circle at 10% 20%, rgba(244, 243, 238, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(233, 72, 46, 0.04) 0%, transparent 50%);
     z-index: 1;
   }
   
@@ -44,33 +44,33 @@ const htmlContent = `
   }
   
   .badge {
-    background: rgba(255, 85, 69, 0.1);
-    border: 1px solid rgba(255, 85, 69, 0.3);
-    color: #ff5545;
+    background: rgba(233, 72, 46, 0.1);
+    border: 1px solid rgba(233, 72, 46, 0.3);
+    color: #e9482e;
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
+    font-family: 'JetBrains Mono', monospace;
     width: fit-content;
     margin-bottom: 24px;
   }
   
   .title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Fraunces', serif;
     font-size: 64px;
-    color: #ffffff;
+    color: #f4f3ee;
     line-height: 1.1;
     margin-bottom: 18px;
-    background: linear-gradient(135deg, #ffffff 30%, #ff5545 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 800;
   }
   
   .tagline {
+    font-family: 'Fraunces', serif;
     font-size: 20px;
-    color: #ff5545;
+    color: #e9482e;
     font-weight: 500;
     margin-bottom: 16px;
     text-transform: uppercase;
@@ -79,7 +79,7 @@ const htmlContent = `
   
   .desc {
     font-size: 16px;
-    color: #8b99aa;
+    color: #9098a8;
     line-height: 1.6;
     margin-bottom: 30px;
   }
@@ -89,7 +89,7 @@ const htmlContent = `
     gap: 24px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    color: #3dd6c6;
+    color: #f4f3ee;
   }
   
   .spec-item {
@@ -101,10 +101,10 @@ const htmlContent = `
   .dot {
     width: 6px;
     height: 6px;
-    background-color: #3dd6c6;
+    background-color: #e9482e;
     border-radius: 50%;
   }
-
+ 
   .preview-panel {
     position: relative;
     width: 620px;
@@ -116,9 +116,9 @@ const htmlContent = `
     width: 680px;
     height: 425px;
     border-radius: 12px;
-    border: 1px solid rgba(139, 153, 170, 0.2);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 85, 69, 0.15);
-    background-color: #0c0f13;
+    border: 1px solid rgba(244, 243, 238, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(233, 72, 46, 0.08);
+    background-color: #0a0a0b;
     overflow: hidden;
     position: absolute;
     top: 50%;

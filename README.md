@@ -14,30 +14,30 @@
 
 <p align="center">
   <a href="https://github.com/Stormynubee/Faraway2026Japan/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=3dd6c6&labelColor=070a0e&logo=github-actions&logoColor=ffffff" alt="CI Status" />
+    <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Faraway2026Japan/ci.yml?branch=main&label=CI&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github-actions&logoColor=ffffff" alt="CI Status" />
   </a>
   <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/tests/">
-    <img src="https://img.shields.io/badge/Pytest-42%20passing-3dd6c6?style=flat-square&labelColor=070a0e&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
+    <img src="https://img.shields.io/badge/Pytest-42%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/src/lib/">
-    <img src="https://img.shields.io/badge/Vitest-65%20passing-3dd6c6?style=flat-square&labelColor=070a0e&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
+    <img src="https://img.shields.io/badge/Vitest-91%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Faraway2026Japan/releases">
-    <img src="https://img.shields.io/badge/Release-v1.6.0-3dd6c6?style=flat-square&labelColor=070a0e&logo=github&logoColor=ffffff" alt="Latest Release" />
+    <img src="https://img.shields.io/github/v/release/Stormynubee/Faraway2026Japan?label=Release&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github&logoColor=ffffff" alt="Latest Release" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://github.com/Stormynubee/Faraway2026Japan/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-3dd6c6?style=flat-square&labelColor=070a0e&logo=open-source-initiative&logoColor=ffffff" alt="License MIT" />
+    <img src="https://img.shields.io/badge/License-MIT-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=open-source-initiative&logoColor=ffffff" alt="License MIT" />
   </a>
   <a href="https://www.python.org/">
-    <img src="https://img.shields.io/badge/Python-3.11-3dd6c6?style=flat-square&labelColor=070a0e&logo=python&logoColor=ffffff" alt="Python 3.11" />
+    <img src="https://img.shields.io/badge/Python-3.11-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=python&logoColor=ffffff" alt="Python 3.11" />
   </a>
   <a href="https://nodejs.org/">
-    <img src="https://img.shields.io/badge/Node-20.x-3dd6c6?style=flat-square&labelColor=070a0e&logo=node.js&logoColor=ffffff" alt="Node 20" />
+    <img src="https://img.shields.io/badge/Node-20.x-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=node.js&logoColor=ffffff" alt="Node 20" />
   </a>
-  <img src="https://img.shields.io/badge/FAR%20AWAY%202026-Railways-ff5545?style=flat-square&labelColor=070a0e" alt="FAR AWAY 2026 Theme" />
+  <img src="https://img.shields.io/badge/FAR%20AWAY%202026-Railways-e9482e?style=flat-square&labelColor=0a0a0b" alt="FAR AWAY 2026 Theme" />
 </p>
 
 ---
@@ -291,13 +291,21 @@ Faraway2026Japan/
 ├── docs/
 │   ├── README.md
 │   ├── PROJECT.md
+│   ├── SENSORS.md
 │   ├── physics.md
 │   ├── ws-schema.md
 │   ├── SUBMISSION.md
 │   ├── DESIGN.md
-│   └── DEMO_SCRIPT.md
+│   ├── DEMO_SCRIPT.md
+│   └── plans/
+│       ├── 2026-06-14-bogie-flow-rebrand.md
+│       ├── 2026-06-14-corridor-scrub-dashboard.md
+│       └── 2026-06-14-overview-calm-instrument.md
+├── hardware/
+│   └── README.md
 ├── scripts/
 │   ├── capture-screenshots.mjs
+│   ├── generate_banner.mjs
 │   └── generate_social_preview.mjs
 ├── server/
 │   ├── agents/
@@ -327,6 +335,14 @@ Faraway2026Japan/
 │   │   │   ├── GuideCoach.jsx
 │   │   │   ├── GuideLauncher.jsx
 │   │   │   └── GuideSpotlight.jsx
+│   │   ├── ink/
+│   │   │   ├── CornerBrackets.jsx
+│   │   │   ├── Eyebrow.jsx
+│   │   │   ├── GrainOverlay.jsx
+│   │   │   ├── Hairline.jsx
+│   │   │   ├── KineticNumber.jsx
+│   │   │   ├── PageHeader.jsx
+│   │   │   └── StatusTicker.jsx
 │   │   ├── views/
 │   │   │   ├── AnalysisView.jsx
 │   │   │   ├── ClimateView.jsx
@@ -355,6 +371,7 @@ Faraway2026Japan/
 │   │   ├── RiskGaugeDial.jsx
 │   │   ├── ScenarioMenu.jsx
 │   │   ├── SegmentHudGrid.jsx
+│   │   ├── SensorStackPanel.jsx
 │   │   ├── Sidebar.jsx
 │   │   ├── StationMapModal.jsx
 │   │   ├── TicketExplain.jsx
@@ -381,10 +398,19 @@ Faraway2026Japan/
 │   │   ├── guideChat.js
 │   │   ├── guideLauncher.js
 │   │   ├── impactDisplay.js
+│   │   ├── overviewSplitLayout.js
+│   │   ├── riskGaugeGeometry.js
 │   │   ├── scrubRail.js
 │   │   ├── segmentUtils.js
+│   │   ├── sensorStack.js
 │   │   ├── wsReconnect.js
 │   │   └── wsReducer.js
+│   ├── styles/
+│   │   ├── ink-motifs.css
+│   │   ├── ink-overrides.css
+│   │   ├── ink-reskin.css
+│   │   ├── ink-tokens.css
+│   │   └── overview-split.css
 │   ├── App.jsx
 │   └── index.css
 ├── tests/
@@ -426,7 +452,7 @@ python -m pytest tests/ -v
 ```bash
 npm run test
 ```
-*(Verifies WebSocket reducer state, config path derivations, corridor scrub, guide launcher, and layout status lines. 65 tests passing).*
+*(Verifies WebSocket reducer state, config path derivations, corridor scrub, guide launcher, sensor stack state, Overview split layout calculation, risk gauge geometries, and custom kinetic counters. 91 tests passing).*
 
 ---
 
@@ -437,7 +463,7 @@ npm run test
 | **Innovation** | Fuses climate meteorology predictions with high-frequency rolling bogie acceleration data. Employs a Gradient Boosting classification model to determine risk levels dynamically rather than relying on static thresholds. |
 | **Technical Depth** | Implements multi-agent pipelines (Hydrology, Vibration, Planner) on an async FastAPI event loop. Features non-blocking Gemini AI integration, real-time Open-Meteo API caching, and automated ticket explanations. |
 | **Real-World Impact** | Explains maintenance tickets via Shapley-style model feature importances, translating ML inputs into actionable engineering indicators. Calculates avoided derailment risks and USD savings to justify maintenance operations. |
-| **Execution** | Built with an industrial "control room" theme using customized typography and smooth Framer Motion entry staggers. Single-origin production setup allows serving REST, WebSockets, and Vite UI from one Docker container. |
+| **Execution** | Built with a high-fidelity "ink & paper" monochrome theme using Fraunces and Hanken Grotesk typography, fine hairline blueprint grids, and tactile feedback. Single-origin production setup allows serving REST, WebSockets, and Vite UI from one Docker container. |
 | **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. See [docs/SENSORS.md](docs/SENSORS.md) for sensor details. |
 
 ---
@@ -466,3 +492,4 @@ npm run test
 
 Built with 💻 for the **FAR AWAY 2026 Hackathon** under the Railways theme.  
 Licensed under the [MIT License](LICENSE).
+
