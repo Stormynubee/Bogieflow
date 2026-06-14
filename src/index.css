@@ -225,26 +225,6 @@ body {
   box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
 }
 
-.scanline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 180, 170, 0.35), transparent);
-  animation: scan 4s linear infinite;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.5;
-}
-
-@keyframes scan {
-  0% { transform: translateY(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(100vh); opacity: 0; }
-}
-
 .text-flicker {
   animation: flicker 3s infinite alternate;
 }

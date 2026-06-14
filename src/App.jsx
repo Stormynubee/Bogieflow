@@ -85,7 +85,6 @@ export default function App() {
 
   return (
     <div className="shell">
-      <div className="scanline" aria-hidden="true" />
       <Sidebar
         connected={connected}
         activeView={view}
