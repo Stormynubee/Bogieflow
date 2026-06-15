@@ -2456,13 +2456,9 @@ body {
 /* Maintenance view */
 .maintenance-layout {
   display: grid;
+  grid-template-columns: 1fr;
   gap: var(--gutter);
-}
-
-@media (min-width: 1024px) {
-  .maintenance-layout {
-    grid-template-columns: 1fr 1fr;
-  }
+  align-content: start;
 }
 
 .maintenance-table-wrap {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { setWeatherMode } from '../lib/api.js'
+import { weatherToggleHint } from '../lib/weatherToggleDisplay.js'
 
 export default function WeatherToggle({
   liveWeather,
@@ -47,7 +48,9 @@ export default function WeatherToggle({
           Live weather
         </button>
       </div>
-      <span className="weather-toggle-hint">Open-Meteo · no API key</span>
+      <span className="weather-toggle-hint">
+        {weatherToggleHint({ liveWeather, realConnected })}
+      </span>
       {weatherNote && (
         <span className="weather-fallback-note" data-testid="weather-fallback-note">
           {weatherNote}
