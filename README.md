@@ -542,3 +542,5 @@ LIVE_BACKEND_URL=https://bogie-flow.onrender.com python -m pytest tests/test_liv
 Built with 💻 for the **FAR AWAY 2026 Hackathon** under the Railways theme.  
 Licensed under the [MIT License](LICENSE).
 
+
+<!-- docs update: bogieflow model refresh -->
