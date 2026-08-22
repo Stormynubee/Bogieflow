@@ -2944,9 +2944,67 @@ body {
 }
 
 .station-map-modal .track-map {
-  background: var(--surface-container-lowest);
+  background: var(--surface-dim);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius);
   padding: 12px;
+}
+
+.track-map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.track-map .segment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  fill: #0a0a0b;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.track-map .map-marker {
+  cursor: pointer;
+}
+
+.track-map .map-marker:hover circle:nth-of-type(2) {
+  stroke: var(--paper);
+}
+
+.track-map .map-marker-active circle:nth-of-type(2) {
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+
+.track-map .train-diamond {
+  fill: var(--paper);
+  stroke: #0a0a0b;
+  stroke-width: 1.5;
+}
+
+.track-map .train-dot {
+  fill: var(--signal, #e9482e);
+}
+
+.track-map-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius);
+  background: var(--surface-container);
+  font-size: 0.66rem;
+  color: var(--on-surface-variant);
+}
+
+.map-detail-id {
+  color: var(--on-surface);
+  font-weight: 700;
 }
 
 @keyframes panelEnter {
