@@ -51,6 +51,7 @@ clients: dict[WebSocket, str] = {}
 sim: SimulationEngine | None = None
 tick_task: asyncio.Task | None = None
 _broadcast_tasks: set[asyncio.Task] = set()
+_main_loop: asyncio.AbstractEventLoop | None = None
 
 
 def require_sim() -> SimulationEngine:
@@ -129,21 +130,33 @@ async def broadcast(message: dict[str, Any], allowed_roles: set[str] | None = No
 def on_sim_event(event: dict[str, Any]) -> None:
     if not clients:
         return
-    task = asyncio.create_task(broadcast(event))
-    _broadcast_tasks.add(task)
-    task.add_done_callback(_log_broadcast_result)
+    # thread-safe: simulation tick may run in threadpool (blocking weather fetch offloaded)
+    loop = _main_loop
+    if loop and loop.is_running():
+        def _schedule():
+            task = asyncio.create_task(broadcast(event))
+            _broadcast_tasks.add(task)
+            task.add_done_callback(_log_broadcast_result)
+
+        loop.call_soon_threadsafe(_schedule)
+    else:
+        task = asyncio.create_task(broadcast(event))
+        _broadcast_tasks.add(task)
+        task.add_done_callback(_log_broadcast_result)
 
 
 async def simulation_loop() -> None:
     while True:
         await asyncio.sleep(0.5)
         if sim:
-            sim.tick()
+            # offload blocking tick (weather urllib) to threadpool so 0.5s loop never stalls 30s on cache miss
+            await run_in_threadpool(sim.tick)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global sim, tick_task
+    global sim, tick_task, _main_loop
+    _main_loop = asyncio.get_running_loop()
     if not MODEL_PATH.exists():
         logger.info("risk_model.joblib missing — training on boot")
         await run_in_threadpool(train_and_save)

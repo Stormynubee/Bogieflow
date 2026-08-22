@@ -59,28 +59,26 @@ def time_to_critical_minutes(
 ) -> float | None:
     """
     Minutes until critical threshold (0.70), or None when stable / already critical.
+    O(n) single pass — previous O(n²) called project_values inside loop.
     """
     if risk_index >= CRITICAL_THRESHOLD:
         return 0.0
 
     steps = _forecast_steps()
-    _, _, horizon_risks = project_values(rainfall, soil_moisture, trend_r, trend_s, steps)
-    projected_risk = horizon_risks[-1]
-
-    if abs(trend_r) < STABLE_TREND_EPS and abs(trend_s) < STABLE_TREND_EPS:
-        if projected_risk < CRITICAL_THRESHOLD:
-            return None
-
-    if projected_risk < CRITICAL_THRESHOLD:
-        return None
-
+    r, s = rainfall, soil_moisture
+    # quick stable check via horizon sampled risk already in project_values tail
+    # but we can also early exit after full scan if never critical
     for step in range(steps + 1):
-        _, _, risks = project_values(rainfall, soil_moisture, trend_r, trend_s, step)
-        if risks[-1] >= CRITICAL_THRESHOLD:
+        result = _hydro.evaluate(r, s)
+        if result["risk_index"] >= CRITICAL_THRESHOLD:
             minutes = (step * TICK_INTERVAL_S) / 60.0
             return round(min(minutes, MAX_ETA_MIN), 1)
-
-    return MAX_ETA_MIN
+        if step < steps:
+            r = max(RAINFALL_FLOOR, r * DECAY_RATE + trend_r)
+            s = max(MOISTURE_FLOOR, s * DECAY_RATE + trend_s)
+    # no critical within horizon
+    # if trend stable and not critical, stay None (same as before)
+    return None
 
 
 def forecast_segment(
