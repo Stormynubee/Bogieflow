@@ -2758,37 +2758,37 @@ body {
 .climate-layout {
   display: flex;
   flex-direction: column;
-  gap: var(--gutter);
+  gap: var(--panel-gap, 12px);
 }
 
 .climate-page-header {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .climate-grid-main {
   display: grid;
-  gap: var(--gutter);
+  gap: var(--panel-gap, 12px);
 }
 
 @media (min-width: 1024px) {
   .climate-grid-main {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   }
 }
 
 .heatmap-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 16px;
-  min-height: 180px;
+  gap: 6px;
+  padding: var(--panel-pad, 14px);
 }
 
 .heatmap-cell {
   background: rgba(233, 72, 46, 0.2);
-  border: 1px solid var(--surface-variant);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 10px;
+  min-height: 64px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2796,14 +2796,15 @@ body {
 
 .heatmap-label {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--on-surface-variant);
 }
 
 .heatmap-value {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--primary);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-surface);
 }
 
 .heatmap-note {
@@ -2817,19 +2818,19 @@ body {
 .longevity-list {
   list-style: none;
   margin: 0;
-  padding: 16px;
+  padding: var(--panel-pad, 14px);
 }
 
 .longevity-item {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .longevity-head {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  margin-bottom: 6px;
+  font-size: 0.68rem;
+  margin-bottom: 4px;
 }
 
 .longevity-track {
