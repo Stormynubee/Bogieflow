@@ -1,6 +1,6 @@
-/* Design tokens: src/styles/ink-tokens.css */
+﻿/* Design tokens: src/styles/ink-tokens.css */
 
-/* Boot splash — brand + terminal init panel */
+/* Boot splash â€” brand + terminal init panel */
 .boot-screen {
   --boot-pad-x: clamp(16px, 4vw, 28px);
   --boot-pad-y: clamp(12px, 3dvh, 24px);
@@ -286,7 +286,7 @@
   color: var(--on-surface-variant);
 }
 
-/* Continue CTA — fixed slot prevents layout jump when ready */
+/* Continue CTA â€” fixed slot prevents layout jump when ready */
 .boot-continue-wrap {
   flex-shrink: 0;
   height: var(--boot-continue-h);
@@ -736,7 +736,7 @@ body {
 /* Sidebar */
 .sidebar {
   display: none;
-  width: 256px;
+  width: var(--shell-sidebar-w, 232px);
   flex-shrink: 0;
   flex-direction: column;
   background: var(--surface-container);
@@ -750,22 +750,23 @@ body {
 }
 
 .sidebar-header {
-  padding: 24px 16px;
+  padding: 18px 14px;
   border-bottom: 1px solid var(--surface-variant);
 }
 
 .sidebar-brand {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--on-surface);
 }
 
 .sidebar-sub {
-  margin: 4px 0 0;
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
   color: var(--on-surface-variant);
 }
 
@@ -773,22 +774,22 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px 0;
+  gap: 2px;
+  padding: 10px 8px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 9px 12px;
   border: none;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
   background: transparent;
   color: var(--on-surface-variant);
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   text-align: left;
@@ -873,8 +874,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  padding: 0 24px;
+  height: var(--topbar-h, 56px);
+  padding: 0 16px;
   flex-shrink: 0;
   background: var(--surface);
   border-bottom: 1px solid var(--outline-variant);
@@ -885,9 +886,9 @@ body {
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--primary);
 }
 
@@ -944,7 +945,7 @@ body {
   align-items: center;
   gap: 10px;
 }
-/* RoleSelect — custom dark dropdown, fixes white-on-white */
+/* RoleSelect â€” custom dark dropdown, fixes white-on-white */
 .role-select-wrap {
   position: relative;
 }
@@ -1021,7 +1022,7 @@ body {
   color: var(--on-surface);
 }
 
-/* RolePicker — mandatory at start */
+/* RolePicker â€” mandatory at start */
 .role-picker-overlay {
   position: fixed;
   inset: 0;
@@ -1305,7 +1306,7 @@ body {
   font-weight: 700;
 }
 
-/* Corridor matrix — frame scrubber */
+/* Corridor matrix â€” frame scrubber */
 .corridor-matrix {
   min-height: auto;
 }
@@ -1393,7 +1394,7 @@ body {
   z-index: 2;
 }
 
-/* Scrub rail — below canvas, no overlay on image */
+/* Scrub rail â€” below canvas, no overlay on image */
 .corridor-scrub-rail {
   display: flex;
   align-items: center;
@@ -1544,13 +1545,13 @@ body {
     position: sticky;
     top: 12px;
     align-self: start;
-    max-height: calc(100dvh - 64px - 56px);
+    max-height: calc(100dvh - var(--topbar-h, 56px) - var(--ticker-h, 32px));
   }
 
   .overview-aside .anomaly-stream {
     display: flex;
     flex-direction: column;
-    max-height: calc(100dvh - 64px - 56px);
+    max-height: calc(100dvh - var(--topbar-h, 56px) - var(--ticker-h, 32px));
     min-height: 320px;
   }
 
@@ -1775,7 +1776,7 @@ body {
   font-size: 1.25rem;
 }
 
-/* Corridor briefing — priority plan panel */
+/* Corridor briefing â€” priority plan panel */
 .corridor-briefing {
   border-left: 2px solid var(--accent);
 }
@@ -2959,7 +2960,7 @@ body {
   color: var(--surface-variant);
 }
 
-/* —— Corridor guide (FAB + launcher + chat + tour spotlight) —— */
+/* â€”â€” Corridor guide (FAB + launcher + chat + tour spotlight) â€”â€” */
 .guide-fab {
   position: fixed;
   right: 20px;
@@ -3460,7 +3461,7 @@ body {
   }
 }
 
-/* ─── Control room redesign (v1.6) ─── */
+/* â”€â”€â”€ Control room redesign (v1.6) â”€â”€â”€ */
 
 .mono {
   font-family: var(--font-mono);
