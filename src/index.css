@@ -2502,12 +2502,12 @@ body {
 .analysis-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gutter);
+  gap: var(--panel-gap, 12px);
 }
 
 @media (min-width: 1280px) {
   .analysis-layout {
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: minmax(0, 1fr) 340px;
   }
 }
 
@@ -2516,15 +2516,16 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: var(--gutter);
+  margin-bottom: var(--panel-gap, 12px);
 }
 
 .analysis-breadcrumb {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--primary);
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 
 .analysis-title,
@@ -2606,15 +2607,15 @@ body {
 
 .segment-picker {
   display: flex;
-  gap: 8px;
-  margin-top: var(--gutter);
+  gap: 4px;
+  margin-top: var(--panel-gap, 12px);
 }
 
 .seg-pick {
-  padding: 6px 12px;
+  padding: 5px 10px;
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  border: 1px solid var(--surface-variant);
+  font-size: 0.62rem;
+  border: 1px solid var(--outline-variant);
   background: transparent;
   color: var(--on-surface-variant);
   cursor: pointer;
@@ -2648,12 +2649,12 @@ body {
 .historical-list {
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 6px;
 }
 
 .historical-item {
-  padding: 12px;
-  border-bottom: 1px solid var(--surface-variant);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .historical-top {
