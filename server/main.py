@@ -24,7 +24,7 @@ def parse_allowed_origin_regex(value: str | None = None) -> str | None:
     raw = raw.strip()
     return raw or None
 
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -33,7 +33,12 @@ from server.auth import (
     GUIDE_HISTORY_MAX,
     require_guide_chat,
     require_mutating_auth,
+    require_perm,
+    resolve_role,
+    resolve_user,
 )
+from server.config_store import get_thresholds, update_thresholds
+from server.rbac import ROLE_PERMS
 
 from server.guide import ai_guide_answer
 from server.explain import explain_ticket
@@ -158,28 +163,35 @@ def api_health():
     return health_payload()
 
 
+@app.get("/api/rbac/me")
+def rbac_me(request: Request):
+    role = resolve_role(request)
+    user = resolve_user(request)
+    return {"user": user, "role": role, "perms": sorted(ROLE_PERMS.get(role, []))}
+
+
 @app.post("/api/inject/monsoon")
-async def inject_monsoon(body: MonsoonInject, _: None = Depends(require_mutating_auth)):
+async def inject_monsoon(body: MonsoonInject, request: Request, auth=Depends(require_perm("ACTION"))):
     engine = require_sim()
-    result = engine.inject_monsoon(body.segment_id, body.rainfall, body.soil_moisture)
+    result = engine.inject_monsoon(body.segment_id, body.rainfall, body.soil_moisture, actor=auth["user"], role=auth["role"])
     return {"ok": True, **result}
 
 
 @app.post("/api/inject/anomaly")
-async def inject_anomaly(body: AnomalyInject, _: None = Depends(require_mutating_auth)):
+async def inject_anomaly(body: AnomalyInject, request: Request, auth=Depends(require_perm("ACTION"))):
     engine = require_sim()
-    result = engine.inject_anomaly(body.segment_id)
+    result = engine.inject_anomaly(body.segment_id, actor=auth["user"], role=auth["role"])
     return {"ok": True, **result}
 
 
 @app.post("/api/sim/reset")
-async def reset_corridor(_: None = Depends(require_mutating_auth)):
+async def reset_corridor(request: Request, auth=Depends(require_perm("CONFIGURE"))):
     engine = require_sim()
     return engine.reset_corridor()
 
 
 @app.post("/api/weather/mode")
-async def set_weather_mode(body: WeatherModeRequest, _: None = Depends(require_mutating_auth)):
+async def set_weather_mode(body: WeatherModeRequest, request: Request, auth=Depends(require_perm("CONFIGURE"))):
     engine = require_sim()
     return {"ok": True, **engine.set_live_weather(body.live)}
 
@@ -197,7 +209,8 @@ def get_impact():
 
 
 @app.get("/api/tickets")
-def list_tickets():
+def list_tickets(request: Request):
+    # VIEW — least privilege but still audit who viewed
     engine = require_sim()
     return {"tickets": [t.to_dict() for t in engine.tickets if t.status != "closed"]}
 
@@ -212,6 +225,102 @@ def ticket_explain(ticket_id: str):
     if not segment:
         raise HTTPException(status_code=404, detail="Segment not found")
     return explain_ticket(ticket.to_dict(), segment.to_dict())
+
+
+class TicketStatusUpdate(BaseModel):
+    status: str = Field(pattern=r"^(open|acknowledged|in_progress|closed)$")
+    note: str | None = Field(default=None, max_length=500)
+
+
+class AssignRequest(BaseModel):
+    assignee: str = Field(min_length=1, max_length=64)
+
+
+class ThresholdPatch(BaseModel):
+    healthy_max: float | None = Field(default=None, ge=0, le=1)
+    critical_min: float | None = Field(default=None, ge=0, le=1)
+    hysteresis_healthy: float | None = Field(default=None, ge=0, le=1)
+    alpha: float | None = Field(default=None, ge=0, le=1)
+    beta: float | None = Field(default=None, ge=0, le=1)
+    lambda_degradation: float | None = Field(default=None, ge=0, le=1)
+    vibration_threshold: float | None = Field(default=None, ge=0.5, le=10)
+    vibration_window: int | None = Field(default=None, ge=5, le=100)
+
+
+@app.post("/api/tickets/{ticket_id}/ack")
+def ack_ticket(ticket_id: str, request: Request, auth=Depends(require_perm("EDIT"))):
+    engine = require_sim()
+    try:
+        return {"ok": True, "ticket": engine.acknowledge_ticket(ticket_id, actor=auth["user"], role=auth["role"])}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/tickets/{ticket_id}/status")
+def ticket_status(ticket_id: str, body: TicketStatusUpdate, request: Request, auth=Depends(require_perm("EDIT"))):
+    engine = require_sim()
+    try:
+        return {"ok": True, "ticket": engine.update_ticket_status(ticket_id, body.status, body.note, actor=auth["user"], role=auth["role"])}
+    except ValueError as e:
+        code = 404 if "not found" in str(e).lower() else 400
+        raise HTTPException(status_code=code, detail=str(e))
+
+
+@app.post("/api/tickets/{ticket_id}/approve")
+def ticket_approve(ticket_id: str, request: Request, auth=Depends(require_perm("APPROVE"))):
+    engine = require_sim()
+    try:
+        return {"ok": True, "ticket": engine.approve_ticket(ticket_id, actor=auth["user"], role=auth["role"])}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/tickets/{ticket_id}/assign")
+def ticket_assign(ticket_id: str, body: AssignRequest, request: Request, auth=Depends(require_perm("APPROVE"))):
+    engine = require_sim()
+    try:
+        return {"ok": True, "ticket": engine.assign_ticket(ticket_id, body.assignee, actor=auth["user"], role=auth["role"])}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/tickets/{ticket_id}/close")
+def ticket_close(ticket_id: str, request: Request, auth=Depends(require_perm("APPROVE"))):
+    engine = require_sim()
+    try:
+        return {"ok": True, "ticket": engine.close_ticket(ticket_id, actor=auth["user"], role=auth["role"])}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/api/config/thresholds")
+def get_config(request: Request):
+    return {"ok": True, "thresholds": get_thresholds()}
+
+
+@app.post("/api/config/thresholds")
+def set_config(body: ThresholdPatch, request: Request, auth=Depends(require_perm("CONFIGURE"))):
+    patch = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not patch:
+        return {"ok": True, "thresholds": get_thresholds()}
+    try:
+        thresholds = update_thresholds(patch)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    # apply to live engines (vibration threshold)
+    engine = require_sim()
+    if "vibration_threshold" in patch:
+        engine.vibration.threshold = thresholds["vibration_threshold"]
+    if "vibration_window" in patch:
+        engine.vibration.window_size = int(thresholds["vibration_window"])
+    engine._push_log("planner", f"thresholds updated {patch} by {auth['user']}", actor=auth["user"], role=auth["role"])
+    return {"ok": True, "thresholds": thresholds}
+
+
+@app.get("/api/audit/logs")
+def audit_logs(request: Request, auth=Depends(require_perm("APPROVE"))):
+    engine = require_sim()
+    return {"logs": [l.to_dict() for l in engine.logs[-50:]]}
 
 
 @app.post("/api/guide/chat")
