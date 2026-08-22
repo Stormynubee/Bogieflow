@@ -14,6 +14,20 @@ export const ROLE_PERMS = {
   admin: new Set(['VIEW', 'EDIT', 'ACTION', 'APPROVE', 'CONFIGURE']),
 }
 
+export const ROLE_HOME = {
+  operator: 'overview',
+  maintainer: 'maintenance',
+  supervisor: 'maintenance',
+  admin: 'climate',
+}
+
+export const ROLE_VIEWS = {
+  operator: ['overview', 'analysis'],
+  maintainer: ['overview', 'analysis', 'maintenance'],
+  supervisor: ['overview', 'analysis', 'maintenance'],
+  admin: ['overview', 'analysis', 'maintenance', 'climate'],
+}
+
 export function normalizeRole(role) {
   if (!role) return 'operator'
   const r = String(role).trim().toLowerCase()

@@ -63,48 +63,53 @@ export default function OverviewOpsStrip({
       />
 
       <div className="overview-ops-body">
-        <div className="overview-inject-row">
-          <button
-            type="button"
-            data-testid="inject-monsoon-s4"
-            className="overview-inject-btn"
-            disabled={busy === 'monsoon' || !canAction}
-            title={!canAction ? 'Requires ACTION — Maintenance+ (least privilege)' : UI.simulation.monsoonHint}
-            onClick={() => canAction && run('monsoon', () => realConnected ? injectMonsoon('S4', 0.9, 0.85) : localInjectMonsoon('S4', 0.9, 0.85))}
-          >
-            {UI.simulation.monsoon}
-          </button>
-          <button
-            type="button"
-            data-testid="inject-anomaly-s4"
-            className="overview-inject-btn overview-inject-secondary"
-            disabled={busy === 'anomaly' || !canAction}
-            title={!canAction ? 'Requires ACTION — Maintenance+' : UI.simulation.anomalyHint}
-            onClick={() => canAction && run('anomaly', () => realConnected ? injectAnomaly('S4') : localInjectAnomaly('S4'))}
-          >
-            {UI.simulation.anomaly}
-          </button>
-          {trainSeg && (
+        {canAction ? (
+          <div className="overview-inject-row">
             <button
               type="button"
-              data-testid="inject-monsoon-train"
-              className="overview-inject-btn overview-inject-secondary"
-              disabled={busy === 'train' || !canAction}
-              title={!canAction ? 'Requires ACTION — Maintenance+' : UI.simulation.stressHint}
-              onClick={() => canAction && run('train', () => realConnected ? injectMonsoon(trainSeg) : localInjectMonsoon(trainSeg))}
+              data-testid="inject-monsoon-s4"
+              className="overview-inject-btn"
+              disabled={busy === 'monsoon'}
+              title={UI.simulation.monsoonHint}
+              onClick={() => run('monsoon', () => realConnected ? injectMonsoon('S4', 0.9, 0.85) : localInjectMonsoon('S4', 0.9, 0.85))}
             >
-              {UI.simulation.stress(trainSeg)}
+              {UI.simulation.monsoon}
             </button>
-          )}
-          <button
-            type="button"
-            className="overview-inject-btn overview-inject-secondary"
-            onClick={() => onNavigate?.('climate')}
-          >
-            {UI.simulation.climateLink}
-          </button>
-        </div>
-        {!canAction && <p className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)', marginTop: 6 }}>ACTION requires Maintenance+ — ask Supervisor</p>}
+            <button
+              type="button"
+              data-testid="inject-anomaly-s4"
+              className="overview-inject-btn overview-inject-secondary"
+              disabled={busy === 'anomaly'}
+              title={UI.simulation.anomalyHint}
+              onClick={() => run('anomaly', () => realConnected ? injectAnomaly('S4') : localInjectAnomaly('S4'))}
+            >
+              {UI.simulation.anomaly}
+            </button>
+            {trainSeg && (
+              <button
+                type="button"
+                data-testid="inject-monsoon-train"
+                className="overview-inject-btn overview-inject-secondary"
+                disabled={busy === 'train'}
+                title={UI.simulation.stressHint}
+                onClick={() => run('train', () => realConnected ? injectMonsoon(trainSeg) : localInjectMonsoon(trainSeg))}
+              >
+                {UI.simulation.stress(trainSeg)}
+              </button>
+            )}
+            <button
+              type="button"
+              className="overview-inject-btn overview-inject-secondary"
+              onClick={() => onNavigate?.('climate')}
+            >
+              {UI.simulation.climateLink}
+            </button>
+          </div>
+        ) : (
+          <p className="mono" style={{ fontSize: '0.66rem', color: 'var(--on-surface-variant)', padding: '8px 10px', border: '1px dashed var(--outline-variant)', borderRadius: 8, background: 'var(--surface-dim)' }}>
+            Monitoring focus — injection controls hidden for VIEW-only (switch to Maintenance+ to act)
+          </p>
+        )}
 
         {toast && <p className="overview-ops-toast">{toast}</p>}
       </div>

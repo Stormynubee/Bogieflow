@@ -93,14 +93,14 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                 <th>Age</th>
                 <th>Status</th>
                 <th>Actor</th>
-                <th>Actions</th>
+                {canEdit || canApprove ? <th>Actions</th> : null}
                 <th>Explain</th>
               </tr>
             </thead>
             <tbody>
               {openTickets.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="empty-row maintenance-empty">
+                  <td colSpan={canEdit || canApprove ? 8 : 7} className="empty-row maintenance-empty">
                     <span className="maintenance-empty-title">{UI.maintenance.emptyTitle}</span>
                     <span className="maintenance-empty-sub">{UI.maintenance.emptySub}</span>
                   </td>
@@ -124,43 +124,57 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                     </span>
                   </td>
                   <td className="mono" style={{ fontSize: '0.65rem' }}>{t.actor || '—'}{t.assignee ? ` → ${t.assignee}` : ''}</td>
-                  <td>
-                    <span style={{ display: 'inline-flex', gap: 4, flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        data-testid={`ack-${t.id}`}
-                        disabled={!canEdit || busy}
-                        title={!canEdit ? 'Requires EDIT — Maintenance+' : 'Acknowledge'}
-                        onClick={() => canEdit && doAction(t.id, () => ackTicket(t.id), `ack-${t.id}`)}
-                        className="overview-inject-btn overview-inject-secondary"
-                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canEdit ? 1 : 0.45, cursor: canEdit ? 'pointer' : 'not-allowed' }}
-                      >
-                        Ack
-                      </button>
-                      <button
-                        type="button"
-                        data-testid={`approve-${t.id}`}
-                        disabled={!canApprove || busy}
-                        title={!canApprove ? 'Requires APPROVE — Supervisor+' : 'Approve'}
-                        onClick={() => canApprove && doAction(t.id, () => approveTicket(t.id), `approve-${t.id}`)}
-                        className="overview-inject-btn"
-                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canApprove ? 1 : 0.45, cursor: canApprove ? 'pointer' : 'not-allowed' }}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        data-testid={`close-${t.id}`}
-                        disabled={!canApprove || busy}
-                        title={!canApprove ? 'Requires APPROVE — Supervisor+' : 'Close'}
-                        onClick={() => canApprove && doAction(t.id, () => closeTicket(t.id), `close-${t.id}`)}
-                        className="overview-inject-btn overview-inject-secondary"
-                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canApprove ? 1 : 0.45, cursor: canApprove ? 'pointer' : 'not-allowed' }}
-                      >
-                        Close
-                      </button>
-                    </span>
-                  </td>
+                  {canEdit || canApprove ? (
+                    <td>
+                      <span style={{ display: 'inline-flex', gap: 4, flexWrap: 'wrap' }}>
+                        {canEdit && (
+                          <button
+                            type="button"
+                            data-testid={`ack-${t.id}`}
+                            disabled={busy}
+                            onClick={() => doAction(t.id, () => ackTicket(t.id), `ack-${t.id}`)}
+                            className="overview-inject-btn overview-inject-secondary"
+                            style={{ padding: '4px 6px', fontSize: '0.6rem' }}
+                          >
+                            Ack
+                          </button>
+                        )}
+                        {canApprove && (
+                          <>
+                            <button
+                              type="button"
+                              data-testid={`approve-${t.id}`}
+                              disabled={busy}
+                              onClick={() => doAction(t.id, () => approveTicket(t.id), `approve-${t.id}`)}
+                              className="overview-inject-btn"
+                              style={{ padding: '4px 6px', fontSize: '0.6rem' }}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              data-testid={`close-${t.id}`}
+                              disabled={busy}
+                              onClick={() => doAction(t.id, () => closeTicket(t.id), `close-${t.id}`)}
+                              className="overview-inject-btn overview-inject-secondary"
+                              style={{ padding: '4px 6px', fontSize: '0.6rem' }}
+                            >
+                              Close
+                            </button>
+                          </>
+                        )}
+                        {!canEdit && !canApprove && (
+                          <span className="mono" style={{ fontSize: '0.58rem', color: 'var(--on-surface-variant)' }}>
+                            view only
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                  ) : (
+                    <td className="mono" style={{ fontSize: '0.62rem', color: 'var(--on-surface-variant)' }}>
+                      view only
+                    </td>
+                  )}
                   <td>
                     <TicketExplain
                       ticketId={t.id}

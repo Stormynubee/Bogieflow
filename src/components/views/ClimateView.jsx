@@ -6,7 +6,7 @@ import PageHeader from '../ink/PageHeader.jsx'
 import WeatherToggle from '../WeatherToggle'
 import { UI } from '../../content/uiCopy.js'
 import { fetchConfig, updateConfig } from '../../lib/api.js'
-import { can, getStoredRole } from '../../lib/rbac.js'
+import { can, getStoredRole, ROLE_VIEWS } from '../../lib/rbac.js'
 
 function avg(segments, key) {
   if (!segments.length) return 0
@@ -29,10 +29,12 @@ export default function ClimateView({
     window.addEventListener('bogie:role-change', h)
     return () => window.removeEventListener('bogie:role-change', h)
   }, [])
-  useEffect(() => {
-    fetchConfig().then((r) => setThresholds(r.thresholds)).catch(() => {})
-  }, [])
   const canConfigure = can(role, 'CONFIGURE')
+  const canViewClimate = (ROLE_VIEWS[role] || []).includes('climate')
+  useEffect(() => {
+    if (!canConfigure) return
+    fetchConfig().then((r) => setThresholds(r.thresholds)).catch(() => {})
+  }, [canConfigure])
   const setField = (k, v) => setThresholds((p) => ({ ...p, [k]: v }))
   const save = async () => {
     if (!canConfigure) return
@@ -203,79 +205,79 @@ export default function ClimateView({
         </table>
       </section>
 
-      <section className="panel panel-editorial panel-stagger-4" data-testid="thresholds-panel">
-        <PanelHeader
-          icon="tune"
-          title="Thresholds & Rules"
-          explainer="Admin CONFIGURE — hydrology healthy/critical + vibration z-score (least privilege)"
-          aside={<span className="mono" style={{ fontSize: '0.62rem' }}>{role} {canConfigure ? '· can edit' : '· view only'}</span>}
-        />
-        {!thresholds ? (
-          <p className="mono" style={{ padding: 14, fontSize: '0.7rem' }}>Loading…</p>
-        ) : (
-          <div style={{ padding: 14, display: 'grid', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-              <label className="mono" style={{ fontSize: '0.65rem' }}>
-                Healthy max
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1"
-                  value={thresholds.healthy_max}
-                  disabled={!canConfigure || busy}
-                  onChange={(e) => setField('healthy_max', parseFloat(e.target.value))}
-                  data-testid="thr-healthy"
-                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
-                />
-              </label>
-              <label className="mono" style={{ fontSize: '0.65rem' }}>
-                Critical min
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1"
-                  value={thresholds.critical_min}
-                  disabled={!canConfigure || busy}
-                  onChange={(e) => setField('critical_min', parseFloat(e.target.value))}
-                  data-testid="thr-critical"
-                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
-                />
-              </label>
-              <label className="mono" style={{ fontSize: '0.65rem' }}>
-                Vib threshold (z)
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.5"
-                  max="10"
-                  value={thresholds.vibration_threshold}
-                  disabled={!canConfigure || busy}
-                  onChange={(e) => setField('vibration_threshold', parseFloat(e.target.value))}
-                  data-testid="thr-vib"
-                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
-                />
-              </label>
+      {canViewClimate ? (
+        <section className="panel panel-editorial panel-stagger-4" data-testid="thresholds-panel">
+          <PanelHeader
+            icon="tune"
+            title="Thresholds & Rules"
+            explainer="Admin CONFIGURE — hydrology healthy/critical + vibration z-score (least privilege)"
+            aside={<span className="mono" style={{ fontSize: '0.62rem' }}>{role} · can edit</span>}
+          />
+          {!thresholds ? (
+            <p className="mono" style={{ padding: 14, fontSize: '0.7rem' }}>Loading thresholds…</p>
+          ) : (
+            <div style={{ padding: 14, display: 'grid', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <label className="mono" style={{ fontSize: '0.65rem' }}>
+                  Healthy max
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                    value={thresholds.healthy_max}
+                    disabled={busy}
+                    onChange={(e) => setField('healthy_max', parseFloat(e.target.value))}
+                    data-testid="thr-healthy"
+                    style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                  />
+                </label>
+                <label className="mono" style={{ fontSize: '0.65rem' }}>
+                  Critical min
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                    value={thresholds.critical_min}
+                    disabled={busy}
+                    onChange={(e) => setField('critical_min', parseFloat(e.target.value))}
+                    data-testid="thr-critical"
+                    style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                  />
+                </label>
+                <label className="mono" style={{ fontSize: '0.65rem' }}>
+                  Vib threshold (z)
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0.5"
+                    max="10"
+                    value={thresholds.vibration_threshold}
+                    disabled={busy}
+                    onChange={(e) => setField('vibration_threshold', parseFloat(e.target.value))}
+                    data-testid="thr-vib"
+                    style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                  />
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button type="button" data-testid="thr-save" disabled={busy} onClick={save} className="overview-inject-btn">
+                  {busy ? 'Saving…' : 'Save thresholds'}
+                </button>
+                {msg && <span className="mono" style={{ fontSize: '0.62rem' }}>{msg}</span>}
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button
-                type="button"
-                data-testid="thr-save"
-                disabled={!canConfigure || busy}
-                title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Save thresholds'}
-                onClick={save}
-                className="overview-inject-btn"
-                style={{ opacity: canConfigure ? 1 : 0.45, cursor: canConfigure ? 'pointer' : 'not-allowed' }}
-              >
-                {busy ? 'Saving…' : 'Save thresholds'}
-              </button>
-              {!canConfigure && <span className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)' }}>CANNOT: Modify thresholds — Admin only</span>}
-              {msg && <span className="mono" style={{ fontSize: '0.62rem' }}>{msg}</span>}
-            </div>
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      ) : (
+        <section className="panel panel-editorial panel-stagger-4" data-testid="thresholds-panel-hidden">
+          <PanelHeader icon="lock" title="Thresholds & Rules" explainer="Hidden — Admin CONFIGURE only (focus)" />
+          <p className="mono" style={{ padding: 14, fontSize: '0.68rem', color: 'var(--on-surface-variant)' }}>
+            View-only focus — thresholds hidden for {role}. Switch to Admin to configure.
+          </p>
+        </section>
+      )}
     </div>
   )
 }

@@ -43,6 +43,15 @@ export default function ScenarioMenu({
     }
   }
 
+  // Resource optimization: hide controls per role to reduce noise
+  if (!canAction && !canConfigure) {
+    return (
+      <section className="panel panel-calm scenario-menu" data-testid="scenario-menu">
+        <PanelHeader icon="movie" title="Scenario replay" explainer="Hidden for VIEW-only — switch to Maintenance+ to replay" className="panel-head-compact" />
+        <p className="mono" style={{ padding: '10px 14px', fontSize: '0.64rem', color: 'var(--on-surface-variant)' }}>View-only focus: scenarios hidden.</p>
+      </section>
+    )
+  }
   return (
     <section className="panel panel-calm scenario-menu" data-testid="scenario-menu">
       <PanelHeader
@@ -52,29 +61,31 @@ export default function ScenarioMenu({
         className="panel-head-compact"
       />
       <div className="scenario-menu-actions">
-        {SCENARIO_MENU.map((scenario) => (
+        {canAction &&
+          SCENARIO_MENU.map((scenario) => (
+            <button
+              key={scenario.id}
+              type="button"
+              data-testid={`scenario-${scenario.id}`}
+              className="overview-inject-btn overview-inject-secondary"
+              disabled={busy != null}
+              onClick={() => run(scenario.id, () => runScenario(scenario.id, api))}
+            >
+              {scenario.label}
+            </button>
+          ))}
+        {canConfigure && (
           <button
-            key={scenario.id}
             type="button"
-            data-testid={`scenario-${scenario.id}`}
-            className="overview-inject-btn overview-inject-secondary"
-            disabled={busy != null || !canAction}
-            title={!canAction ? 'Requires ACTION — Maintenance+' : scenario.label}
-            onClick={() => canAction && run(scenario.id, () => runScenario(scenario.id, api))}
+            data-testid="scenario-reset"
+            className="overview-inject-btn"
+            disabled={busy != null}
+            onClick={() => run('reset', realConnected ? resetCorridor : localReset)}
           >
-            {scenario.label}
+            Reset corridor
           </button>
-        ))}
-        <button
-          type="button"
-          data-testid="scenario-reset"
-          className="overview-inject-btn"
-          disabled={busy != null || !canConfigure}
-          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Reset corridor'}
-          onClick={() => canConfigure && run('reset', realConnected ? resetCorridor : localReset)}
-        >
-          Reset corridor
-        </button>
+        )}
+        {canAction && !canConfigure && <span className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)', alignSelf: 'center' }}>Reset hidden · Admin only</span>}
       </div>
     </section>
   )

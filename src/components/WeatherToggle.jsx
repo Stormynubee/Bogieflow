@@ -34,38 +34,29 @@ export default function WeatherToggle({
     }
   }
 
+  if (!canConfigure) {
+    return (
+      <div className="weather-toggle" data-testid="weather-toggle">
+        <span className="mono" style={{ padding: '6px 10px', border: '1px solid var(--outline-variant)', borderRadius: 999, background: 'var(--surface-dim)', fontSize: '0.64rem' }}>
+          {liveWeather ? 'Live weather' : 'Simulated'} · view only (Admin to switch)
+        </span>
+        <span className="weather-toggle-hint">{weatherToggleHint({ liveWeather, realConnected })}</span>
+        {weatherNote && <span className="weather-fallback-note" data-testid="weather-fallback-note">{weatherNote}</span>}
+      </div>
+    )
+  }
   return (
     <div className="weather-toggle" data-testid="weather-toggle">
       <div className="ink-segmented weather-toggle-segmented" role="group" aria-label="Weather data source">
-        <button
-          type="button"
-          aria-pressed={!liveWeather}
-          disabled={busy || !canConfigure}
-          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Simulated'}
-          onClick={() => canConfigure && setMode(false)}
-          data-testid="weather-mode-simulated"
-        >
+        <button type="button" aria-pressed={!liveWeather} disabled={busy} onClick={() => setMode(false)} data-testid="weather-mode-simulated">
           Simulated
         </button>
-        <button
-          type="button"
-          aria-pressed={liveWeather}
-          disabled={busy || !canConfigure}
-          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Live weather'}
-          onClick={() => canConfigure && setMode(true)}
-          data-testid="weather-mode-live"
-        >
+        <button type="button" aria-pressed={liveWeather} disabled={busy} onClick={() => setMode(true)} data-testid="weather-mode-live">
           Live weather
         </button>
       </div>
-      <span className="weather-toggle-hint">
-        {weatherToggleHint({ liveWeather, realConnected })} {!canConfigure && '· CONFIGURE Admin only'}
-      </span>
-      {weatherNote && (
-        <span className="weather-fallback-note" data-testid="weather-fallback-note">
-          {weatherNote}
-        </span>
-      )}
+      <span className="weather-toggle-hint">{weatherToggleHint({ liveWeather, realConnected })}</span>
+      {weatherNote && <span className="weather-fallback-note" data-testid="weather-fallback-note">{weatherNote}</span>}
     </div>
   )
 }
