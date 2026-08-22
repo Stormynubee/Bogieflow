@@ -47,7 +47,7 @@ from server.simulation import SimulationEngine
 from server.static_routes import mount_static_routes
 from server.agents.risk_model import MODEL_PATH, get_model_card, train_and_save
 
-clients: set[WebSocket] = set()
+clients: dict[WebSocket, str] = {}
 sim: SimulationEngine | None = None
 tick_task: asyncio.Task | None = None
 _broadcast_tasks: set[asyncio.Task] = set()
@@ -68,16 +68,48 @@ def _log_broadcast_result(task: asyncio.Task) -> None:
         logger.exception("WebSocket broadcast failed", exc_info=exc)
 
 
-async def broadcast(message: dict[str, Any]) -> None:
+def _allowed_for_role(message: dict[str, Any], role: str) -> bool:
+    from server.rbac import can
+
+    t = message.get("type", "")
+    # Resource optimization: filter heavy analytics for VIEW-only operator
+    if t in ("forecast", "impact"):
+        # operator VIEW only → skip heavy forecast/impact to reduce noise/bandwidth
+        if not can(role, "EDIT"):
+            return False
+    if t == "weather_status":
+        if not can(role, "CONFIGURE"):
+            # weather toggle is CONFIGURE; supervisor/maintainer don't need it every tick
+            return False
+    # audit logs already via REST, no WS audit type currently
+    return True
+
+
+async def broadcast(message: dict[str, Any], allowed_roles: set[str] | None = None) -> None:
+    if not clients:
+        return
+    # filter clients by role if allowed_roles supplied
+    targets: list[WebSocket] = []
+    for ws, role in list(clients.items()):
+        if allowed_roles is not None and role not in allowed_roles:
+            continue
+        if not _allowed_for_role(message, role):
+            continue
+        targets.append(ws)
+    if not targets:
+        return
     dead: list[WebSocket] = []
-    for ws in clients:
+    # concurrent fan-out with backpressure tolerance
+    async def _send(ws: WebSocket):
         try:
             await ws.send_json(message)
         except Exception as exc:
             logger.warning("WebSocket send failed: %s", exc)
             dead.append(ws)
+
+    await asyncio.gather(*[_send(ws) for ws in targets], return_exceptions=True)
     for ws in dead:
-        clients.discard(ws)
+        clients.pop(ws, None)
 
 
 def on_sim_event(event: dict[str, Any]) -> None:
@@ -210,9 +242,15 @@ def get_impact():
 
 @app.get("/api/tickets")
 def list_tickets(request: Request):
-    # VIEW — least privilege but still audit who viewed
+    # VIEW — public read even when BOGIE_API_SECRET set (read routes stay public)
+    from server.rbac import can
+
+    role = resolve_role(request)
+    if not can(role, "VIEW"):
+        raise HTTPException(status_code=403, detail="Forbidden: requires VIEW")
     engine = require_sim()
-    return {"tickets": [t.to_dict() for t in engine.tickets if t.status != "closed"]}
+    tickets = [t.to_dict() for t in engine.tickets if t.status != "closed"]
+    return {"tickets": tickets}
 
 
 @app.get("/api/tickets/{ticket_id}/explain")
@@ -295,6 +333,11 @@ def ticket_close(ticket_id: str, request: Request, auth=Depends(require_perm("AP
 
 @app.get("/api/config/thresholds")
 def get_config(request: Request):
+    from server.rbac import can
+
+    role = resolve_role(request)
+    if not can(role, "VIEW"):
+        raise HTTPException(status_code=403, detail="Forbidden: requires VIEW")
     return {"ok": True, "thresholds": get_thresholds()}
 
 
@@ -318,7 +361,7 @@ def set_config(body: ThresholdPatch, request: Request, auth=Depends(require_perm
 
 
 @app.get("/api/audit/logs")
-def audit_logs(request: Request, auth=Depends(require_perm("APPROVE"))):
+def audit_logs(request: Request, auth=Depends(require_perm("CONFIGURE"))):
     engine = require_sim()
     return {"logs": [l.to_dict() for l in engine.logs[-50:]]}
 
@@ -331,17 +374,23 @@ async def guide_chat(body: GuideChatRequest, _: None = Depends(require_guide_cha
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
+    # Role from query ?role= or header X-Role (demo mock)
+    role = ws.query_params.get("role") or ws.headers.get("x-role") or ws.headers.get("X-Role") or "operator"
+    from server.rbac import normalize_role
+
+    role = normalize_role(role)
     await ws.accept()
-    clients.add(ws)
+    clients[ws] = role
     try:
         if sim is not None:
+            # filtered snapshot per role could be added later; currently same for compat
             await ws.send_json(sim.state_snapshot())
         while True:
             await ws.receive_text()
     except WebSocketDisconnect:
         pass
     finally:
-        clients.discard(ws)
+        clients.pop(ws, None)
 
 
 if mount_static_routes(app):
