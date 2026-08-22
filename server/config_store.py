@@ -43,6 +43,29 @@ def update_thresholds(patch: dict) -> dict[str, float]:
     return get_thresholds()
 
 
+def preview_thresholds(patch: dict) -> dict[str, float]:
+    cand = dict(_store)
+    for k, v in patch.items():
+        if k not in _defaults:
+            raise ValueError(f"Unknown threshold: {k}")
+        fv = float(v)
+        if k in ("healthy_max", "critical_min", "hysteresis_healthy", "alpha", "beta", "lambda_degradation"):
+            if not 0 <= fv <= 1:
+                raise ValueError(f"{k} must be 0..1")
+        if k == "vibration_threshold":
+            if not 0.5 <= fv <= 10:
+                raise ValueError("vibration_threshold 0.5..10")
+        if k == "vibration_window":
+            if not 5 <= fv <= 100:
+                raise ValueError("vibration_window 5..100")
+        cand[k] = fv
+    if cand["hysteresis_healthy"] >= cand["healthy_max"]:
+        raise ValueError("hysteresis_healthy must be < healthy_max")
+    if cand["healthy_max"] >= cand["critical_min"]:
+        raise ValueError("healthy_max must be < critical_min")
+    return cand
+
+
 def reset_thresholds() -> dict[str, float]:
     _store.clear()
     _store.update(_defaults)

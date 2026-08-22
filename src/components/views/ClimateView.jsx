@@ -5,7 +5,7 @@ import DashboardSkeleton from '../DashboardSkeleton'
 import PageHeader from '../ink/PageHeader.jsx'
 import WeatherToggle from '../WeatherToggle'
 import { UI } from '../../content/uiCopy.js'
-import { fetchConfig, updateConfig } from '../../lib/api.js'
+import { fetchConfig, previewConfig, updateConfig } from '../../lib/api.js'
 import { can, getStoredRole, ROLE_VIEWS } from '../../lib/rbac.js'
 
 function avg(segments, key) {
@@ -24,6 +24,7 @@ export default function ClimateView({
   const [thresholds, setThresholds] = useState(null)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
+  const [preview, setPreview] = useState(null)
   useEffect(() => {
     const h = (e) => setRole(e.detail || getStoredRole())
     window.addEventListener('bogie:role-change', h)
@@ -35,7 +36,28 @@ export default function ClimateView({
     if (!canConfigure) return
     fetchConfig().then((r) => setThresholds(r.thresholds)).catch(() => {})
   }, [canConfigure])
-  const setField = (k, v) => setThresholds((p) => ({ ...p, [k]: v }))
+  const setField = (k, v) => {
+    setThresholds((p) => ({ ...p, [k]: v }))
+    setPreview(null)
+  }
+  const doPreview = async () => {
+    if (!canConfigure) return
+    setBusy(true)
+    setMsg('')
+    try {
+      const res = await previewConfig({
+        healthy_max: thresholds.healthy_max,
+        critical_min: thresholds.critical_min,
+        vibration_threshold: thresholds.vibration_threshold,
+      })
+      setPreview(res.impact)
+      setMsg(`Preview: ${res.impact.segments_changed} segments would change, +${res.impact.new_warnings} warnings`)
+    } catch (e) {
+      setMsg(String(e.message || e).slice(0, 140))
+    } finally {
+      setBusy(false)
+    }
+  }
   const save = async () => {
     if (!canConfigure) return
     setBusy(true)
@@ -47,6 +69,7 @@ export default function ClimateView({
         vibration_threshold: thresholds.vibration_threshold,
       })
       setThresholds(res.thresholds)
+      setPreview(null)
       setMsg('Saved')
     } catch (e) {
       setMsg(String(e.message || e).slice(0, 140))
@@ -261,12 +284,27 @@ export default function ClimateView({
                   />
                 </label>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button type="button" data-testid="thr-preview" disabled={busy} onClick={doPreview} className="overview-inject-btn overview-inject-secondary">
+                  {busy ? '…' : 'Preview impact'}
+                </button>
                 <button type="button" data-testid="thr-save" disabled={busy} onClick={save} className="overview-inject-btn">
                   {busy ? 'Saving…' : 'Save thresholds'}
                 </button>
                 {msg && <span className="mono" style={{ fontSize: '0.62rem' }}>{msg}</span>}
               </div>
+              {preview && (
+                <div className="mono" style={{ fontSize: '0.64rem', padding: '8px 10px', border: '1px solid var(--outline-variant)', borderRadius: 8, background: 'var(--surface-dim)' }} data-testid="thr-preview-result">
+                  <div>Segments changed: {preview.segments_changed} · New warnings: {preview.new_warnings}</div>
+                  <div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {preview.details.map((d) => (
+                      <span key={d.id} style={{ padding: '2px 6px', borderRadius: 999, border: '1px solid var(--outline-variant)', background: d.current_state !== d.projected_state ? 'rgba(233,72,46,0.12)' : 'transparent' }}>
+                        {d.id}: {d.current_state} → {d.projected_state}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

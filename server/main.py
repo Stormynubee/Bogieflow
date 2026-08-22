@@ -37,7 +37,7 @@ from server.auth import (
     resolve_role,
     resolve_user,
 )
-from server.config_store import get_thresholds, update_thresholds
+from server.config_store import get_thresholds, preview_thresholds, update_thresholds
 from server.rbac import ROLE_PERMS
 
 from server.guide import ai_guide_answer
@@ -339,6 +339,44 @@ def get_config(request: Request):
     if not can(role, "VIEW"):
         raise HTTPException(status_code=403, detail="Forbidden: requires VIEW")
     return {"ok": True, "thresholds": get_thresholds()}
+
+
+@app.post("/api/config/thresholds/preview")
+def preview_config(body: ThresholdPatch, request: Request, auth=Depends(require_perm("CONFIGURE"))):
+    patch = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not patch:
+        return {"ok": True, "projected": get_thresholds(), "impact": {"segments_changed": 0, "details": []}}
+    try:
+        projected = preview_thresholds(patch)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    # compute blast radius on current segments
+    engine = require_sim()
+    new_healthy = projected["healthy_max"]
+    new_critical = projected["critical_min"]
+
+    def _state_for(risk: float) -> str:
+        if risk >= new_critical:
+            return "CRITICAL_MUD_PUMPING"
+        if risk >= new_healthy:
+            return "WARNING_WATERLOGGING"
+        return "HEALTHY"
+
+    details = []
+    changed = 0
+    for seg in engine.segments.values():
+        cur_state = seg.state
+        proj_state = _state_for(seg.risk_index)
+        if proj_state != cur_state:
+            changed += 1
+        details.append({"id": seg.id, "risk_index": seg.risk_index, "current_state": cur_state, "projected_state": proj_state})
+    # estimate bandwidth impact: each WARNING adds ~12% tickets
+    est_ticket_delta = sum(1 for d in details if d["projected_state"] != "HEALTHY" and d["current_state"] == "HEALTHY")
+    return {
+        "ok": True,
+        "projected": projected,
+        "impact": {"segments_changed": changed, "new_warnings": est_ticket_delta, "details": details},
+    }
 
 
 @app.post("/api/config/thresholds")

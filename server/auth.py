@@ -16,7 +16,16 @@ GUIDE_HISTORY_MAX = 12
 GUIDE_RATE_LIMIT = 10
 GUIDE_RATE_WINDOW_SEC = 60
 
+ROLE_RATE_LIMITS: dict[str, tuple[int, int]] = {
+    # perm -> (max_hits, window_sec) : resource protection per role
+    "ACTION": (10, 60),  # maintainer inject 10/min
+    "CONFIGURE": (5, 60),  # admin threshold/config 5/min
+    "EDIT": (20, 60),
+    "APPROVE": (20, 60),
+}
+
 _guide_hits: dict[str, list[float]] = defaultdict(list)
+_role_hits: dict[str, list[float]] = defaultdict(list)
 
 
 def api_secret_configured() -> bool:
@@ -29,6 +38,7 @@ def configured_api_secret() -> str:
 
 def reset_guide_rate_limits() -> None:
     _guide_hits.clear()
+    _role_hits.clear()
 
 
 def verify_api_secret(request: Request) -> None:
@@ -83,6 +93,20 @@ def resolve_user(request: Request) -> str:
     return f"{role}@local"
 
 
+def _check_role_rate_limit(role: str, perm: str) -> None:
+    limits = ROLE_RATE_LIMITS.get(perm)
+    if not limits:
+        return
+    max_hits, window = limits
+    key = f"{role}:{perm}"
+    now = time.time()
+    hits = _role_hits[key]
+    hits[:] = [t for t in hits if now - t < window]
+    if len(hits) >= max_hits:
+        raise HTTPException(status_code=429, detail=f"Rate limited: {perm} for {role} ({max_hits}/{window}s)")
+    hits.append(now)
+
+
 def require_perm(perm: str):
     """FastAPI Depends factory: 403 if role lacks perm, but still respects BOGIE_API_SECRET."""
 
@@ -93,6 +117,7 @@ def require_perm(perm: str):
 
         if not can(role, perm):
             raise HTTPException(status_code=403, detail=f"Forbidden: requires {perm} (role={role})")
+        _check_role_rate_limit(role, perm)
         return {"role": role, "user": resolve_user(request), "perm": perm}
 
     return _checker

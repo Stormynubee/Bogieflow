@@ -69,3 +69,6 @@ export function fetchConfig() {
 export function updateConfig(patch) {
   return postJson('/api/config/thresholds', patch)
 }
+export function previewConfig(patch) {
+  return postJson('/api/config/thresholds/preview', patch)
+}
