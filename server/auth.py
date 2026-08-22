@@ -10,6 +10,8 @@ from collections import defaultdict
 from fastapi import HTTPException, Request
 
 API_SECRET_HEADER = "X-Bogie-Api-Key"
+ROLE_HEADER = "X-Role"
+USER_HEADER = "X-User"
 GUIDE_HISTORY_MAX = 12
 GUIDE_RATE_LIMIT = 10
 GUIDE_RATE_WINDOW_SEC = 60
@@ -57,3 +59,40 @@ def require_guide_chat(request: Request) -> None:
     check_guide_rate_limit(client_ip)
     if api_secret_configured() and not os.environ.get("GUIDE_AI_API_KEY", "").strip():
         raise HTTPException(status_code=503, detail="Guide AI not configured")
+
+
+# --- RBAC helpers ---
+
+def resolve_role(request: Request) -> str:
+    from server.rbac import normalize_role
+
+    header_role = request.headers.get(ROLE_HEADER, "").strip()
+    if header_role:
+        return normalize_role(header_role)
+    # Optional: map api secret to role via env RBAC_USERS=user:role:secret,...
+    # Fallback operator (least privilege by design)
+    return "operator"
+
+
+def resolve_user(request: Request) -> str:
+    user = request.headers.get(USER_HEADER, "").strip()
+    if user:
+        return user[:64]
+    # derive from role if no explicit user
+    role = resolve_role(request)
+    return f"{role}@local"
+
+
+def require_perm(perm: str):
+    """FastAPI Depends factory: 403 if role lacks perm, but still respects BOGIE_API_SECRET."""
+
+    def _checker(request: Request) -> dict:
+        verify_api_secret(request)
+        role = resolve_role(request)
+        from server.rbac import can
+
+        if not can(role, perm):
+            raise HTTPException(status_code=403, detail=f"Forbidden: requires {perm} (role={role})")
+        return {"role": role, "user": resolve_user(request), "perm": perm}
+
+    return _checker
