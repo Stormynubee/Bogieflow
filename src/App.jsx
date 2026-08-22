@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useToast } from './hooks/useToast'
+import { hasChosenRole } from './lib/rbac.js'
+import RolePicker from './components/RolePicker.jsx'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import StationMapModal from './components/StationMapModal'
@@ -65,6 +67,7 @@ export default function App() {
   const reduced = usePrefersReducedMotion()
 
   const [booted, setBooted] = useState(false)
+  const [needsRole, setNeedsRole] = useState(true)
   const [view, setView] = useState('overview')
   const [selectedSegmentId, setSelectedSegmentId] = useState('S3')
   const [stationMapOpen, setStationMapOpen] = useState(false)
@@ -150,6 +153,10 @@ export default function App() {
 
   if (!booted) {
     return <BootLoader onComplete={handleBootComplete} />
+  }
+
+  if (needsRole) {
+    return <RolePicker onPick={() => setNeedsRole(false)} />
   }
 
   return (
