@@ -38,17 +38,17 @@
 .overview-scroll-shell {
   display: flex;
   flex-direction: column;
-  gap: var(--gutter);
+  gap: var(--panel-gap, 12px);
   min-height: auto;
-  padding: var(--gutter);
-  padding-bottom: calc(var(--gutter) * 2);
+  padding: var(--panel-gap, 12px) var(--gutter);
+  padding-bottom: calc(var(--panel-gap, 12px) * 2);
 }
 
 .overview-header-block {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .overview-header-block .ink-page-header {
@@ -75,7 +75,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--panel-gap, 12px);
   align-content: start;
   align-self: start;
 }
@@ -107,7 +107,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--panel-gap, 12px);
   align-content: start;
   align-self: start;
 }
@@ -115,7 +115,7 @@
 .overview-deck {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--panel-gap, 12px);
   align-items: stretch;
   min-width: 0;
 }
@@ -123,7 +123,7 @@
 .overview-deck-right {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--panel-gap, 12px);
   min-width: 0;
 }
 
@@ -240,7 +240,7 @@
 }
 
 .corridor-feed-split .panel-head-calm {
-  padding: 10px 14px 8px;
+  padding: 8px 14px 6px;
   border-bottom: 1px solid var(--line);
 }
 
