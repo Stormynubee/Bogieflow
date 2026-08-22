@@ -23,10 +23,10 @@
     <img src="https://img.shields.io/github/actions/workflow/status/Stormynubee/Bogieflow/ci.yml?branch=main&label=CI&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github-actions&logoColor=ffffff" alt="CI Status" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/blob/main/tests/">
-    <img src="https://img.shields.io/badge/Pytest-79%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
+    <img src="https://img.shields.io/badge/Pytest-86%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=pytest&logoColor=ffffff" alt="Pytest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/blob/main/src/lib/">
-    <img src="https://img.shields.io/badge/Vitest-133%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
+    <img src="https://img.shields.io/badge/Vitest-143%20passing-f4f3ee?style=flat-square&labelColor=0a0a0b&logo=vitest&logoColor=ffffff" alt="Vitest Count" />
   </a>
   <a href="https://github.com/Stormynubee/Bogieflow/releases">
     <img src="https://img.shields.io/github/v/release/Stormynubee/Bogieflow?label=v1.7.0&style=flat-square&color=f4f3ee&labelColor=0a0a0b&logo=github&logoColor=ffffff" alt="Latest Release" />

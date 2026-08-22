@@ -6,8 +6,11 @@ MUTATE_HEADER = "X-Bogie-Api-Key"
 SECRET = "test-mutate-secret"
 
 
-def _auth_headers(secret: str = SECRET) -> dict[str, str]:
-    return {MUTATE_HEADER: secret}
+def _auth_headers(secret: str = SECRET, role: str = "maintainer") -> dict[str, str]:
+    return {MUTATE_HEADER: secret, "X-Role": role, "X-User": f"{role}@test"}
+
+def _admin_headers(secret: str = SECRET) -> dict[str, str]:
+    return {MUTATE_HEADER: secret, "X-Role": "admin", "X-User": "admin@test"}
 
 
 def test_inject_monsoon_open_when_secret_unset(client, monkeypatch):
@@ -15,6 +18,7 @@ def test_inject_monsoon_open_when_secret_unset(client, monkeypatch):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers={"X-Role": "maintainer", "X-User": "maintainer@test"},
     )
     assert response.status_code == 200
 
@@ -24,6 +28,7 @@ def test_inject_monsoon_requires_secret_when_configured(client, monkeypatch):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers={"X-Role": "maintainer", "X-User": "maintainer@test"},
     )
     assert response.status_code == 401
 
@@ -40,17 +45,17 @@ def test_inject_monsoon_accepts_valid_secret(client, monkeypatch):
 
 def test_reset_and_weather_require_secret(client, monkeypatch):
     monkeypatch.setenv("BOGIE_API_SECRET", SECRET)
-    assert client.post("/api/sim/reset", json={}).status_code == 401
-    assert client.post("/api/weather/mode", json={"live": True}).status_code == 401
+    assert client.post("/api/sim/reset", json={}, headers={"X-Role": "admin"}).status_code == 401
+    assert client.post("/api/weather/mode", json={"live": True}, headers={"X-Role": "admin"}).status_code == 401
     assert (
-        client.post("/api/sim/reset", json={}, headers=_auth_headers()).status_code
+        client.post("/api/sim/reset", json={}, headers=_admin_headers()).status_code
         == 200
     )
     assert (
         client.post(
             "/api/weather/mode",
             json={"live": False},
-            headers=_auth_headers(),
+            headers=_admin_headers(),
         ).status_code
         == 200
     )

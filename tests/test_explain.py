@@ -41,6 +41,7 @@ def test_explain_api(client, monkeypatch):
     client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers={"X-Role": "maintainer", "X-User": "maintainer@test"},
     )
     tickets = client.get("/api/tickets").json()["tickets"]
     assert tickets

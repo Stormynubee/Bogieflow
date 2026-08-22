@@ -4,10 +4,15 @@ def test_health(client):
     assert r.json()["status"] == "ok"
 
 
+def _h(role="maintainer"):
+    return {"X-Role": role, "X-User": f"{role}@test"}
+
+
 def test_inject_monsoon_returns_segment(client):
     r = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers=_h(),
     )
     assert r.status_code == 200
     data = r.json()
@@ -25,6 +30,7 @@ def test_websocket_receives_snapshot_and_segment_update(client):
         client.post(
             "/api/inject/monsoon",
             json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+            headers=_h(),
         )
 
         seen_segment_update = False
@@ -40,6 +46,7 @@ def test_inject_monsoon_invalid_segment_returns_422(client):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S99", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers=_h(),
     )
     assert response.status_code == 422
 
@@ -48,6 +55,7 @@ def test_inject_monsoon_missing_segment_returns_422(client):
     response = client.post(
         "/api/inject/monsoon",
         json={"rainfall": 0.9, "soil_moisture": 0.85},
+        headers=_h(),
     )
     assert response.status_code == 422
 
@@ -56,6 +64,7 @@ def test_inject_monsoon_out_of_range_rainfall_returns_422(client):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 1.5, "soil_moisture": 0.85},
+        headers=_h(),
     )
     assert response.status_code == 422
 
@@ -64,6 +73,7 @@ def test_inject_monsoon_segment_id_abuse_returns_422(client):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4'; DROP TABLE segments;--", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers=_h(),
     )
     assert response.status_code == 422
 
@@ -72,6 +82,7 @@ def test_inject_anomaly_invalid_segment_returns_422(client):
     response = client.post(
         "/api/inject/anomaly",
         json={"segment_id": "INVALID"},
+        headers=_h(),
     )
     assert response.status_code == 422
 
@@ -80,5 +91,6 @@ def test_inject_anomaly_missing_segment_returns_422(client):
     response = client.post(
         "/api/inject/anomaly",
         json={},
+        headers=_h(),
     )
     assert response.status_code == 422

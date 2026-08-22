@@ -8,6 +8,7 @@ def test_inject_monsoon_returns_503_when_sim_unavailable(monkeypatch):
     response = client.post(
         "/api/inject/monsoon",
         json={"segment_id": "S4", "rainfall": 0.9, "soil_moisture": 0.85},
+        headers={"X-Role": "maintainer", "X-User": "maintainer@test"},
     )
     assert response.status_code == 503
     assert response.json()["detail"] == "Simulation not ready"
@@ -19,5 +20,6 @@ def test_inject_anomaly_returns_503_when_sim_unavailable(monkeypatch):
     response = client.post(
         "/api/inject/anomaly",
         json={"segment_id": "S4"},
+        headers={"X-Role": "maintainer", "X-User": "maintainer@test"},
     )
     assert response.status_code == 503
