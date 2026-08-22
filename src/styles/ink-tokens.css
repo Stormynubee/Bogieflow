@@ -33,10 +33,22 @@
   --radius-soft: 2px;
   --radius-pill: 999px;
 
-  --gutter: clamp(20px, 3vw, 32px);
-  --space-section: clamp(36px, 5vh, 56px);
-  --space-panel: 20px;
-  --corridor-dock-height: clamp(220px, 34vh, 360px);
+  --gutter: clamp(14px, 1.6vw, 20px);
+  --space-section: clamp(28px, 4vh, 44px);
+  --space-panel: 18px;
+  --corridor-dock-height: clamp(280px, 45vh, 520px);
+
+  /* Command-center density tokens (Samsara IA + Palantir density) */
+  --shell-sidebar-w: 232px;
+  --topbar-h: 56px;
+  --ticker-h: 32px;
+  --panel-pad: 14px;
+  --panel-gap: 12px;
+  --row-h: 36px;
+  --table-cell-y: 8px;
+  --hud-min: 56px;
+  --mono-num: var(--font-mono);
+  --metric-unit-dim: rgba(245, 245, 240, 0.55);
 
   --transition-fast: var(--dur-fast) var(--ease-ink);
   --transition-normal: var(--dur-normal) var(--ease-ink);
