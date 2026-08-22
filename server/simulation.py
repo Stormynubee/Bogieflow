@@ -61,8 +61,8 @@ class SimulationEngine:
             "active_risk_index": round(self.active_risk_index(), 3),
         }
 
-    def _push_log(self, agent: str, message: str) -> None:
-        log = AgentLog(agent=agent, message=message, timestamp=time.time())
+    def _push_log(self, agent: str, message: str, actor: str | None = None, role: str | None = None) -> None:
+        log = AgentLog(agent=agent, message=message, timestamp=time.time(), actor=actor, role=role)
         self.logs.append(log)
         if len(self.logs) > MAX_LOGS:
             self.logs = self.logs[-MAX_LOGS:]
@@ -177,13 +177,15 @@ class SimulationEngine:
                 }
             )
 
-    def _close_open_tickets(self, segment_id: str) -> None:
+    def _close_open_tickets(self, segment_id: str, actor: str | None = None, role: str | None = None) -> None:
         for ticket in self.tickets:
             if ticket.segment == segment_id and ticket.status == "open":
                 ticket.status = "closed"
+                if actor:
+                    ticket.actor = actor
                 self._ticket_cooldown[segment_id] = 0
                 self.on_event(ticket.to_dict())
-                self._push_log("planner", f"{segment_id}: ticket {ticket.id} auto-closed — segment HEALTHY")
+                self._push_log("planner", f"{segment_id}: ticket {ticket.id} auto-closed — segment HEALTHY", actor=actor, role=role)
 
     def _open_ticket_for_segment(self, segment_id: str) -> Ticket | None:
         for ticket in reversed(self.tickets):
@@ -199,7 +201,7 @@ class SimulationEngine:
         keep_closed = closed[-(MAX_TICKETS - len(open_tickets)) :]
         self.tickets = open_tickets + keep_closed
 
-    def inject_monsoon(self, segment_id: str, rainfall: float, soil_moisture: float) -> dict:
+    def inject_monsoon(self, segment_id: str, rainfall: float, soil_moisture: float, actor: str | None = None, role: str | None = None) -> dict:
         seg = self.segments[segment_id]
         self._anomaly_segments.discard(segment_id)
         seg.rainfall = rainfall
@@ -209,16 +211,16 @@ class SimulationEngine:
         seg.risk_index = result["risk_index"]
         seg.k_effective = result["k_effective"]
         seg.state = result["state"]
-        self._push_log("hydrology", f"{segment_id}: {result['description']}")
+        self._push_log("hydrology", f"{segment_id}: {result['description']}", actor=actor, role=role)
         self._record_history(segment_id, seg.rainfall, seg.soil_moisture)
         self.on_event(self._segment_update_payload(segment_id))
         vib = {"anomaly": True, "z_score": 4.0, "az": seg.az}
         if seg.risk_index >= 0.7:
             seg.vib_z = 4.0
-        self._evaluate_segment(segment_id, vib)
+        self._evaluate_segment(segment_id, vib, actor=actor, role=role)
         return {"segment": seg.to_dict(), "hydrology": result}
 
-    def inject_anomaly(self, segment_id: str) -> dict:
+    def inject_anomaly(self, segment_id: str, actor: str | None = None, role: str | None = None) -> dict:
         seg = self.segments[segment_id]
         self._anomaly_segments.add(segment_id)
         window = self.vibration._windows.setdefault(segment_id, [])
@@ -233,9 +235,70 @@ class SimulationEngine:
             seg.soil_moisture = max(seg.soil_moisture, 0.55)
             self._apply_hydrology(segment_id)
         self.on_event(self._segment_update_payload(segment_id))
-        self._evaluate_segment(segment_id, vib)
+        self._evaluate_segment(segment_id, vib, actor=actor, role=role)
         self._anomaly_segments.discard(segment_id)
         return {"segment": seg.to_dict(), "vibration": vib}
+
+    # --- Ticket lifecycle (RBAC: maintainer EDIT, supervisor APPROVE) ---
+    def acknowledge_ticket(self, ticket_id: str, actor: str | None = None, role: str | None = None) -> dict:
+        t = next((x for x in self.tickets if x.id == ticket_id), None)
+        if not t:
+            raise ValueError("Ticket not found")
+        if actor:
+            t.actor = actor
+        self.on_event(t.to_dict())
+        self._push_log("planner", f"{t.segment}: ticket {t.id} acknowledged by {actor or 'system'}", actor=actor, role=role)
+        return t.to_dict()
+
+    def update_ticket_status(self, ticket_id: str, status: str, note: str | None = None, actor: str | None = None, role: str | None = None) -> dict:
+        t = next((x for x in self.tickets if x.id == ticket_id), None)
+        if not t:
+            raise ValueError("Ticket not found")
+        # allowed transitions: open -> acknowledged/in_progress
+        if status not in ("open", "acknowledged", "in_progress", "closed"):
+            raise ValueError("Invalid status")
+        t.status = status
+        if note:
+            t.reason = f"{t.reason} | note: {note}"
+        if actor:
+            t.actor = actor
+        self.on_event(t.to_dict())
+        self._push_log("planner", f"{t.segment}: ticket {t.id} status → {status} by {actor or 'system'}", actor=actor, role=role)
+        return t.to_dict()
+
+    def approve_ticket(self, ticket_id: str, actor: str | None = None, role: str | None = None) -> dict:
+        t = next((x for x in self.tickets if x.id == ticket_id), None)
+        if not t:
+            raise ValueError("Ticket not found")
+        # mark approved via note; keep priority but stamp actor
+        t.reason = f"{t.reason} [approved by {actor or 'supervisor'}]"
+        if actor:
+            t.actor = actor
+        self.on_event(t.to_dict())
+        self._push_log("planner", f"{t.segment}: ticket {t.id} approved by {actor or 'supervisor'}", actor=actor, role=role)
+        return t.to_dict()
+
+    def assign_ticket(self, ticket_id: str, assignee: str, actor: str | None = None, role: str | None = None) -> dict:
+        t = next((x for x in self.tickets if x.id == ticket_id), None)
+        if not t:
+            raise ValueError("Ticket not found")
+        t.assignee = assignee
+        if actor:
+            t.actor = actor
+        self.on_event(t.to_dict())
+        self._push_log("planner", f"{t.segment}: ticket {t.id} assigned to {assignee} by {actor or 'supervisor'}", actor=actor, role=role)
+        return t.to_dict()
+
+    def close_ticket(self, ticket_id: str, actor: str | None = None, role: str | None = None) -> dict:
+        t = next((x for x in self.tickets if x.id == ticket_id), None)
+        if not t:
+            raise ValueError("Ticket not found")
+        t.status = "closed"
+        if actor:
+            t.actor = actor
+        self.on_event(t.to_dict())
+        self._push_log("planner", f"{t.segment}: ticket {t.id} closed by {actor or 'supervisor'}", actor=actor, role=role)
+        return t.to_dict()
 
     def _segment_update_payload(self, segment_id: str) -> dict:
         seg = self.segments[segment_id]
@@ -300,7 +363,7 @@ class SimulationEngine:
                 base += random.uniform(1.2, 2.5)
         return max(0.05, base)
 
-    def _evaluate_segment(self, segment_id: str, vib: dict) -> None:
+    def _evaluate_segment(self, segment_id: str, vib: dict, actor: str | None = None, role: str | None = None) -> None:
         seg = self.segments[segment_id]
         ticket = self.planner.evaluate(
             segment_id=segment_id,
@@ -315,6 +378,8 @@ class SimulationEngine:
             self._push_log(
                 "vibration",
                 f"{segment_id}: z-score {vib['z_score']:.2f} exceeds threshold — anomaly detected",
+                actor=actor,
+                role=role,
             )
         if not ticket:
             return
@@ -326,18 +391,22 @@ class SimulationEngine:
             if new_rank <= existing_rank:
                 existing.reason = ticket.reason
                 existing.model_label = ticket.model_label
+                if actor:
+                    existing.actor = actor
                 self.on_event(existing.to_dict())
                 return
             existing.priority = ticket.priority
             existing.reason = ticket.reason
             existing.model_label = ticket.model_label
+            if actor:
+                existing.actor = actor
             self.on_event(existing.to_dict())
             if ticket.priority == "P1":
                 seg.state = "CRITICAL_MUD_PUMPING"
             elif ticket.priority == "P2" and seg.state == "HEALTHY":
                 seg.state = "WARNING_WATERLOGGING"
             self.on_event(self._segment_update_payload(segment_id))
-            self._push_log("planner", f"{segment_id}: upgraded to {ticket.priority} (model: {ticket.model_label})")
+            self._push_log("planner", f"{segment_id}: upgraded to {ticket.priority} (model: {ticket.model_label})", actor=actor, role=role)
             return
 
         if self._ticket_cooldown.get(segment_id, 0) > 0:
@@ -345,6 +414,8 @@ class SimulationEngine:
 
         self._ticket_counter += 1
         ticket.id = f"T-{self._ticket_counter:03d}"
+        if actor:
+            ticket.actor = actor
         self.tickets.append(ticket)
         self._trim_tickets()
         self._ticket_cooldown[segment_id] = TICKET_COOLDOWN_TICKS
@@ -354,4 +425,4 @@ class SimulationEngine:
             seg.state = "WARNING_WATERLOGGING"
         self.on_event(ticket.to_dict())
         self.on_event(self._segment_update_payload(segment_id))
-        self._push_log("planner", f"{segment_id}: {ticket.reason} (model: {ticket.model_label})")
+        self._push_log("planner", f"{segment_id}: {ticket.reason} (model: {ticket.model_label})", actor=actor, role=role)

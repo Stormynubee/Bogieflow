@@ -53,9 +53,11 @@ class Ticket:
     reason: str
     status: str = "open"
     model_label: str = "OK"
+    actor: str | None = None
+    assignee: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "type": "ticket",
             "id": self.id,
             "priority": self.priority,
@@ -64,6 +66,11 @@ class Ticket:
             "status": self.status,
             "model_label": self.model_label,
         }
+        if self.actor:
+            d["actor"] = self.actor
+        if self.assignee:
+            d["assignee"] = self.assignee
+        return d
 
 
 @dataclass
@@ -71,11 +78,18 @@ class AgentLog:
     agent: str
     message: str
     timestamp: float
+    actor: str | None = None
+    role: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "type": "agent_log",
             "agent": self.agent,
             "message": self.message,
             "timestamp": self.timestamp,
         }
+        if self.actor:
+            d["actor"] = self.actor
+        if self.role:
+            d["role"] = self.role
+        return d
