@@ -24,7 +24,7 @@ def parse_allowed_origin_regex(value: str | None = None) -> str | None:
     raw = raw.strip()
     return raw or None
 
-from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -332,12 +332,18 @@ def ticket_close(ticket_id: str, request: Request, auth=Depends(require_perm("AP
 
 
 @app.get("/api/config/thresholds")
-def get_config(request: Request):
+def get_config(request: Request, response: Response):
     from server.rbac import can
 
     role = resolve_role(request)
     if not can(role, "VIEW"):
         raise HTTPException(status_code=403, detail="Forbidden: requires VIEW")
+    # per-role cache: admin thresholds change often, others stale longer
+    if role == "admin":
+        response.headers["Cache-Control"] = "private, max-age=30"
+    else:
+        response.headers["Cache-Control"] = "private, max-age=60"
+    response.headers["Vary"] = "X-Role"
     return {"ok": True, "thresholds": get_thresholds()}
 
 

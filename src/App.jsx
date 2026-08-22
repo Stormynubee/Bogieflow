@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useToast } from './hooks/useToast'
@@ -8,12 +8,14 @@ import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import StationMapModal from './components/StationMapModal'
 import GuideCoach from './components/guide/GuideCoach'
-import OverviewView from './components/views/OverviewView'
-import AnalysisView from './components/views/AnalysisView'
-import MaintenanceView from './components/views/MaintenanceView'
-import ClimateView from './components/views/ClimateView'
+import DashboardSkeleton from './components/DashboardSkeleton.jsx'
 import BootLoader from './components/BootLoader'
 import ToastStack from './components/ToastStack'
+
+const OverviewView = lazy(() => import('./components/views/OverviewView'))
+const AnalysisView = lazy(() => import('./components/views/AnalysisView'))
+const MaintenanceView = lazy(() => import('./components/views/MaintenanceView'))
+const ClimateView = lazy(() => import('./components/views/ClimateView'))
 import { highestRiskSegment } from './lib/segmentUtils.js'
 import { injectMonsoon } from './lib/api.js'
 import { UI } from './content/uiCopy.js'
@@ -189,68 +191,70 @@ export default function App() {
         <main
           className={`main-grid ${view === 'overview' ? 'main-grid-overview' : ''} ${view !== 'overview' ? 'main-grid-single' : ''}`}
         >
-          <AnimatePresence mode="wait">
-            {view === 'overview' && (
-              <motion.div key="overview" className="view-shell" {...viewMotion}>
-                <OverviewView
-                  segments={segments}
-                  tickets={tickets}
-                  logs={logs}
-                  train={train}
-                  connected={connected}
-                  realConnected={realConnected}
-                  openTicketCount={openTickets}
-                  activeRiskIndex={activeRiskIndex}
-                  segmentHistory={segmentHistory}
-                  lastTickAt={lastTickAt}
-                  forecast={forecast}
-                  impact={impact}
-                  dataReady={dataReady}
-                  onSegmentClick={handleSegmentClick}
-                  onOpenStationMap={() => setStationMapOpen(true)}
-                  onNavigate={setView}
-                  onGoMaintenance={goMaintenance}
-                  onInjectToast={pushToast}
-                  localInjectMonsoon={localInjectMonsoon}
-                  localInjectAnomaly={localInjectAnomaly}
-                  localReset={localReset}
-                />
-              </motion.div>
-            )}
-            {view === 'analysis' && (
-              <motion.div key="analysis" className="view-shell" {...viewMotion}>
-                <AnalysisView
-                  segments={segments}
-                  activeRiskIndex={activeRiskIndex}
-                  logs={logs}
-                  segmentHistory={segmentHistory}
-                  selectedSegmentId={selectedSegmentId}
-                  onSelectSegment={setSelectedSegmentId}
-                  onNavigateMaintenance={goMaintenance}
-                  onInjectToast={pushToast}
-                  dataReady={dataReady}
-                  realConnected={realConnected}
-                  localInjectAnomaly={localInjectAnomaly}
-                />
-              </motion.div>
-            )}
-            {view === 'maintenance' && (
-              <motion.div key="maintenance" className="view-shell" {...viewMotion}>
-                <MaintenanceView tickets={tickets} logs={logs} dataReady={dataReady} />
-              </motion.div>
-            )}
-            {view === 'climate' && (
-              <motion.div key="climate" className="view-shell" {...viewMotion}>
-                <ClimateView
-                  segments={segments}
-                  dataReady={dataReady}
-                  weatherStatus={weatherStatus}
-                  realConnected={realConnected}
-                  localSetWeatherMode={localSetWeatherMode}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <Suspense fallback={<DashboardSkeleton />}>
+            <AnimatePresence mode="wait">
+              {view === 'overview' && (
+                <motion.div key="overview" className="view-shell" {...viewMotion}>
+                  <OverviewView
+                    segments={segments}
+                    tickets={tickets}
+                    logs={logs}
+                    train={train}
+                    connected={connected}
+                    realConnected={realConnected}
+                    openTicketCount={openTickets}
+                    activeRiskIndex={activeRiskIndex}
+                    segmentHistory={segmentHistory}
+                    lastTickAt={lastTickAt}
+                    forecast={forecast}
+                    impact={impact}
+                    dataReady={dataReady}
+                    onSegmentClick={handleSegmentClick}
+                    onOpenStationMap={() => setStationMapOpen(true)}
+                    onNavigate={setView}
+                    onGoMaintenance={goMaintenance}
+                    onInjectToast={pushToast}
+                    localInjectMonsoon={localInjectMonsoon}
+                    localInjectAnomaly={localInjectAnomaly}
+                    localReset={localReset}
+                  />
+                </motion.div>
+              )}
+              {view === 'analysis' && (
+                <motion.div key="analysis" className="view-shell" {...viewMotion}>
+                  <AnalysisView
+                    segments={segments}
+                    activeRiskIndex={activeRiskIndex}
+                    logs={logs}
+                    segmentHistory={segmentHistory}
+                    selectedSegmentId={selectedSegmentId}
+                    onSelectSegment={setSelectedSegmentId}
+                    onNavigateMaintenance={goMaintenance}
+                    onInjectToast={pushToast}
+                    dataReady={dataReady}
+                    realConnected={realConnected}
+                    localInjectAnomaly={localInjectAnomaly}
+                  />
+                </motion.div>
+              )}
+              {view === 'maintenance' && (
+                <motion.div key="maintenance" className="view-shell" {...viewMotion}>
+                  <MaintenanceView tickets={tickets} logs={logs} dataReady={dataReady} />
+                </motion.div>
+              )}
+              {view === 'climate' && (
+                <motion.div key="climate" className="view-shell" {...viewMotion}>
+                  <ClimateView
+                    segments={segments}
+                    dataReady={dataReady}
+                    weatherStatus={weatherStatus}
+                    realConnected={realConnected}
+                    localSetWeatherMode={localSetWeatherMode}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Suspense>
         </main>
 
         <footer className="app-footer" data-guide="app-footer">
