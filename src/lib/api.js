@@ -1,5 +1,5 @@
 import { apiUrl } from './config.js'
-import { mutateHeaders } from './apiAuth.js'
+import { mutateHeaders, viewHeaders } from './apiAuth.js'
 
 export async function postJson(path, body) {
   const res = await fetch(apiUrl(path), {
@@ -32,15 +32,40 @@ export function setWeatherMode(live) {
 }
 
 export function fetchModelCard() {
-  return fetch(apiUrl('/api/model/card')).then(async (res) => {
+  return fetch(apiUrl('/api/model/card'), { headers: viewHeaders() }).then(async (res) => {
     if (!res.ok) throw new Error(await res.text())
     return res.json()
   })
 }
 
 export function fetchTicketExplain(ticketId) {
-  return fetch(apiUrl(`/api/tickets/${ticketId}/explain`)).then(async (res) => {
+  return fetch(apiUrl(`/api/tickets/${ticketId}/explain`), { headers: viewHeaders() }).then(async (res) => {
     if (!res.ok) throw new Error(await res.text())
     return res.json()
   })
+}
+
+export function ackTicket(ticketId) {
+  return postJson(`/api/tickets/${ticketId}/ack`, {})
+}
+export function updateTicketStatus(ticketId, status, note) {
+  return postJson(`/api/tickets/${ticketId}/status`, { status, note })
+}
+export function approveTicket(ticketId) {
+  return postJson(`/api/tickets/${ticketId}/approve`, {})
+}
+export function assignTicket(ticketId, assignee) {
+  return postJson(`/api/tickets/${ticketId}/assign`, { assignee })
+}
+export function closeTicket(ticketId) {
+  return postJson(`/api/tickets/${ticketId}/close`, {})
+}
+export function fetchConfig() {
+  return fetch(apiUrl('/api/config/thresholds'), { headers: viewHeaders() }).then(async (r) => {
+    if (!r.ok) throw new Error(await r.text())
+    return r.json()
+  })
+}
+export function updateConfig(patch) {
+  return postJson('/api/config/thresholds', patch)
 }
