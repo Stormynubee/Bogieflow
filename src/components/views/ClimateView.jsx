@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react'
 import { highestRiskSegment } from '../../lib/segmentUtils.js'
 import PanelHeader from '../PanelHeader'
 import DashboardSkeleton from '../DashboardSkeleton'
 import PageHeader from '../ink/PageHeader.jsx'
 import WeatherToggle from '../WeatherToggle'
 import { UI } from '../../content/uiCopy.js'
+import { fetchConfig, updateConfig } from '../../lib/api.js'
+import { can, getStoredRole } from '../../lib/rbac.js'
 
 function avg(segments, key) {
   if (!segments.length) return 0
@@ -17,6 +20,39 @@ export default function ClimateView({
   realConnected,
   localSetWeatherMode,
 }) {
+  const [role, setRole] = useState(() => getStoredRole())
+  const [thresholds, setThresholds] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  useEffect(() => {
+    fetchConfig().then((r) => setThresholds(r.thresholds)).catch(() => {})
+  }, [])
+  const canConfigure = can(role, 'CONFIGURE')
+  const setField = (k, v) => setThresholds((p) => ({ ...p, [k]: v }))
+  const save = async () => {
+    if (!canConfigure) return
+    setBusy(true)
+    setMsg('')
+    try {
+      const res = await updateConfig({
+        healthy_max: thresholds.healthy_max,
+        critical_min: thresholds.critical_min,
+        vibration_threshold: thresholds.vibration_threshold,
+      })
+      setThresholds(res.thresholds)
+      setMsg('Saved')
+    } catch (e) {
+      setMsg(String(e.message || e).slice(0, 140))
+    } finally {
+      setBusy(false)
+      setTimeout(() => setMsg(''), 2000)
+    }
+  }
   if (!dataReady) {
     return (
       <div className="climate-layout" data-testid="view-climate">
@@ -165,6 +201,80 @@ export default function ClimateView({
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section className="panel panel-editorial panel-stagger-4" data-testid="thresholds-panel">
+        <PanelHeader
+          icon="tune"
+          title="Thresholds & Rules"
+          explainer="Admin CONFIGURE — hydrology healthy/critical + vibration z-score (least privilege)"
+          aside={<span className="mono" style={{ fontSize: '0.62rem' }}>{role} {canConfigure ? '· can edit' : '· view only'}</span>}
+        />
+        {!thresholds ? (
+          <p className="mono" style={{ padding: 14, fontSize: '0.7rem' }}>Loading…</p>
+        ) : (
+          <div style={{ padding: 14, display: 'grid', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <label className="mono" style={{ fontSize: '0.65rem' }}>
+                Healthy max
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  value={thresholds.healthy_max}
+                  disabled={!canConfigure || busy}
+                  onChange={(e) => setField('healthy_max', parseFloat(e.target.value))}
+                  data-testid="thr-healthy"
+                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                />
+              </label>
+              <label className="mono" style={{ fontSize: '0.65rem' }}>
+                Critical min
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  value={thresholds.critical_min}
+                  disabled={!canConfigure || busy}
+                  onChange={(e) => setField('critical_min', parseFloat(e.target.value))}
+                  data-testid="thr-critical"
+                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                />
+              </label>
+              <label className="mono" style={{ fontSize: '0.65rem' }}>
+                Vib threshold (z)
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.5"
+                  max="10"
+                  value={thresholds.vibration_threshold}
+                  disabled={!canConfigure || busy}
+                  onChange={(e) => setField('vibration_threshold', parseFloat(e.target.value))}
+                  data-testid="thr-vib"
+                  style={{ width: '100%', marginTop: 4, padding: 6, border: '1px solid var(--outline-variant)', borderRadius: 4, background: 'var(--surface)', color: 'var(--on-surface)' }}
+                />
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                data-testid="thr-save"
+                disabled={!canConfigure || busy}
+                title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Save thresholds'}
+                onClick={save}
+                className="overview-inject-btn"
+                style={{ opacity: canConfigure ? 1 : 0.45, cursor: canConfigure ? 'pointer' : 'not-allowed' }}
+              >
+                {busy ? 'Saving…' : 'Save thresholds'}
+              </button>
+              {!canConfigure && <span className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)' }}>CANNOT: Modify thresholds — Admin only</span>}
+              {msg && <span className="mono" style={{ fontSize: '0.62rem' }}>{msg}</span>}
+            </div>
+          </div>
+        )}
       </section>
     </div>
   )

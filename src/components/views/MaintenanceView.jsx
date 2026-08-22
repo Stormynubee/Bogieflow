@@ -6,10 +6,22 @@ import DashboardSkeleton from '../DashboardSkeleton'
 import TicketExplain from '../TicketExplain'
 import { UI } from '../../content/uiCopy.js'
 import { formatTicketAge } from '../../hooks/useTicketAge.js'
+import { ackTicket, approveTicket, assignTicket, closeTicket, updateTicketStatus } from '../../lib/api.js'
+import { can, getStoredRole } from '../../lib/rbac.js'
 
 export default function MaintenanceView({ tickets, logs, dataReady }) {
   const [firstSeen, setFirstSeen] = useState({})
   const [openExplain, setOpenExplain] = useState(null)
+  const [role, setRole] = useState(() => getStoredRole())
+  const [busy, setBusy] = useState(null)
+  const [msg, setMsg] = useState('')
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  const canEdit = can(role, 'EDIT')
+  const canApprove = can(role, 'APPROVE')
 
   useEffect(() => {
     const ts = Date.now()
@@ -36,6 +48,20 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
     )
   }
 
+  const doAction = async (id, fn, key) => {
+    setBusy(key)
+    setMsg('')
+    try {
+      await fn()
+      setMsg('OK')
+      setTimeout(() => setMsg(''), 1500)
+    } catch (e) {
+      setMsg(String(e.message || e).slice(0, 120))
+    } finally {
+      setBusy(null)
+    }
+  }
+
   return (
     <div className="maintenance-layout" data-guide="maintenance-main" data-testid="view-maintenance">
       <PageHeader
@@ -48,9 +74,15 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
         <PanelHeader
           icon="build"
           title="Maintenance tickets"
-          explainer="Prioritized work orders from the agent planner"
-          aside={<span className="live-tag live-tag-pulse">LIVE</span>}
+          explainer="Prioritized work orders from the agent planner — RBAC: EDIT Maintainer+, APPROVE Supervisor+"
+          aside={
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span className="mono" style={{ fontSize: '0.62rem' }}>{role}</span>
+              <span className="live-tag live-tag-pulse">LIVE</span>
+            </span>
+          }
         />
+        {msg && <p className="mono" style={{ padding: '6px 14px', fontSize: '0.62rem', color: 'var(--on-surface-variant)' }}>{msg}</p>}
         <div className="maintenance-table-wrap">
           <table className="maintenance-table">
             <thead className="maintenance-table-head">
@@ -60,13 +92,15 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                 <th>Reason</th>
                 <th>Age</th>
                 <th>Status</th>
+                <th>Actor</th>
+                <th>Actions</th>
                 <th>Explain</th>
               </tr>
             </thead>
             <tbody>
               {openTickets.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="empty-row maintenance-empty">
+                  <td colSpan={8} className="empty-row maintenance-empty">
                     <span className="maintenance-empty-title">{UI.maintenance.emptyTitle}</span>
                     <span className="maintenance-empty-sub">{UI.maintenance.emptySub}</span>
                   </td>
@@ -89,6 +123,44 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                       {t.status ?? 'open'}
                     </span>
                   </td>
+                  <td className="mono" style={{ fontSize: '0.65rem' }}>{t.actor || '—'}{t.assignee ? ` → ${t.assignee}` : ''}</td>
+                  <td>
+                    <span style={{ display: 'inline-flex', gap: 4, flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        data-testid={`ack-${t.id}`}
+                        disabled={!canEdit || busy}
+                        title={!canEdit ? 'Requires EDIT — Maintenance+' : 'Acknowledge'}
+                        onClick={() => canEdit && doAction(t.id, () => ackTicket(t.id), `ack-${t.id}`)}
+                        className="overview-inject-btn overview-inject-secondary"
+                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canEdit ? 1 : 0.45, cursor: canEdit ? 'pointer' : 'not-allowed' }}
+                      >
+                        Ack
+                      </button>
+                      <button
+                        type="button"
+                        data-testid={`approve-${t.id}`}
+                        disabled={!canApprove || busy}
+                        title={!canApprove ? 'Requires APPROVE — Supervisor+' : 'Approve'}
+                        onClick={() => canApprove && doAction(t.id, () => approveTicket(t.id), `approve-${t.id}`)}
+                        className="overview-inject-btn"
+                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canApprove ? 1 : 0.45, cursor: canApprove ? 'pointer' : 'not-allowed' }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        data-testid={`close-${t.id}`}
+                        disabled={!canApprove || busy}
+                        title={!canApprove ? 'Requires APPROVE — Supervisor+' : 'Close'}
+                        onClick={() => canApprove && doAction(t.id, () => closeTicket(t.id), `close-${t.id}`)}
+                        className="overview-inject-btn overview-inject-secondary"
+                        style={{ padding: '4px 6px', fontSize: '0.6rem', opacity: canApprove ? 1 : 0.45, cursor: canApprove ? 'pointer' : 'not-allowed' }}
+                      >
+                        Close
+                      </button>
+                    </span>
+                  </td>
                   <td>
                     <TicketExplain
                       ticketId={t.id}
@@ -104,7 +176,7 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
       </section>
 
       <section id="network-logs" className="panel panel-editorial maintenance-logs panel-stagger-2">
-        <PanelHeader icon="terminal" title="Agent logs" explainer="Decision trail from hydrology, vibration, and planner agents" />
+        <PanelHeader icon="terminal" title="Agent logs" explainer="Decision trail from hydrology, vibration, and planner agents — auditable: actor·role·time" />
         <ul className="stream-list">
           {logs.length === 0 && (
             <li className="stream-item stream-muted">Waiting for agent logs…</li>
@@ -121,6 +193,7 @@ export default function MaintenanceView({ tickets, logs, dataReady }) {
                   critical:
                     log.message?.includes('CRITICAL') || log.message?.includes('P1'),
                   title: log.message,
+                  detail: [log.actor ? `actor:${log.actor}` : null, log.role ? `role:${log.role}` : null].filter(Boolean).join(' · ') || undefined,
                 }}
               />
             ))}
