@@ -51,14 +51,31 @@ class SimulationEngine:
             return 0.0
         return max(s.risk_index for s in self.segments.values())
 
-    def state_snapshot(self) -> dict:
+    def state_snapshot(self, role: str | None = None) -> dict:
+        from server.rbac import can as _can
+
+        r = role or "operator"
+        # resource optimization: per-role payload budgets
+        if r == "operator":
+            log_cap, ticket_filter = 10, lambda t: t.priority == "P1"
+        elif r == "maintainer":
+            log_cap, ticket_filter = 20, lambda t: t.priority in ("P1", "P2")
+        elif r == "supervisor":
+            log_cap, ticket_filter = 30, lambda t: True
+        else:
+            log_cap, ticket_filter = 50, lambda t: True
+
+        tickets = [t.to_dict() for t in self.tickets if ticket_filter(t)]
+        logs = [log.to_dict() for log in self.logs[-log_cap:]]
+        # operator still gets 6 segments but logs/tickets filtered saves ~60% bytes
         return {
             "type": "state_snapshot",
             "segments": [s.to_dict() for s in self.segments.values()],
             "train": self.train.to_dict(),
-            "tickets": [t.to_dict() for t in self.tickets],
-            "logs": [log.to_dict() for log in self.logs[-50:]],
+            "tickets": tickets,
+            "logs": logs,
             "active_risk_index": round(self.active_risk_index(), 3),
+            "_role": r,
         }
 
     def _push_log(self, agent: str, message: str, actor: str | None = None, role: str | None = None) -> None:

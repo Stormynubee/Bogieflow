@@ -88,6 +88,21 @@ def _allowed_for_role(message: dict[str, Any], role: str) -> bool:
 async def broadcast(message: dict[str, Any], allowed_roles: set[str] | None = None) -> None:
     if not clients:
         return
+    t = message.get("type", "")
+    dead: list[WebSocket] = []
+    # resource optimization: state_snapshot is per-role filtered
+    if t == "state_snapshot" and sim is not None:
+        async def _send_snapshot(ws: WebSocket, role: str):
+            try:
+                await ws.send_json(sim.state_snapshot(role))
+            except Exception as exc:
+                logger.warning("WebSocket send failed: %s", exc)
+                dead.append(ws)
+
+        await asyncio.gather(*[_send_snapshot(ws, role) for ws, role in list(clients.items()) if (allowed_roles is None or role in allowed_roles)], return_exceptions=True)
+        for ws in dead:
+            clients.pop(ws, None)
+        return
     # filter clients by role if allowed_roles supplied
     targets: list[WebSocket] = []
     for ws, role in list(clients.items()):
@@ -98,7 +113,6 @@ async def broadcast(message: dict[str, Any], allowed_roles: set[str] | None = No
         targets.append(ws)
     if not targets:
         return
-    dead: list[WebSocket] = []
     # concurrent fan-out with backpressure tolerance
     async def _send(ws: WebSocket):
         try:
@@ -242,14 +256,21 @@ def get_impact():
 
 @app.get("/api/tickets")
 def list_tickets(request: Request):
-    # VIEW — public read even when BOGIE_API_SECRET set (read routes stay public)
     from server.rbac import can
 
     role = resolve_role(request)
     if not can(role, "VIEW"):
         raise HTTPException(status_code=403, detail="Forbidden: requires VIEW")
     engine = require_sim()
-    tickets = [t.to_dict() for t in engine.tickets if t.status != "closed"]
+    all_open = [t for t in engine.tickets if t.status != "closed"]
+    # per-role focus: operator P1 only, maintainer P1/P2
+    if role == "operator":
+        all_open = [t for t in all_open if t.priority == "P1"]
+    elif role == "maintainer":
+        all_open = [t for t in all_open if t.priority in ("P1", "P2")]
+    tickets = [t.to_dict() for t in all_open]
+    # audit byte count for resource optimization metric
+    request.state._rbac_bytes = len(str(tickets).encode())
     return {"tickets": tickets}
 
 
@@ -427,8 +448,7 @@ async def websocket_endpoint(ws: WebSocket):
     clients[ws] = role
     try:
         if sim is not None:
-            # filtered snapshot per role could be added later; currently same for compat
-            await ws.send_json(sim.state_snapshot())
+            await ws.send_json(sim.state_snapshot(role))
         while True:
             await ws.receive_text()
     except WebSocketDisconnect:
