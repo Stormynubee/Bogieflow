@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { UI } from '../content/uiCopy.js'
+import { can, getStoredRole } from '../lib/rbac.js'
 
 const NAV_ITEMS = [
   { id: 'overview', icon: 'dashboard', label: UI.nav.overview },
@@ -8,6 +10,13 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar({ connected, reconnectAttempts = 0, activeView, onNavigate, onScan }) {
+  const [role, setRole] = useState(() => getStoredRole())
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  const canAct = can(role, 'ACTION')
   return (
     <nav className="sidebar sidebar-editorial" aria-label="Main navigation" data-guide="sidebar">
       <div className="sidebar-header">
@@ -31,12 +40,22 @@ export default function Sidebar({ connected, reconnectAttempts = 0, activeView, 
       </div>
 
       <div className="sidebar-footer">
-        <button type="button" className="btn-scan" onClick={onScan} title={UI.nav.scanHint} data-testid="scan-corridor">
+        <button
+          type="button"
+          className="btn-scan"
+          onClick={canAct ? onScan : undefined}
+          disabled={!canAct}
+          title={canAct ? UI.nav.scanHint : 'CANNOT: Requires ACTION — Maintenance+ (least privilege)'}
+          data-testid="scan-corridor"
+          aria-disabled={!canAct}
+          style={!canAct ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+        >
           <span className="material-symbols-outlined">radar</span>
           {UI.nav.scan}
         </button>
+        {!canAct && <p className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)', marginTop: 6 }}>View only — ask Maintenance+</p>}
         <p className={`sidebar-status ${connected ? 'online' : 'offline'}`} data-testid="sidebar-connection-status">
-          {connected ? UI.nav.linkActive : 'Demo mode'}
+          {connected ? UI.nav.linkActive : 'Demo mode'} · {role}
         </p>
       </div>
     </nav>

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PanelHeader from './PanelHeader'
 import { injectAnomaly, injectMonsoon } from '../lib/api.js'
 import { UI } from '../content/uiCopy.js'
+import { can, getStoredRole } from '../lib/rbac.js'
 
 /** Live injection controls — clearly labeled as simulation / demo. */
 export default function OverviewOpsStrip({
@@ -15,6 +16,13 @@ export default function OverviewOpsStrip({
 }) {
   const [busy, setBusy] = useState(null)
   const [toast, setToast] = useState('')
+  const [role, setRole] = useState(() => getStoredRole())
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  const canAction = can(role, 'ACTION')
 
   const trainSeg = train?.segment_id
 
@@ -60,9 +68,9 @@ export default function OverviewOpsStrip({
             type="button"
             data-testid="inject-monsoon-s4"
             className="overview-inject-btn"
-            disabled={busy === 'monsoon'}
-            title={UI.simulation.monsoonHint}
-            onClick={() => run('monsoon', () => realConnected ? injectMonsoon('S4', 0.9, 0.85) : localInjectMonsoon('S4', 0.9, 0.85))}
+            disabled={busy === 'monsoon' || !canAction}
+            title={!canAction ? 'Requires ACTION — Maintenance+ (least privilege)' : UI.simulation.monsoonHint}
+            onClick={() => canAction && run('monsoon', () => realConnected ? injectMonsoon('S4', 0.9, 0.85) : localInjectMonsoon('S4', 0.9, 0.85))}
           >
             {UI.simulation.monsoon}
           </button>
@@ -70,9 +78,9 @@ export default function OverviewOpsStrip({
             type="button"
             data-testid="inject-anomaly-s4"
             className="overview-inject-btn overview-inject-secondary"
-            disabled={busy === 'anomaly'}
-            title={UI.simulation.anomalyHint}
-            onClick={() => run('anomaly', () => realConnected ? injectAnomaly('S4') : localInjectAnomaly('S4'))}
+            disabled={busy === 'anomaly' || !canAction}
+            title={!canAction ? 'Requires ACTION — Maintenance+' : UI.simulation.anomalyHint}
+            onClick={() => canAction && run('anomaly', () => realConnected ? injectAnomaly('S4') : localInjectAnomaly('S4'))}
           >
             {UI.simulation.anomaly}
           </button>
@@ -81,9 +89,9 @@ export default function OverviewOpsStrip({
               type="button"
               data-testid="inject-monsoon-train"
               className="overview-inject-btn overview-inject-secondary"
-              disabled={busy === 'train'}
-              title={UI.simulation.stressHint}
-              onClick={() => run('train', () => realConnected ? injectMonsoon(trainSeg) : localInjectMonsoon(trainSeg))}
+              disabled={busy === 'train' || !canAction}
+              title={!canAction ? 'Requires ACTION — Maintenance+' : UI.simulation.stressHint}
+              onClick={() => canAction && run('train', () => realConnected ? injectMonsoon(trainSeg) : localInjectMonsoon(trainSeg))}
             >
               {UI.simulation.stress(trainSeg)}
             </button>
@@ -96,6 +104,7 @@ export default function OverviewOpsStrip({
             {UI.simulation.climateLink}
           </button>
         </div>
+        {!canAction && <p className="mono" style={{ fontSize: '0.6rem', color: 'var(--on-surface-variant)', marginTop: 6 }}>ACTION requires Maintenance+ — ask Supervisor</p>}
 
         {toast && <p className="overview-ops-toast">{toast}</p>}
       </div>

@@ -1,4 +1,5 @@
 import { UI } from '../content/uiCopy.js'
+import RoleSelect from './RoleSelect.jsx'
 
 export default function TopBar({ connected, reconnectAttempts = 0, openTicketCount, onNavigateMaintenance }) {
   return (
@@ -8,6 +9,7 @@ export default function TopBar({ connected, reconnectAttempts = 0, openTicketCou
         {UI.brand.name}
       </div>
       <div className="topbar-actions">
+        <RoleSelect />
         {openTicketCount > 0 && (
           <button
             type="button"

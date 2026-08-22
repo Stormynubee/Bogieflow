@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { setWeatherMode } from '../lib/api.js'
 import { weatherToggleHint } from '../lib/weatherToggleDisplay.js'
+import { can, getStoredRole } from '../lib/rbac.js'
 
 export default function WeatherToggle({
   liveWeather,
@@ -9,6 +10,13 @@ export default function WeatherToggle({
   localSetWeatherMode,
 }) {
   const [busy, setBusy] = useState(false)
+  const [role, setRole] = useState(() => getStoredRole())
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  const canConfigure = can(role, 'CONFIGURE')
 
   const setMode = async (wantLive) => {
     if (busy || wantLive === liveWeather) return
@@ -32,8 +40,9 @@ export default function WeatherToggle({
         <button
           type="button"
           aria-pressed={!liveWeather}
-          disabled={busy}
-          onClick={() => setMode(false)}
+          disabled={busy || !canConfigure}
+          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Simulated'}
+          onClick={() => canConfigure && setMode(false)}
           data-testid="weather-mode-simulated"
         >
           Simulated
@@ -41,15 +50,16 @@ export default function WeatherToggle({
         <button
           type="button"
           aria-pressed={liveWeather}
-          disabled={busy}
-          onClick={() => setMode(true)}
+          disabled={busy || !canConfigure}
+          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Live weather'}
+          onClick={() => canConfigure && setMode(true)}
           data-testid="weather-mode-live"
         >
           Live weather
         </button>
       </div>
       <span className="weather-toggle-hint">
-        {weatherToggleHint({ liveWeather, realConnected })}
+        {weatherToggleHint({ liveWeather, realConnected })} {!canConfigure && '· CONFIGURE Admin only'}
       </span>
       {weatherNote && (
         <span className="weather-fallback-note" data-testid="weather-fallback-note">

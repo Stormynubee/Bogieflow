@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PanelHeader from './PanelHeader'
 import { DEMO_SCENARIOS, runScenario } from '../lib/demoScenarios.js'
 import { injectAnomaly, injectMonsoon, resetCorridor } from '../lib/api.js'
 import { UI } from '../content/uiCopy.js'
+import { can, getStoredRole } from '../lib/rbac.js'
 
 const SCENARIO_MENU = [
   { id: 'monsoon-sweep', ...DEMO_SCENARIOS['monsoon-sweep'] },
@@ -17,6 +18,14 @@ export default function ScenarioMenu({
   localReset,
 }) {
   const [busy, setBusy] = useState(null)
+  const [role, setRole] = useState(() => getStoredRole())
+  useEffect(() => {
+    const h = (e) => setRole(e.detail || getStoredRole())
+    window.addEventListener('bogie:role-change', h)
+    return () => window.removeEventListener('bogie:role-change', h)
+  }, [])
+  const canAction = can(role, 'ACTION')
+  const canConfigure = can(role, 'CONFIGURE')
 
   const api = realConnected
     ? { injectMonsoon, injectAnomaly }
@@ -49,8 +58,9 @@ export default function ScenarioMenu({
             type="button"
             data-testid={`scenario-${scenario.id}`}
             className="overview-inject-btn overview-inject-secondary"
-            disabled={busy != null}
-            onClick={() => run(scenario.id, () => runScenario(scenario.id, api))}
+            disabled={busy != null || !canAction}
+            title={!canAction ? 'Requires ACTION — Maintenance+' : scenario.label}
+            onClick={() => canAction && run(scenario.id, () => runScenario(scenario.id, api))}
           >
             {scenario.label}
           </button>
@@ -59,8 +69,9 @@ export default function ScenarioMenu({
           type="button"
           data-testid="scenario-reset"
           className="overview-inject-btn"
-          disabled={busy != null}
-          onClick={() => run('reset', realConnected ? resetCorridor : localReset)}
+          disabled={busy != null || !canConfigure}
+          title={!canConfigure ? 'Requires CONFIGURE — Admin only' : 'Reset corridor'}
+          onClick={() => canConfigure && run('reset', realConnected ? resetCorridor : localReset)}
         >
           Reset corridor
         </button>
