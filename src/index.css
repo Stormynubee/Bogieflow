@@ -2700,7 +2700,7 @@ body {
 .maintenance-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gutter);
+  gap: var(--panel-gap, 12px);
   align-content: start;
 }
 
@@ -2712,20 +2712,32 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .maintenance-table th,
 .maintenance-table td {
-  padding: 10px 12px;
+  padding: var(--table-cell-y, 8px) 10px;
   text-align: left;
-  border-bottom: 1px solid var(--surface-variant);
+  border-bottom: 1px solid var(--outline-variant);
+  white-space: nowrap;
+}
+
+.maintenance-table td.ticket-reason {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 380px;
+  line-height: 1.4;
 }
 
 .maintenance-table th {
   color: var(--on-surface-variant);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.58rem;
+  border-bottom-color: var(--line-strong);
 }
 
 .mono {
