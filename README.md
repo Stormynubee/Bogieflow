@@ -511,7 +511,7 @@ LIVE_BACKEND_URL=https://bogie-flow.onrender.com python -m pytest tests/test_liv
 | **Technical Depth** | Implements multi-agent pipelines (Hydrology, Vibration, Planner) on an async FastAPI event loop. Features non-blocking Gemini AI integration, real-time Open-Meteo API caching, and automated ticket explanations. |
 | **Real-World Impact** | Explains maintenance tickets via Shapley-style model feature importances, translating ML inputs into actionable engineering indicators. Calculates avoided derailment risks and USD savings to justify maintenance operations. |
 | **Execution** | Built with a high-fidelity "ink & paper" monochrome theme using Fraunces and Hanken Grotesk typography, fine hairline blueprint grids, and tactile feedback. Single-origin production setup allows serving REST, WebSockets, and Vite UI from one Docker container. |
-| **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. See [docs/SENSORS.md](docs/SENSORS.md) for sensor details. |
+| **Scalability** | Designed with standard hardware interface targets (ESP32-S3 and MPU6050 accelerometer). Back-end agents are decoupled from presentation, making them ready to port directly to edge gatekeepers. See [docs/SENSORS.md](docs/SENSORS.md) and [hardware/README.md](hardware/README.md) for the bench BOM and node architecture. |
 
 ---
 
