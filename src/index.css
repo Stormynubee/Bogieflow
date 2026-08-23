@@ -1182,6 +1182,60 @@ body {
   border: 1px solid var(--outline-variant);
 }
 
+/* Constant attention pulse — forces selection every boot/login */
+.role-picker-attn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid rgba(233, 72, 46, 0.5);
+  border-radius: 999px;
+  background: rgba(233, 72, 46, 0.12);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--signal, #e9482e);
+  animation: attn-pulse 1.6s ease-in-out infinite;
+}
+
+.role-picker-attn .attn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0 rgba(233, 72, 46, 0.5);
+  animation: attn-dot 1.6s ease-out infinite;
+}
+
+@keyframes attn-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(233, 72, 46, 0.35), 0 0 12px rgba(233, 72, 46, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(233, 72, 46, 0), 0 0 24px rgba(233, 72, 46, 0.5);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes attn-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(233, 72, 46, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(233, 72, 46, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-picker-attn,
+  .role-picker-attn .attn-dot {
+    animation: none;
+  }
+}
+
 /* Main grid */
 .main-grid {
   flex: 1;

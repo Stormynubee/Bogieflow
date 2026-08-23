@@ -47,6 +47,10 @@ export default function RolePicker({ onPick }) {
           <div className="role-picker-kicker">RAILTWIN-X · ACCESS CONTROL</div>
           <h2 className="role-picker-title">Select your role to continue</h2>
           <p className="role-picker-lede">The right data. The right controls. The right person. — Least privilege by design.</p>
+          <span className="role-picker-attn" data-testid="role-picker-attn">
+            <span className="attn-dot" aria-hidden="true" />
+            ROLE REQUIRED — SELECT TO CONTINUE
+          </span>
         </header>
 
         <div className="role-picker-grid">
