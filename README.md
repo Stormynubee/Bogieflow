@@ -138,6 +138,11 @@ Monsoon rains saturate railway ballast, leading to loss of stiffness, subgrade e
 </p>
 
 ---
+## Hardware Prototype
+
+<p align="center">
+  <img src="https://cdn.discordapp.com/attachments/940514472932569088/1540945801801367673/file_00000000e0b88208abc3d3d4b50f39bb.png?ex=6a8bcd1c&is=6a8a7b9c&hm=5b5e570f53e79dd38d6f31ff0fdcab4e2b024f3440839f8079b85a26599a8e0d" alt="Bogieflow Hardware Prototype" width="100%">
+</p>
 
 ## System Architecture
 
