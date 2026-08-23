@@ -40,6 +40,7 @@ export default function RoleSelect() {
         data-testid="role-select"
         onClick={() => setOpen((v) => !v)}
       >
+        <span className="role-active-dot" aria-hidden="true" />
         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>shield_person</span>
         <span className="role-select-value">{current.label}</span>
         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{open ? 'expand_less' : 'expand_more'}</span>
